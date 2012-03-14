@@ -1,0 +1,49 @@
+{% extends "admin/base.html" %}
+{% load i18n adminmedia %}
+{% load url from future %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet"
+type="text/css" href="{{ STATIC_URL }}admin/css/forms.css" />{% endblock %}
+            {% block user_settings_link %}
+                {% trans ' User Settings' %} /
+            {% endblock %}
+
+{% block title %}{% trans 'User settings' %}{% endblock %}
+
+{% block content %}<div id="content-main">
+
+<form action="" method="post">{% csrf_token %}
+<div>
+{% if form.errors %}
+    <p class="errornote">
+    {% blocktrans count form.errors.items|length as counter %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktrans %}
+    </p>
+{% endif %}
+
+<h1>{% trans 'User settings' %}</h1>
+
+<fieldset class="module aligned wide">
+
+<div class="form-row">
+    <label for="iface_lang" class="required">{% trans 'Interface language' %}:
+    </label>{{ form.iface_lang|safe}}
+</div>
+<div class="form-row">
+    <label for="list_per_page" class="required">{% trans 'List per page' %}:
+    </label>{{ form.list_per_page_code|safe }}
+</div>
+<div class="form-row">
+    <label for="notification" class="required">{% trans 'Notification' %}:
+    </label>{{ form.notification|safe }}
+</div>
+
+
+</fieldset>
+
+<div class="submit-row">
+    <input type="submit" value="{% trans 'Change my settings' %}" class="default" />
+</div>
+
+</div>
+</form></div>
+
+{% endblock %}

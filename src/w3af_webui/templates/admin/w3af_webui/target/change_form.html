@@ -1,0 +1,41 @@
+{% extends "admin/w3af_webui/change_form.html" %}
+{% load i18n admin_static admin_modify %}
+
+{% block after_field_sets %}
+<script type="text/javascript">
+
+(function($) { 
+var available_label = ' {% trans 'Available URL'%}'
+var unavailable_label = ' {% trans 'Unavailable URL'%}'
+var invalid_label = ' {% trans 'Invalid URL'%}'
+function check_url()
+{
+      var url_inpute = $('#id_url').val(); 
+      if(url_inpute == '')
+      {   
+          $('p.checkRes').html('<font color="white">|</font>');
+          return 
+      }
+      $.ajax({ 
+          url: '/check_url',
+          data: 'url=' + url_inpute, 
+          success: function(html){ 
+            $('p.checkRes').html(available_label);
+          },
+          error: function(html){
+            if(html.responseText=='ValueError') 
+            $('p.checkRes').html('<font color="red"><b>' + invalid_label + '</b></font>');
+            else
+            $('p.checkRes').html('<font color="red"><b>'+ unavailable_label + '</b></font>');
+          },
+      });
+}
+
+$('#id_url').change(function() {
+    check_url();
+});
+check_url();
+})(django.jQuery);
+</script>
+{% endblock %}
+

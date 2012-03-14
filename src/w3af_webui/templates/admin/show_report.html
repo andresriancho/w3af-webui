@@ -1,0 +1,11 @@
+{% extends "admin/base.html" %}
+{% block content %}
+{{result_message}}
+<br/>
+{% if report_link %}
+{% include report_link %}
+{% else %}
+Отчет не найден
+{% endif %}
+{% endblock %}
+

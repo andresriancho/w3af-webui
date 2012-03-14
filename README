@@ -1,0 +1,66 @@
+W3AF-WEB is built on
+
+    * Django (https://www.djangoproject.com/).
+        Django is a high-level Python Web framework that encourages rapid 
+        development and clean, pragmatic design.
+
+        Developed by a fast-moving online-news operation, Django was designed 
+        to handle two challenges: the intensive deadlines of a newsroom and 
+        the stringent requirements of the experienced Web developers who wrote it. 
+        It lets you build high-performing, elegant Web applications quickly
+
+    * Celery (http://celeryproject.org/)
+        Celery is an open source asynchronous task queue/job queue based on 
+        distributed message passing. It is focused on real-time operation, 
+        but supports scheduling as well.
+
+        The execution units, called tasks, are executed concurrently on one 
+        or more worker nodes using multiprocessing, Eventlet or gevent. 
+        Tasks can execute asynchronously (in the background) 
+        or synchronously (wait until ready)
+
+INSTALL
+    
+    sudo python setup.py install
+
+MYSQL INIT
+
+    mysql -u root -p
+
+        CREATE DATABASE w3af_webui CHARACTER SET utf8; 
+        CREATE user w3af_webui@localhost IDENTIFIED BY "w3af_webui"; 
+        GRANT ALL ON w3af_webui.* TO w3af_webui@localhost;
+
+    # Edit /etc/mysql/my.cnf
+    # ...
+    # [mysqld]
+    # ...
+    # transaction-isolation  = READ-COMMITTED
+    # ...
+
+    # restart mysql
+    /etc/init.d/mysql restart
+
+MYSQL SCHEMA INIT
+
+    ./bin/django syncdb --noinput
+    ./bin/django migrate
+
+INIT USER PRESETS
+
+    ./bin/django init
+    ./bin/django init <your username> --set_roles=admin
+
+CREATE SIMLINK FOR DEVELOPMENT SETTINGS 
+
+cd src/w3af_webui/
+ln -s settings.development.py local_settings.py
+cd ../../
+
+DJANGO RUN
+
+    ./bin/django runserver_plus
+
+CELERY RUN
+
+    ./bin/django celeryd -l INFO -B

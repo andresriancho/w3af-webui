@@ -1,0 +1,13 @@
+*.pyc
+*.pyo
+*.swp
+.installed.cfg
+bin
+develop-eggs
+dist
+downloads
+eggs
+parts
+var
+eggs-cache
+download-cache
