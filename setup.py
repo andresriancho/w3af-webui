@@ -1,27 +1,27 @@
 #!/usr/bin/env python
 import os
 import sys
-from setuptools import setup
-from setuptools.command.install import install as _install
 from subprocess import call
 from subprocess import PIPE
+from setuptools import setup
+from setuptools.command.install import install as _install
 dirs = ['w3af_web' + root.replace('/', '.')[3:]
         for root, dirs, files in os.walk('src/', topdown=False) 
         if '.svn' not in root]
 system_depends = [
     'w3af_console -h',
 ]
-py_depends = [
-    'lxml',
-    'ghettoq',
-    'celery',
-    'django_extensions',
-    'south',
-    'cronex',
-    'djcelery',
-    'djkombu',
-    'MySQLdb',
-]
+py_depends = {
+        'lxml':'In Debian based systems just install python-lxml',
+        'ghettoq':'You can install it from PyPI by easy_install ghettoq',
+        'celery':'You can install it from PyPI by easy_install celery',
+        'django_extensions':'You can install it from PyPI by easy_install django-extensions',
+        'south':'You can install it from PyPI by easy_install south',
+        'cronex':'You can get it from https://github.com/jameseric/cronex',
+        'djcelery':'You can install it from PyPI by easy_install django-celery',
+        'djkombu':'You can install it from PyPI by easy_install django-kombu',
+        'MySQLdb':'In Debian based systems just install python-mysqldb',
+    }
 py_version_depends = { 
     'django': '1.4',
 }
@@ -34,7 +34,7 @@ def check_py_dependencies():
             __import__(depend)
             print 'OK'
         except ImportError, e:
-            print e
+            print e, py_depends[depend]
             result = False
     return result
 
@@ -84,7 +84,7 @@ class install(_install):
             not check_version_dependencies() or
             not check_py_dependencies()):
             print 'Can not find all requires'
-            raise BaseException
+            raise EnvironmentError
         _install.run(self)
 
 setup(

@@ -1,66 +1,85 @@
-W3AF-WEB is built on
+============
+w3af webui
+============
 
-    * Django (https://www.djangoproject.com/).
-        Django is a high-level Python Web framework that encourages rapid 
-        development and clean, pragmatic design.
+Intro
+=====
 
-        Developed by a fast-moving online-news operation, Django was designed 
-        to handle two challenges: the intensive deadlines of a newsroom and 
-        the stringent requirements of the experienced Web developers who wrote it. 
-        It lets you build high-performing, elegant Web applications quickly
+This project provides web interface for w3af_ and is mostly built on:
 
-    * Celery (http://celeryproject.org/)
-        Celery is an open source asynchronous task queue/job queue based on 
-        distributed message passing. It is focused on real-time operation, 
-        but supports scheduling as well.
+* Django (https://www.djangoproject.com/).
+* Celery (http://celeryproject.org/)
 
-        The execution units, called tasks, are executed concurrently on one 
-        or more worker nodes using multiprocessing, Eventlet or gevent. 
-        Tasks can execute asynchronously (in the background) 
-        or synchronously (wait until ready)
+.. _w3af: http://w3af.org
 
-INSTALL
-    
-    sudo python setup.py install
+Django
+======
 
-MYSQL INIT
+NB! w3af_webui requires at least 1.4 version of Django web framework :(
+You can get it from https://www.djangoproject.com/download/
 
-    mysql -u root -p
+Install
+=======
 
-        CREATE DATABASE w3af_webui CHARACTER SET utf8; 
-        CREATE user w3af_webui@localhost IDENTIFIED BY "w3af_webui"; 
-        GRANT ALL ON w3af_webui.* TO w3af_webui@localhost;
+Install required dependences:
 
-    # Edit /etc/mysql/my.cnf
-    # ...
+* w3af-console - In Debian based systems just install w3af-console or get fresh version from http://w3af.org
+* MySQLdb - In Debian based systems just install python-mysqldb
+* lxml - In Debian based systems just install python-lxml
+* django - https://www.djangoproject.com/
+* django_extensions - You can install it from PyPI by easy_install django-extensions
+* south - You can install it from PyPI by easy_install south
+* cronex - You can get it from https://github.com/jameseric/cronex
+* ghettoq - You can install it from PyPI by easy_install ghettoq
+* celery - You can install it from PyPI by easy_install celery
+* djcelery - You can install it from PyPI by easy_install django-celery
+* djkombu - You can install it from PyPI by easy_install django-kombu
+
+Make database init: ::
+
+    CREATE DATABASE w3af_webui CHARACTER SET utf8; 
+    CREATE user w3af_webui@localhost IDENTIFIED BY "w3af_webui"; 
+    GRANT ALL ON w3af_webui.* TO w3af_webui@localhost;
+    FLUSH PRIVILEGES;
+
+Dont forget to edit /etc/mysql/my.cnf: ::
+
     # [mysqld]
     # ...
     # transaction-isolation  = READ-COMMITTED
-    # ...
 
-    # restart mysql
+and restart mysql: ::
+
     /etc/init.d/mysql restart
 
-MYSQL SCHEMA INIT
+To configure w3af_webui settings please edit file src/w3af_webui/settings.py.
+Then create local_settings simlink: :: 
 
-    ./bin/django syncdb --noinput
-    ./bin/django migrate
+    cd src/w3af_webui
+    ln -s local_settings.development.py local_settings.py
 
-INIT USER PRESETS
+Create necessary directories: ::
+    
+    mkdir /var/local/w3af_webui
+    chown USER:USER /var/local/w3af_webui
+    mkdir /var/log/w3af-webui/
+    chown USER:USER /var/log/w3af-webui
 
-    ./bin/django init
-    ./bin/django init <your username> --set_roles=admin
+Database schema init: ::
 
-CREATE SIMLINK FOR DEVELOPMENT SETTINGS 
+    cd ../
+    ./manage.py syncdb --noinput
+    ./manage.py migrate
 
-cd src/w3af_webui/
-ln -s settings.development.py local_settings.py
-cd ../../
+Run django via runserver: :: 
+    
+    ./manage.py runserver 0.0.0.0:8080
 
-DJANGO RUN
+Run celery: ::
 
-    ./bin/django runserver_plus
+    ./manage celeryd -l INFO -B
 
-CELERY RUN
+Open in your browser http://0.0.0.0:8080/.
+Default user is w3af_admin:w3af_admin
 
-    ./bin/django celeryd -l INFO -B
+.. vim:ft=rst

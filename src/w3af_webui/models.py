@@ -65,6 +65,9 @@ class Profile(models.Model):
                                        default=0,
                                        choices=settings.NOTIFY_STATUS)
 
+    class Meta:
+        db_table = u'w3af_webui_profile'
+
 def create_profile(sender, **kwargs):
     if kwargs['created']:
         Profile.objects.create(user=kwargs['instance'])
@@ -226,6 +229,9 @@ class ProfilesTasks(models.Model):
         verbose_name        = _('Profile')
         verbose_name_plural = _('Profiles')
         db_table            = u'profiles_tasks'
+    
+    def __unicode__(self):
+        return u'%s' % (self.scan_profile, )
 
 class Scan(models.Model): 
     '''Reports for scans'''
@@ -240,7 +246,7 @@ class Scan(models.Model):
                                         default=datetime.now())
     finish = models.fields.DateTimeField(_('Scan finish'),
                                          blank=True,
-                                         null=True, )
+                                         null=True,)
     data = models.CharField(max_length=255, default='',
                             verbose_name = _('Report'),
                             null=True)

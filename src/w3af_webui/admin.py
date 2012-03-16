@@ -121,6 +121,12 @@ class ProfileTargetInline(admin.StackedInline):
     fieldsets = (
         (None, { 'classes': ('extrapretty' ),
         'fields': (( 'scan_profile'), )}), )
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "scan_profile":
+            kwargs["queryset"] = ScanProfile.objects.filter(user=request.user)
+        return super(ProfileTargetInline, self).formfield_for_foreignkey(
+                    db_field, request, **kwargs)
 
 class ProfileInline(admin.StackedInline):
     '''for multiprofiles in task scan page '''
@@ -129,7 +135,13 @@ class ProfileInline(admin.StackedInline):
     fieldsets = (
         (None, { 'classes': ('extrapretty' ),
         'fields': (( 'scan_profile'), )}), )
-
+    
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "scan_profile":
+            kwargs["queryset"] = ScanProfile.objects.filter(user=request.user)
+        return super(ProfileInline, self).formfield_for_foreignkey(
+                    db_field, request, **kwargs)
+    
 class ScanTaskAdmin(admin.ModelAdmin):
     '''Class for view scans in admin'''
     inlines = (ProfileInline, )
@@ -137,17 +149,17 @@ class ScanTaskAdmin(admin.ModelAdmin):
                     'get_status', 'do_action', )
     ordering = ('-id',)
     fieldsets = (
-            (None, {
-                'fields' : ('target', 'comment', 'start', ),
-            }),
-            (_('Repeating'), {
-                'classes': ('collapse',),
-                'fields' : ('repeat_each', 
-                           ('repeat_at',
-                            'repeat_each_weekday',
-                            'repeat_each_day', 
-                           ),),
-            }),
+                (None, {
+                    'fields' : ('target', 'comment', 'start', ),
+                }),
+                (_('Repeating'), {
+                    'classes': ('collapse',),
+                    'fields' : ('repeat_each', 
+                               ('repeat_at',
+                                'repeat_each_weekday',
+                                'repeat_each_day', 
+                               ),),
+                }),
     )
     
     def schedule(self, obj):
@@ -214,6 +226,11 @@ class ScanTaskAdmin(admin.ModelAdmin):
         extra_context = {'title': u'%s' % _('Tasks'), }
         return super(ScanTaskAdmin, self).changelist_view(request,
                                                           extra_context)
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "target":
+            kwargs["queryset"] = Target.objects.filter(user=request.user)
+        return super(ScanTaskAdmin, self).formfield_for_foreignkey(
+                    db_field, request, **kwargs)
 
 class TargetAdmin(admin.ModelAdmin):
     inlines = (ProfileTargetInline,)

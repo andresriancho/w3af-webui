@@ -12,14 +12,16 @@ from south.signals import post_migrate
 
 logger = getLogger(__name__)
 
+SUPERUSER_NAME = 'w3af_admin'
+
 def create_superuser():
     try:
-        superuser = User.objects.get(username=settings.SUPERUSER_NAME)
+        superuser = User.objects.get(username=SUPERUSER_NAME)
     except User.DoesNotExist:
         superuser = User.objects.create_user(
-            settings.SUPERUSER_NAME,
-            '%s@%s' % (settings.SUPERUSER_NAME, settings.APP_DOMAIN),
-            settings.SUPERUSER_NAME,
+            SUPERUSER_NAME,
+            '%s@%s' % (SUPERUSER_NAME, settings.APP_DOMAIN),
+            SUPERUSER_NAME,
             )
         logger.info('Create superuser "%s" <%s>' % (
                     superuser.username, superuser.email))
@@ -28,6 +30,8 @@ def create_superuser():
     superuser.save()
 
 def init_user_group(app, **kwargs):
+    if app != 'w3af_webui':
+        return
     create_superuser()
     # user groups
     need_groups_names = ('Scan', 'ScanProfile', 'ScanTask', 'Target',)
@@ -57,7 +61,5 @@ def init_user_group(app, **kwargs):
             ag = Group(name=g_name)
             ag.save()
         ag.permissions.add(permission)
-       
 
 post_migrate.connect(init_user_group)
-
