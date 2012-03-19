@@ -1,6 +1,6 @@
-============
-w3af webui
-============
+=======================
+w3af Web User Interface
+=======================
 
 Intro
 =====
@@ -10,33 +10,35 @@ This project provides web interface for w3af_ and is mostly built on:
 * Django (https://www.djangoproject.com/).
 * Celery (http://celeryproject.org/)
 
-.. _w3af: http://w3af.org
-
-Django
-======
-
-NB! w3af_webui requires at least 1.4 version of Django web framework :(
-You can get it from https://www.djangoproject.com/download/
-
 Install
 =======
 
 Install required dependences:
 
-* w3af-console - In Debian based systems just install w3af-console or get fresh version from http://w3af.org
-* MySQLdb - In Debian based systems just install python-mysqldb
-* lxml - In Debian based systems just install python-lxml
-* django - https://www.djangoproject.com/
-* django_extensions - You can install it from PyPI by easy_install django-extensions
-* south - You can install it from PyPI by easy_install south
-* cronex - You can get it from https://github.com/jameseric/cronex
-* ghettoq - You can install it from PyPI by easy_install ghettoq
-* celery - You can install it from PyPI by easy_install celery
-* djcelery - You can install it from PyPI by easy_install django-celery
-* djkombu - You can install it from PyPI by easy_install django-kombu
+* w3af-console
+* MySQL                 apt-get install python-mysqldb mysql-server-5.1
+* lxml                  apt-get install python-lxml
+* django_extensions     easy_install django-extensions
+* south                 easy_install south
+* ghettoq               easy_install ghettoq
+* celery                easy_install celery
+* djcelery              easy_install django-celery
+* djkombu               easy_install django-kombu
+* django                Download version 1.4 from https://www.djangoproject.com/
+* cronex                Download from https://github.com/jameseric/cronex
+
+These commands should help you with the installation process, please run from the w3af_webui 
+root directory (where setup.py lives):
+
+    sudo easy_install django-kombu django-celery celery ghettoq south django-extensions
+    sudo apt-get update
+    sudo apt-get install python-mysqldb python-lxml mysql-server-5.1
+    git clone git://github.com/jameseric/cronex.git
+    sudo python setup.py install
 
 Make database init: ::
 
+    mysql -u root -p
     CREATE DATABASE w3af_webui CHARACTER SET utf8; 
     CREATE user w3af_webui@localhost IDENTIFIED BY "w3af_webui"; 
     GRANT ALL ON w3af_webui.* TO w3af_webui@localhost;
@@ -53,6 +55,7 @@ and restart mysql: ::
     /etc/init.d/mysql restart
 
 To configure w3af_webui settings please edit file src/w3af_webui/settings.py.
+
 Then create local_settings simlink: :: 
 
     cd src/w3af_webui
@@ -60,10 +63,10 @@ Then create local_settings simlink: ::
 
 Create necessary directories: ::
     
-    mkdir /var/local/w3af_webui
-    chown USER:USER /var/local/w3af_webui
-    mkdir /var/log/w3af-webui/
-    chown USER:USER /var/log/w3af-webui
+    sudo mkdir /var/local/w3af_webui
+    sudo chown USER: /var/local/w3af_webui
+    sudo mkdir /var/log/w3af-webui/
+    sudo chown USER: /var/log/w3af-webui
 
 Database schema init: ::
 
@@ -77,7 +80,7 @@ Run django via runserver: ::
 
 Run celery: ::
 
-    ./manage celeryd -l INFO -B
+    ./manage.py celeryd -l INFO -B
 
 Open in your browser http://0.0.0.0:8080/.
 Default user is w3af_admin:w3af_admin
