@@ -14,9 +14,9 @@ ADMINS = (
 DATABASES = {
     'default': {
         'ENGINE'   : 'django.db.backends.mysql',
-        'NAME'     : 'w3af_webui_test',
-        'USER'     : 'w3af_webui_test',
-        'PASSWORD' : 'w3af_webui_test',
+        'NAME'     : 'w3af_webui',
+        'USER'     : 'w3af_webui',
+        'PASSWORD' : 'w3af_webui',
         'HOST'     : '',
         'PORT'     : '3306',
         'OPTIONS'  : { 'init_command': 'SET storage_engine=INNODB;' },
