@@ -24,7 +24,7 @@ logger = getLogger(__name__)
 def send_notification(scan):
     notify_set =  scan.scan_task.user.get_profile().notification
     try:
-        if settings.NOTIFY_MODULES[notify_set]['id'] == 'None': 
+        if settings.NOTIFY_MODULES[notify_set]['id'] == 'None':
             # No notification
             return True
         notify_module = __import__(settings.NOTIFY_MODULES[notify_set]['module'],
@@ -36,7 +36,7 @@ def send_notification(scan):
                                     scan.id)
     except Exception, e:
         logger.error('can not send notification: %s' % e)
-        return False 
+        return False
 
 def get_profile(scan_task, report_path, report_file):
     profiles_tasks = ProfilesTasks.objects.filter(
@@ -134,11 +134,11 @@ class Command(BaseCommand):
                     profile_fname = get_profile(scan.scan_task,
                                                 report_path,
                                                 output.name)
-                    if (Scan.objects.get(pk=int(scan_id)).status != 
+                    if (Scan.objects.get(pk=int(scan_id)).status !=
                         settings.SCAN_STATUS['in_process']):
                         return { } # scan was stopped by user
-                    process = Popen([settings.W3AF_RUN, 
-                                    '--no-update', '-P', 
+                    process = Popen([settings.W3AF_RUN,
+                                    '--no-update', '-P',
                                     profile_fname],
                                     stdout=PIPE,
                                     stderr=PIPE)

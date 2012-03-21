@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class Command(BaseCommand):
     args = '<>'
     help = (u"command for scan task ")
-    
+
     def handle(self, *args, **options):
         now = datetime.now()
         lock_time = now - settings.FSCAN_TDELTA['max']
@@ -32,18 +32,18 @@ class Command(BaseCommand):
             # start at fixed time
             if scan_task.start:
                 now_delta = now - scan_task.start
-                if (now_delta < settings.FSCAN_TDELTA['max'] and 
+                if (now_delta < settings.FSCAN_TDELTA['max'] and
                     now_delta > settings.FSCAN_TDELTA['min']):
-                    if not Scan.objects.filter(scan_task=scan_task.id, 
+                    if not Scan.objects.filter(scan_task=scan_task.id,
                                                finish__gte=min_time_allowed):
                         logger.info('Found waitng scan: %s' % scan_task.target)
                         scan_task.run()
             # cron-schedule start
             if scan_task.cron:
                 job = CronExpression(smart_str(scan_task.cron))
-                if job.check_trigger((now.year, now.month, now.day, now.hour, 
+                if job.check_trigger((now.year, now.month, now.day, now.hour,
                                       now.minute)):
-                    if not Scan.objects.filter(scan_task=scan_task.id, 
+                    if not Scan.objects.filter(scan_task=scan_task.id,
                                                finish__gte=min_time_allowed):
                         logger.info('Found waitng scan: %s' % scan_task.target)
                         scan_task.run()

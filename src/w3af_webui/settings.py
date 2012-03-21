@@ -3,11 +3,10 @@ import os.path
 from datetime import timedelta
 from django.utils.translation import ugettext_lazy as _
 
+# ---------- Personal settings -----------------
 ADMINS = (
-     ('Your Name', 'your_mail@example.ru'),
+    # ('Your Name', 'your_email@example.com'),
 )
-
-MANAGERS = ADMINS
 
 #CREATE USER w3af_webui@localhost IDENTIFIED BY "w3af_webui";
 #CREATE DATABASE w3af_webui CHARACTER SET utf8;
@@ -15,14 +14,23 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE'   : 'django.db.backends.mysql',
-        'NAME'     : 'w3af_webui',
-        'USER'     : 'w3af_webui',
-        'PASSWORD' : 'w3af_webui',
+        'NAME'     : 'w3af_webui_test',
+        'USER'     : 'w3af_webui_test',
+        'PASSWORD' : 'w3af_webui_test',
         'HOST'     : '',
         'PORT'     : '3306',
         'OPTIONS'  : { 'init_command': 'SET storage_engine=INNODB;' },
     }
 }
+
+# Full url, just for link in notification email
+APP_URL = 'http://your_domain.net'
+
+# Path for w3af reports and profiles in your system
+HTML_REPORT_UPLOAD = '/var/local/w3af-webui'
+
+# ----------- Advanced settings--------------
+MANAGERS = ADMINS
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -38,16 +46,10 @@ LANGUAGES = (
     ('en', _('English')),
 )
 
-NOTIFY_MODULES = (
-#   (_('Notification name'), 'string_id',  'module'), # example
-    {'label': _('None'), 'id': 'None', 'module': ''}, # status number 1 set as default
-    {'label': _('e-mail'), 'id': 'Mail', 'module': 'w3af_webui.notification.send_mail'},
-)
-NOTIFY_STATUS = list((ind, value['label'])
-                     for ind, value in enumerate(NOTIFY_MODULES))
-
+# Path for localisation 
 _PATH = os.path.abspath(os.path.dirname(__file__))
 LOCALE_PATHS = (os.path.join(_PATH, 'locale'),)
+
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
 LANGUAGE_CODE = 'en-EN'
@@ -61,7 +63,7 @@ USE_I18N = True
 
 # If you set this to False, Django will not format dates, numbers and
 # calendars according to the current locale
-USE_L10N = True  
+USE_L10N = True
 
 # Absolute filesystem path to the directory that will hold user-uploaded files.
 # Example: "/home/media/media.lawrence.com/media/"
@@ -74,10 +76,6 @@ MEDIA_ROOT = (os.path.join(_PATH, 'media'),)
 # URL prefix for static files.
 # Example: "http://media.lawrence.com/static/"
 STATIC_URL = '/static/'
-# URL prefix for admin static files -- CSS, JavaScript and images.
-# Make sure to use a trailing slash.
-# Examples: "http://foo.com/static/admin/", "/static/admin/".
-#ADMIN_MEDIA_PREFIX = '/static/admin/'
 
 # Additional locations of static files
 STATICFILES_DIRS = (
@@ -110,29 +108,62 @@ TEMPLATE_LOADERS = (
 
 ROOT_URLCONF = 'w3af_webui.urls'
 
-# path for w3af reports and profiles in your system
-HTML_REPORT_UPLOAD = '/var/local/w3af-webui'
-TEMPLATE_DIRS = (
-    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
-    # Always use forward slashes, even on Windows.
-    # Don't forget to use absolute paths, not relative paths.
-    os.path.join(_PATH, 'templates'),
-    HTML_REPORT_UPLOAD,
-    '/usr/share/pyshared/django/contrib/admin/static/admin',
+CARROT_BACKEND = "django"
+
+# Path for test_coverage reports
+COVERAGE_REPORT_HTML_OUTPUT_DIR = os.path.join(_PATH, 'cover')
+
+# jcelery
+BROKER_HOST = "localhost"
+BROKER_PORT = 3306
+BROKER_VHOST = "/"
+BROKER_USER = "guest"
+BROKER_PASSWORD = "guest"
+CELERYD_CONCURRENCY = 10
+CELERYD_LOG_LEVEL = "INFO"
+
+# Table name for user profile
+AUTH_PROFILE_MODULE = 'w3af_webui.Profile'
+
+# Settings for email notification
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_PORT = 25 # port for SMTP
+#EMAIL_HOST = 'your-relay.domain.net' # SMTP relay for e-mail notification
+
+# ----------W3af_webui particular settings--------------
+# Login for first user. It will create after migrate command
+# This user have all permission. Password will be the same as username, don't
+# forget to change it
+SUPERUSER_NAME = 'w3af_admin'
+
+# Interface language selection
+LANGUAGES = (
+    ('ru', _('Russian')),
+    ('en', _('English')),
 )
 
-CARROT_BACKEND = "django"
-COVERAGE_REPORT_HTML_OUTPUT_DIR = os.path.join(_PATH, 'cover')
-# TIME DELTA TO FIND SCAN
-FSCAN_TDELTA = {
-    'max': timedelta(seconds=62),
-    'min': timedelta(seconds=1),
-}
-# DOMAIN
-APP_DOMAIN = 'w3af.sourceforge.net'
+# Set default language for interfase. This value must be in LANGUAGES tuple
+DEFAULT_LANGUAGE = 'en'
 
-# PRESET USER GROUPS PREFIX
-PUG_PREFIX = 'w3af_webui'
+# Default content of scan profile
+SCAN_DEFAULT_PROFILE = "\n"
+
+# This output plugin will be added automaticaly for all scans
+W3AF_OUTPUT_PLUGIN = 'output.htmlFile' # default output plugin for all scans
+
+# Shell command for w3af scaner
+W3AF_RUN = 'w3af_console'
+
+# Notification about scan finish. You can write your own notification module and 
+# link up it here. Date format: 
+# {'label': 'notification name', 
+#  'id': 'notification_string_id', 
+#  'module': 'python module witch send notification'},
+# The first value set as default
+NOTIFY_MODULES = (
+    {'label': _('None'), 'id': 'None', 'module': ''}, # status number 1 set as default
+    {'label': _('e-mail'), 'id': 'Mail', 'module': 'w3af_webui.notification.send_mail'},
+)
 
 # Week day name
 WEEK_DAY_NAME = (_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'),
@@ -149,30 +180,17 @@ SCAN_STATUS = dict(zip(SCAN_STATUS_KEYS, range(1, len(SCAN_STATUS_KEYS) + 1)))
 SCAN_REPEAT_KEYS = (_('never'), _('daily'), _('weekly'), _('monthly'),)
 SCAN_REPEAT = dict(zip(SCAN_REPEAT_KEYS, range(1, len(SCAN_REPEAT_KEYS) + 1)))
 
-SCAN_DEFAULT_PROFILE = "\n"
+# Time delta for find scan
+FSCAN_TDELTA = {
+    'max': timedelta(seconds=62),
+    'min': timedelta(seconds=1),
+}
 
-# jcelery
-BROKER_HOST     = "localhost"
-BROKER_PORT     = 3306
-BROKER_VHOST    = "/"
-BROKER_USER     = "guest"
-BROKER_PASSWORD = "guest"
-CELERYD_CONCURRENCY = 10
-CELERYD_LOG_LEVEL   = "INFO"
-
-AUTH_PROFILE_MODULE = 'w3af_webui.Profile'
-
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_PORT = 25 # port for SMTP
-#EMAIL_HOST = 'your-relay.domain.net' # SMTP relay for e-mail notification
-
-APP_URL = 'http://your_domain.net'
-
-W3AF_RUN = 'w3af_console'
-W3AF_OUTPUT_PLUGIN = 'output.htmlFile' # default output plugin for all scans
-
-TARGET_COMMENT_LABEL = _('Comment')
-# set permissions for users
+# User permissions configuration
+# It describe logic group for command set_user_role
+# You can run manage.py set_role_for_user <username> --role admin
+# And <username> will be included in all django group from
+# USER_ROLES['admin']['groups'] 
 USER_ROLES = {
             'admin' : {
                 'email_prefix' : 'admin',
@@ -208,9 +226,22 @@ USER_ROLES = {
                 'description' : 'engineer (can add targets, configure'
                                 ' scan profiles and start scans)',
             },
-        } 
+        }
 
-#------import local settings
+# Name of one of the field for target page
+TARGET_COMMENT_LABEL = _('Comment')
+
+# ----------End W3af_webui particular settings--------------
+# ------import local settings-------------------------------
+TEMPLATE_DIRS = (
+    # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
+    # Always use forward slashes, even on Windows.
+    # Don't forget to use absolute paths, not relative paths.
+    os.path.join(_PATH, 'templates'),
+    HTML_REPORT_UPLOAD,
+    '/usr/share/pyshared/django/contrib/admin/static/admin',
+)
+
 AUTH_MIDDLEWARE = ()
 TEMPLATE_CONTEXT_PROCESSORS = ()
 INSTALLED_APPS = ()
@@ -230,8 +261,8 @@ except Exception, e:
 MIDDLEWARE_CLASSES = ((
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',) + 
-    AUTH_MIDDLEWARE + 
+    'django.middleware.csrf.CsrfViewMiddleware',) +
+    AUTH_MIDDLEWARE +
     ('django.middleware.doc.XViewMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'w3af_webui.middleware.I18NMiddleware',
@@ -242,7 +273,7 @@ TEMPLATE_CONTEXT_PROCESSORS += (
     'django.core.context_processors.i18n',
     'django.core.context_processors.media',
     'django.contrib.auth.context_processors.auth',
-    'django.core.context_processors.static', 
+    'django.core.context_processors.static',
     'django.core.context_processors.request',
     'django.contrib.messages.context_processors.messages',
 )

@@ -12,16 +12,15 @@ from south.signals import post_migrate
 
 logger = getLogger(__name__)
 
-SUPERUSER_NAME = 'w3af_admin'
 
 def create_superuser():
     try:
-        superuser = User.objects.get(username=SUPERUSER_NAME)
+        superuser = User.objects.get(username=settings.SUPERUSER_NAME)
     except User.DoesNotExist:
         superuser = User.objects.create_user(
-            SUPERUSER_NAME,
-            '%s@%s' % (SUPERUSER_NAME, settings.APP_DOMAIN),
-            SUPERUSER_NAME,
+            settings.SUPERUSER_NAME,
+            '',
+            settings.SUPERUSER_NAME,
             )
         logger.info('Create superuser "%s" <%s>' % (
                     superuser.username, superuser.email))
@@ -36,7 +35,7 @@ def init_user_group(app, **kwargs):
     # user groups
     need_groups_names = ('Scan', 'ScanProfile', 'ScanTask', 'Target',)
     for name in need_groups_names:
-        group_name = '%s_%s_manage' % (settings.PUG_PREFIX, name.lower())
+        group_name = '%s_%s_manage' % (app, name.lower())
         try:
             group = Group.objects.get(name=group_name)
         except Group.DoesNotExist:
@@ -54,7 +53,7 @@ def init_user_group(app, **kwargs):
     for permission in Permission.objects.filter(
                             content_type=ContentType.objects.filter(
                             app_label='auth', name='user')):
-        g_name = '%s_auth_manage' % settings.PUG_PREFIX
+        g_name = '%s_auth_manage' % app
         try:
             ag = Group.objects.get(name=g_name)
         except Group.DoesNotExist:

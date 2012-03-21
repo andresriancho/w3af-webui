@@ -16,6 +16,7 @@ from django.conf import settings
 
 from w3af_webui.models import ScanTask
 from w3af_webui.models import Scan
+from w3af_webui.models import Profile
 
 logger = getLogger(__name__)
 
@@ -51,8 +52,8 @@ def get_select_code(select_value, data_array, element_id):
         if str(select_value) == str(obj[0]):
             selected = u'selected="selected"'
         result += u'<option value="%s" %s>%s</option>' % (
-            str(obj[0]), 
-            selected, 
+            str(obj[0]),
+            selected,
             obj[1],
         )
     result += u'</select>'
@@ -91,7 +92,7 @@ def user_settings(request):
                                       settings.LANGUAGES,
                                       'iface_lang')
     form.notification = get_select_code(profile.notification,
-                                        settings.NOTIFY_STATUS,
+                                        Profile.NOTIFY_STATUS,
                                         'notification')
     context = {'form': form, }
     return render_to_response("admin/user_settings.html", context,

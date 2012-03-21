@@ -9,6 +9,7 @@ from logging import getLogger
 from optparse import make_option
 
 logger = getLogger(__name__)
+APP = 'w3af_webui'
 
 class Command(BaseCommand):
     args = '<username1 username2 ...>'
@@ -17,7 +18,7 @@ class Command(BaseCommand):
         make_option('--role',
                     dest='role',
                     default='manager',
-                    help='Setup roles set for user(s): %s' % 
+                    help='Setup roles set for user(s): %s' %
                     settings.USER_ROLES
                     ),
         )
@@ -25,7 +26,6 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         user_examples = {}
         user_profiles = settings.USER_ROLES
-        
         for username in args:
             user_examples[username] = user_profiles[options['role']]
 
@@ -39,9 +39,8 @@ class Command(BaseCommand):
                             user_examples[username]['email_prefix']))
             except User.DoesNotExist:
                 new_user = User.objects.create_user(
-                        username, '%s@%s' %  (
-                                user_examples[username]['email_prefix'],
-                                settings.APP_DOMAIN),
+                        username,
+                        '',
                         username)
                 logger.info("Create %s \"%s\" <%s>" % (
                             user_examples[username]['description'],
@@ -51,15 +50,14 @@ class Command(BaseCommand):
             new_user.is_staff = True
             new_user.groups = []
             for group_name in user_examples[username]['groups']:
-                full_group_name = '%s_%s' % (settings.PUG_PREFIX,
+                full_group_name = '%s_%s' % (APP,
                                              group_name)
-                print full_group_name
                 try:
                     group_object = Group.objects.get(name=full_group_name)
                 except Group.DoesNotExist:
-                    print 'wrong group name %s' % group_name
+                    print 'Wrong group name %s' % group_name
                     continue
                 new_user.groups.add(group_object)
             new_user.save()
-
+            print 'Setting role for user %s has done' % username
 

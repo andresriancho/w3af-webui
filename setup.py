@@ -6,7 +6,7 @@ from subprocess import PIPE
 from setuptools import setup
 from setuptools.command.install import install as _install
 dirs = ['w3af_web' + root.replace('/', '.')[3:]
-        for root, dirs, files in os.walk('src/', topdown=False) 
+        for root, dirs, files in os.walk('src/', topdown=False)
         if '.svn' not in root]
 system_depends = [
     'w3af_console -h',
@@ -21,8 +21,8 @@ py_depends = {
         'djcelery':'You can install it from PyPI by easy_install django-celery',
         'djkombu':'You can install it from PyPI by easy_install django-kombu',
         'MySQLdb':'In Debian based systems just install python-mysqldb',
-    }
-py_version_depends = { 
+}
+py_version_depends = {
     'django': '1.4',
 }
     

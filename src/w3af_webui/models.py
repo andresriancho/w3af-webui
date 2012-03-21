@@ -25,6 +25,7 @@ def kill_process(str_pid):
         logger.error('models.kill_process error: can not kill process: %s' % e)
         return False
 
+
 def generate_cron_daily(*args, **kwargs):
     if not kwargs['hour_min']:
         return ''
@@ -32,6 +33,7 @@ def generate_cron_daily(*args, **kwargs):
         kwargs['hour_min'].minute,
         kwargs['hour_min'].hour,
     )
+
 
 def generate_cron_weekly(*args, **kwargs):
     if not kwargs['hour_min'] or not kwargs['weekday']:
@@ -42,6 +44,7 @@ def generate_cron_weekly(*args, **kwargs):
         kwargs['weekday'],
     )
 
+
 def generate_cron_monthly(*args, **kwargs):
     if not kwargs['hour_min'] or not kwargs['day']:
         return ''
@@ -51,27 +54,36 @@ def generate_cron_monthly(*args, **kwargs):
         kwargs['day'],
     )
 
+
 def generate_cron_never(*args, **kwargs):
     return ''
 
+
 class Profile(models.Model):
+    NOTIFY_STATUS = tuple((ind, value['label'])
+                     for ind, value in enumerate(settings.NOTIFY_MODULES))
+
     user = models.OneToOneField(User, unique=True, related_name='profile')
     list_per_page = models.PositiveIntegerField(null=False, default=50)
     lang_ui = models.CharField(_('Interface language'),
                                choices=settings.LANGUAGES,
-                               default='RU',
+                               default=settings.DEFAULT_LANGUAGE,
                                max_length=4)
     notification = models.IntegerField(_('Notification'),
                                        default=0,
-                                       choices=settings.NOTIFY_STATUS)
+                                       choices=NOTIFY_STATUS)
 
     class Meta:
         db_table = u'w3af_webui_profile'
 
+
 def create_profile(sender, **kwargs):
     if kwargs['created']:
         Profile.objects.create(user=kwargs['instance'])
+
+
 models.signals.post_save.connect(create_profile, sender=User)
+
 
 class ScanProfile(models.Model):
     '''Scan profiles here'''
@@ -80,17 +92,18 @@ class ScanProfile(models.Model):
     short_comment = models.CharField(_('Short description'), blank=True,
                                      max_length=240)
     w3af_profile = models.TextField(_('w3af-profile'), blank=True,
-                                    default=settings.SCAN_DEFAULT_PROFILE) 
+                                    default=settings.SCAN_DEFAULT_PROFILE)
     user = models.ForeignKey(User, verbose_name=_('User'),
                              blank=True, null=True)
-    
+
     class Meta:
         verbose_name = _('scan profile')
         verbose_name_plural = _('Scan profiles')
         db_table = u'scan_profiles'
-    
+
     def __unicode__(self):
         return u'%s' % self.name
+
 
 class Target(models.Model):
     '''Targets for scanning'''
@@ -106,14 +119,15 @@ class Target(models.Model):
                                             blank=True,
                                             null=True,
                                             editable=False)
-    
+
     class Meta:
         verbose_name = _('target')
         verbose_name_plural = _('Targets')
         db_table = u'targets'
-    
+
     def __unicode__(self):
         return u'%s' % self.name
+
 
 class ScanTask(models.Model):
     '''Scan jobs'''
@@ -121,7 +135,7 @@ class ScanTask(models.Model):
     status = models.PositiveIntegerField(
                     _('Status'),
                     default=settings.TASK_STATUS[settings.TASK_STATUS_KEYS[0]],
-                    choices=(list((settings.TASK_STATUS[k],_(k))
+                    choices=(list((settings.TASK_STATUS[k], k)
                     for k in settings.TASK_STATUS_KEYS)))
     start = models.fields.DateTimeField(_('Scan start'), null=True, blank=True)
     user = models.ForeignKey(User, verbose_name=_('User'), blank=True,
@@ -146,24 +160,24 @@ class ScanTask(models.Model):
                             _('Day of week'), null=True, blank=True,
                             choices=(list((k + 1, settings.WEEK_DAY_NAME[k])
                             for k in range(0, len(settings.WEEK_DAY_NAME)))))
-    
+
     class Meta:
         verbose_name = _('scan task')
         verbose_name_plural = _('scan tasks')
         db_table = u'scan_tasks'
         permissions = (
             ("view_all_data", "Can view no only yourself tasks, scans,..etc"),)
-    
+
     def __unicode__(self):
             return u'%s %s' % (self.comment, self.target,)
-    
+
     def save(self, *args, **kwargs):
         try:
             self.user = kwargs['user']
             del kwargs['user']
         except Exception:
             pass
-        repeat_period = self.repeat_each 
+        repeat_period = self.repeat_each
         functions = {1: generate_cron_never, 2: generate_cron_daily,
                      3: generate_cron_weekly, 4: generate_cron_monthly,}
         self.cron = functions.get(repeat_period, generate_cron_never)(
@@ -179,7 +193,7 @@ class ScanTask(models.Model):
                             repeat_period,
                         ))
         return super(ScanTask, self).save(*args, **kwargs)
-    
+
     def create_scan(self):
         scan = Scan.objects.create(scan_task=self,
                                    start=datetime.now(),)
@@ -187,7 +201,7 @@ class ScanTask(models.Model):
         self.last_updated = datetime.now()
         self.save()
         return scan
-    
+
     def run(self):
         scan = self.create_scan()
         try:
@@ -200,6 +214,7 @@ class ScanTask(models.Model):
             scan.unlock_task(message)
             raise Exception, e
 
+
 class ProfilesTargets(models.Model):
     id = models.AutoField(_('id'), primary_key=True)
     scan_profile = models.ForeignKey(ScanProfile,
@@ -208,14 +223,14 @@ class ProfilesTargets(models.Model):
     target = models.ForeignKey(Target,
                                blank=True,
                                verbose_name=_('Target'))
-    
+
     class Meta:
         verbose_name        = _('Default scan profile')
         verbose_name_plural = _('Default scan profiles')
         db_table            = u'profiles_targets'
-    
+
     def __unicode__(self):
-        return u'%s' % self.scan_profile 
+        return u'%s' % self.scan_profile
 
 class ProfilesTasks(models.Model):
     id = models.AutoField(_('id'), primary_key=True)
@@ -229,11 +244,12 @@ class ProfilesTasks(models.Model):
         verbose_name        = _('Profile')
         verbose_name_plural = _('Profiles')
         db_table            = u'profiles_tasks'
-    
+
     def __unicode__(self):
         return u'%s' % (self.scan_profile, )
 
-class Scan(models.Model): 
+
+class Scan(models.Model):
     '''Reports for scans'''
     id = models.AutoField(_('id'), primary_key=True)
     scan_task = models.ForeignKey(ScanTask, verbose_name=_('Scan task'))
@@ -254,12 +270,12 @@ class Scan(models.Model):
     last_updated = models.DateTimeField(null=True,
                                         default=datetime(1991, 01, 01, 00, 00))
     result_message = models.CharField(max_length=1000, null=True, default='')
-    
+
     def set_task_status_free(self):
         scan_task = self.scan_task
         scan_task.status = settings.TASK_STATUS['free']
-        scan_task.save() 
-    
+        scan_task.save()
+
     def unlock_task(self, text_comment='unlock task'):
         if self.status != settings.SCAN_STATUS['in_process']:
             return False
@@ -268,14 +284,13 @@ class Scan(models.Model):
         self.status = settings.SCAN_STATUS['fail']
         self.result_message = text_comment
         self.save()
-        return True 
-    
+        return True
+
     class Meta:
         verbose_name = _('scan')
         verbose_name_plural = _('scans')
         db_table = u'scans'
-    
+
     def __unicode__(self):
         return u'%s' % (self.scan_task, )
-    
 
