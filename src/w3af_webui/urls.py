@@ -19,10 +19,10 @@ urlpatterns = patterns('w3af_webui.views',
     ('^user_settings/$', 'user_settings'),
     ('^run_now/$', 'run_now'),
     ('^$', 'root'),
-    ('^admin/$', 'root'),
+    #('^admin/$', 'root'),
     (r'^static/(?P<path>.*)$', st, {'document_root': settings.STATIC_ROOT}),
     #(r'^media/(?P<path>.*)$', st, {'document_root': MEDIA_ROOT}),
-    url(r'^admin/', include(admin.site.urls), name='admin'),
+    url(r'', include(admin.site.urls), name=''),
 )
 if settings.DEBUG:
 # Обработка статичный файлов на сервере разработки

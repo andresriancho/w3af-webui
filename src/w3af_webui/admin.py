@@ -44,12 +44,23 @@ class CustomUserAdmin(UserAdmin):
         obj.is_staff=True
         obj.save()
 
-
-class ScanProfileAdmin(admin.ModelAdmin):
-    list_display = ('name', 'short_comment')
+# Base class for ModelAdmin
+class W3AF_ModelAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         self.list_per_page = request.user.get_profile().list_per_page
-        return super(ScanProfileAdmin, self).changelist_view(request, extra_context)
+        """
+        if(request.user.has_perm('w3af_webui.view_all_data')):
+            self.list_display = list(self.default_list_display) + ['user']
+        else:
+            self.list_display = self.default_list_display
+        """
+        return super(W3AF_ModelAdmin, self).changelist_view(request,
+                                                            extra_context)
+
+
+class ScanProfileAdmin(W3AF_ModelAdmin):
+    default_list_display = ['name', 'short_comment']
+    list_display = default_list_display
 
     def queryset(self, request):
         if(request.user.has_perm('w3af_webui.view_all_data')):
@@ -58,28 +69,18 @@ class ScanProfileAdmin(admin.ModelAdmin):
 
 
 class ScanAdmin(admin.ModelAdmin):
-    search_fields = ['scan_task__target__name', 'scan_task__comment']
-    list_display = ('icon', 'target_name', 'get_start', 'get_finish',
-                    'comment', 'report_or_stop','show_log' )
+    search_fields = ['scan_task__name', 'scan_task__comment']
+    default_list_display = ('icon', 'scan_task', 'comment', 'start', 'finish',
+                            'report_or_stop','show_log', )
+    list_display = default_list_display
     ordering = ('-start',)
     list_display_links = ('report_or_stop', )
     actions = ['stop_action', 'delete_selected']
+
     def stop_action(self, request, queryset):
         for selected_obj in queryset:
             selected_obj.unlock_task()
     stop_action.short_description = u'%s' % _('Stop selected')
-
-    def get_start(self, obj):
-        return obj.start
-    get_start.short_description = _('Scan start')
-    get_start.allow_tags = True
-
-    def get_finish(self, obj):
-        if obj.finish is None:
-            return ''
-        return obj.finish
-    get_finish.short_description = _('Finish')
-    get_finish.allow_tags = True
 
     def comment(self, obj):
         return mark_safe(obj.scan_task.comment)
@@ -95,13 +96,13 @@ class ScanAdmin(admin.ModelAdmin):
     stop_process.short_description = _('Action')
     stop_process.allow_tags = True
 
-    def target_name(self, obj):
-        return mark_safe(u'<a href="../target/%s/"> %s</a>' % (
-                         obj.scan_task.target.id,
-                         obj.scan_task.target.name,
+    def scan_task_link(self, obj):
+        return mark_safe(u'<a href="../scantask/%s/"> %s </a>' % (
+                         obj.scan_task.id,
+                         obj.scan_task.name,
                         ))
-    target_name.short_description = _('target')
-    target_name.allow_tags = True
+    scan_task_link.short_description = _('Task name')
+    scan_task_link.allow_tags = True
 
     def icon(self, obj):
         icons_status = {
@@ -135,12 +136,35 @@ class ScanAdmin(admin.ModelAdmin):
     def has_add_permission(self, request):
         return False
     def queryset(self, request):
-        if(request.user.has_perm('w3af_webui.view_all_data')):
+        if request.user.has_perm('w3af_webui.view_all_data'):
             return Scan.objects.all()
         return Scan.objects.filter(scan_task__user=request.user)
+    """
+    def get_form(self, request, obj=None, **kwargs):
+        if request.user.has_perm('w3af_webui.view_all_data'):
+            #self.list_display = tuple(
+            #                          list(self.default_list_display) +
+            #                          ['user']
+            #                          )
+        else:
+            self.exclude = ('user')
+            #self.list_display = tuple(self.default_list_display)
+        return super(ScanAdmin,self).get_form(request, obj=None,
+                                              **kwargs)
+    """
     def changelist_view(self, request, extra_context=None):
         extra_context = {'title': u'%s' % _('Scans'), }
         self.list_per_page = request.user.get_profile().list_per_page
+        """
+        if(request.user.has_perm('w3af_webui.view_all_data')):
+            print 'view all'
+            self.list_display = tuple(
+                                      list(self.default_list_display) +
+                                      ['user']
+                                      )
+        else:
+            self.list_display = tuple(self.default_list_display)
+        """
         return super(ScanAdmin, self).changelist_view(request,
                                                       extra_context)
 
@@ -175,15 +199,16 @@ class ProfileInline(admin.StackedInline):
                     db_field, request, **kwargs)
 
 
-class ScanTaskAdmin(admin.ModelAdmin):
+class ScanTaskAdmin(W3AF_ModelAdmin):
     '''Class for view scans in admin'''
     inlines = (ProfileInline, )
-    list_display = ('id', 'target_name', 'comment', 'get_report', 'schedule',
-                    'get_status', 'do_action', )
+    default_list_display = ['name', 'target_name', 'comment', 'get_report', 'schedule',
+                    'get_status', 'do_action', ]
+    list_display = default_list_display
     ordering = ('-id',)
     fieldsets = (
                 (None, {
-                    'fields' : ('target', 'comment', 'start', ),
+                    'fields' : ('name', 'target', 'comment', 'start', ),
                 }),
                 (_('Repeating'), {
                     'classes': ('collapse',),
@@ -237,7 +262,7 @@ class ScanTaskAdmin(admin.ModelAdmin):
     def get_report(self, obj):
         try:
             scan = Scan.objects.filter(scan_task=obj.id).order_by('-start')[0]
-            return mark_safe(u'<a href="/show_report?id=%s">%s</a>' % (
+            return mark_safe(u'<a href="/show_report/%s/">%s</a>' % (
                              scan.id,
                              scan.start
                             ))
@@ -255,7 +280,6 @@ class ScanTaskAdmin(admin.ModelAdmin):
          obj.save(user=request.user)
 
     def changelist_view(self, request, extra_context=None):
-        self.list_per_page = request.user.get_profile().list_per_page
         extra_context = {'title': u'%s' % _('Tasks'), }
         return super(ScanTaskAdmin, self).changelist_view(request,
                                                           extra_context)
@@ -266,9 +290,10 @@ class ScanTaskAdmin(admin.ModelAdmin):
                     db_field, request, **kwargs)
 
 
-class TargetAdmin(admin.ModelAdmin):
+class TargetAdmin(W3AF_ModelAdmin):
     inlines = (ProfileTargetInline,)
-    list_display = ('name', 'url', 'get_profiles', 'last_scan')
+    default_list_display = ('name', 'url', 'get_profiles', 'last_scan')
+    list_display = list(default_list_display)
 
     def get_profiles(self, obj):
         all_profiles = ProfilesTargets.objects.filter(target=obj)
@@ -292,3 +317,5 @@ admin.site.register(Target, TargetAdmin)
 admin.site.register(ScanTask, ScanTaskAdmin)
 admin.site.register(Scan, ScanAdmin)
 admin.site.register(ScanProfile, ScanProfileAdmin)
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)

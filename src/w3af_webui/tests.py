@@ -132,7 +132,7 @@ class TestView(unittest.TestCase):
 
     def test_stop_scan(self):
         # Issue a GET request.
-        #self.client.META['HTTP_REFERER'] = '/admin/w3af_webui/scan/'
+        #self.client.META['HTTP_REFERER'] = '/w3af_webui/scan/'
         #response = self.client.get('/stop_scan/', { 'id': self.scan.id})
         # Check that the response is 200 OK.
         #self.assertEqual(response.status_code, 302)
@@ -219,6 +219,9 @@ class TestScanModel(TestCase):
 class TestScanTaskModel(TestCase):
     def setUp(self):
         self.target = any_model(Target)
+        self.user = User.objects.create_user('scan_task_user', 'test@example.com',
+                                        'scan_task_user')
+        self.user.save()
 
     def test_add(self):
         self.assertEqual(0, ScanTask.objects.count())
@@ -234,7 +237,7 @@ class TestScanTaskModel(TestCase):
                               status=settings.TASK_STATUS['free'],
                               last_updated='0')
         self.assertEqual(0, Scan.objects.count())
-        scan = scan_task.create_scan()
+        scan = scan_task.create_scan(self.user)
         self.assertEqual(1, Scan.objects.count())
         self.assertEqual(scan_task.status, settings.TASK_STATUS['lock'])
         self.assertNotEqual(scan_task.last_updated, '0')
@@ -514,20 +517,20 @@ class TestModelAdmin(unittest.TestCase):
 
     def test_scan_list(self):
         # Issue a GET request.
-        response = self.client.get('/admin/w3af_webui/scan/')
+        response = self.client.get('/w3af_webui/scan/')
         # Check that the response is 200 OK.
         self.assertEqual(response.status_code, 200)
 
     def test_scantask_list(self):
         # ScanTask: Issue a GET request.
-        response = self.client.get('/admin/w3af_webui/scantask/')
+        response = self.client.get('/w3af_webui/scantask/')
         # Check that the response is 200 OK.
         self.assertEqual(response.status_code, 200)
 
     def test_edit_scantask(self):
         # Issue a GET request.
         response = self.client.get(
-            '/admin/w3af_webui/scantask/%s/' % self.scan_task.id,
+            '/w3af_webui/scantask/%s/' % self.scan_task.id,
             follow=True,
             )
         # Check that the response is 200 OK.
@@ -535,14 +538,14 @@ class TestModelAdmin(unittest.TestCase):
 
     def test_target_list(self):
         # Target: Issue a GET request.
-        response = self.client.get('/admin/w3af_webui/target/')
+        response = self.client.get('/w3af_webui/target/')
         # Check that the response is 200 OK.
         self.assertEqual(response.status_code, 200)
 
     def test_edit_target(self):
         # My Target: Issue a GET request.
         response = self.client.get(
-            '/admin/w3af_webui/target/%s/' % self.target.id,
+            '/w3af_webui/target/%s/' % self.target.id,
             follow=True,
             )
         # Check that the response is 200 OK.
@@ -551,14 +554,14 @@ class TestModelAdmin(unittest.TestCase):
 
     def test_scanprofile_list(self):
         # Target: Issue a GET request.
-        response = self.client.get('/admin/w3af_webui/scanprofile/')
+        response = self.client.get('/w3af_webui/scanprofile/')
         # Check that the response is 200 OK.
         self.assertEqual(response.status_code, 200)
 
     def test_edit_scanprofile(self):
         # Target: Issue a GET request.
         response = self.client.get(
-            '/admin/w3af_webui/scanprofile/%s/' % self.profile.id,
+            '/w3af_webui/scanprofile/%s/' % self.profile.id,
             follow=True,
             )
         # Check that the response is 200 OK.

@@ -132,6 +132,7 @@ class Target(models.Model):
 class ScanTask(models.Model):
     '''Scan jobs'''
     id = models.AutoField(_('id'), primary_key=True)
+    name = models.CharField(_('Task name'), max_length=64, null=True)
     status = models.PositiveIntegerField(
                     _('Status'),
                     default=settings.TASK_STATUS[settings.TASK_STATUS_KEYS[0]],
@@ -139,10 +140,10 @@ class ScanTask(models.Model):
                     for k in settings.TASK_STATUS_KEYS)))
     start = models.fields.DateTimeField(_('Scan start'), null=True, blank=True)
     user = models.ForeignKey(User, verbose_name=_('User'), blank=True,
-                            null=True)
+                             null=True)
     target = models.ForeignKey(Target, verbose_name=_('Target'))
-    comment = models.CharField(_('Description'), blank=True, null=True,
-                               max_length=255)
+    comment = models.TextField(_('Description'), blank=True, null=True,
+                               max_length=500)
     cron = models.CharField(_('Cron string'), blank=True, null=True,
                             max_length=64)
     repeat_at = models.fields.TimeField(_('Time'), null=True, blank=True)
@@ -165,11 +166,15 @@ class ScanTask(models.Model):
         verbose_name = _('scan task')
         verbose_name_plural = _('scan tasks')
         db_table = u'scan_tasks'
-        permissions = (
-            ("view_all_data", "Can view no only yourself tasks, scans,..etc"),)
+        #permissions = (
+        #    ("view_all_data", "Can view no only yourself tasks, scans,..etc"),)
 
     def __unicode__(self):
-            return u'%s %s' % (self.comment, self.target,)
+        return u'%s' % (self.name)
+        #return u'<a href="../scantask/%s/"> %s</a>' % (
+        #                 self.id,
+        #                 self.name,
+        #                )
 
     def save(self, *args, **kwargs):
         try:
@@ -194,16 +199,20 @@ class ScanTask(models.Model):
                         ))
         return super(ScanTask, self).save(*args, **kwargs)
 
-    def create_scan(self):
+    def create_scan(self, user):
         scan = Scan.objects.create(scan_task=self,
-                                   start=datetime.now(),)
+                                   start=datetime.now(),
+                                   user=user)
         self.status = settings.TASK_STATUS['lock']
         self.last_updated = datetime.now()
         self.save()
         return scan
 
-    def run(self):
-        scan = self.create_scan()
+    def run(self, *args):
+        user = self.user
+        if(args):
+            user = args[0]
+        scan = self.create_scan(user)
         try:
             scan_start.delay(scan.id)
         except Exception, e:
@@ -231,6 +240,7 @@ class ProfilesTargets(models.Model):
 
     def __unicode__(self):
         return u'%s' % self.scan_profile
+
 
 class ProfilesTasks(models.Model):
     id = models.AutoField(_('id'), primary_key=True)
@@ -270,6 +280,9 @@ class Scan(models.Model):
     last_updated = models.DateTimeField(null=True,
                                         default=datetime(1991, 01, 01, 00, 00))
     result_message = models.CharField(max_length=1000, null=True, default='')
+    user = models.ForeignKey(User, verbose_name=_('User'), blank=True,
+                             null=True)
+
 
     def set_task_status_free(self):
         scan_task = self.scan_task
@@ -290,6 +303,7 @@ class Scan(models.Model):
         verbose_name = _('scan')
         verbose_name_plural = _('scans')
         db_table = u'scans'
+        #ordering = ['-start']
 
     def __unicode__(self):
         return u'%s' % (self.scan_task, )

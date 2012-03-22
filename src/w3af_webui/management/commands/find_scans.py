@@ -36,7 +36,7 @@ class Command(BaseCommand):
                     now_delta > settings.FSCAN_TDELTA['min']):
                     if not Scan.objects.filter(scan_task=scan_task.id,
                                                finish__gte=min_time_allowed):
-                        logger.info('Found waitng scan: %s' % scan_task.target)
+                        logger.info('Found waiting time scan: %s' % scan_task.target)
                         scan_task.run()
             # cron-schedule start
             if scan_task.cron:
@@ -45,5 +45,5 @@ class Command(BaseCommand):
                                       now.minute)):
                     if not Scan.objects.filter(scan_task=scan_task.id,
                                                finish__gte=min_time_allowed):
-                        logger.info('Found waitng scan: %s' % scan_task.target)
+                        logger.info('Found waiting cron scan: %s' % scan_task.target)
                         scan_task.run()

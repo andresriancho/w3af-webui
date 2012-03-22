@@ -31,7 +31,7 @@ def send_notification(scan):
                                    fromlist=[''])
         if 'notify' not in dir(notify_module):
             return False
-        return notify_module.notify(scan.scan_task.user,
+        return notify_module.notify(scan.user,
                                     scan.scan_task.target,
                                     scan.id)
     except Exception, e:
@@ -107,8 +107,12 @@ def wait_process_finish(scan, process):
         sleep(W3AF_POLL_PERIOD) # wail 
         process.poll() # get process status
     scan.set_task_status_free()
-    scan.finish = datetime.now()
+    finish_time = datetime.now()
+    scan.finish = finish_time
     scan.save()
+    target = scan.scan_task.target
+    target.last_scan = finish_time
+    target.save()
     logger.info('w3af Process return code %s' % process.returncode)
     return process.returncode
 

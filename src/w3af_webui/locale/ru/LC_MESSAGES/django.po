@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-02-16 14:22+0300\n"
-"PO-Revision-Date: 2012-02-16 14:22+0300\n"
+"POT-Creation-Date: 2012-03-22 10:25+0300\n"
+"PO-Revision-Date: 2012-03-22 10:25+0300\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -18,278 +18,290 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 
-#: admin.py:51
+#: admin.py:31
+msgid "Personal info"
+msgstr ""
+
+#: admin.py:37
+msgid "Permissions"
+msgstr ""
+
+#: admin.py:72
 msgid "Stop selected"
 msgstr "Остановить выделенное"
 
-#: admin.py:55 models.py:130 models.py:228
+#: admin.py:76 models.py:141 models.py:263
 msgid "Scan start"
 msgstr "Начало сканирования"
 
-#: admin.py:62
+#: admin.py:83
 msgid "Finish"
 msgstr "Финиш"
 
-#: admin.py:67 models.py:133
+#: admin.py:88 models.py:145
 msgid "Description"
 msgstr "Описание"
 
-#: admin.py:73 admin.py:186
+#: admin.py:94 admin.py:230
 msgid "Stop"
 msgstr "Остановить"
 
-#: admin.py:76 admin.py:104 admin.py:193
+#: admin.py:97 admin.py:128 admin.py:236
 msgid "Action"
 msgstr "Действие"
 
-#: admin.py:84 admin.py:173 models.py:108
+#: admin.py:105 admin.py:217 models.py:124
 msgid "target"
 msgstr "цель"
 
-#: admin.py:95 admin.py:167 models.py:126 models.py:225
+#: admin.py:119 admin.py:211 models.py:137 models.py:259
 msgid "Status"
 msgstr "Статус"
 
-#: admin.py:101
+#: admin.py:125
 msgid "Show report"
 msgstr "Показать отчёт"
 
-#: admin.py:103
+#: admin.py:127
 msgid "Stop scan"
 msgstr "Остановить сканирование"
 
-#: admin.py:108 admin.py:109
+#: admin.py:133 admin.py:135
 msgid "Show log"
 msgstr "Показать лог"
 
-#: admin.py:118 templates/admin/base.html:62
+#: admin.py:144 templates/admin/base.html:49
 msgid "Scans"
 msgstr "Сканирования"
 
-#: admin.py:150
+#: admin.py:190
 msgid "Repeating"
 msgstr "Повторять"
 
-#: admin.py:159
+#: admin.py:203
 msgid "Schedule"
 msgstr "Расписание"
 
-#: admin.py:160
+#: admin.py:204
 msgid "One-time"
 msgstr "Одноразово"
 
-#: admin.py:161
+#: admin.py:205
 msgid "Run regularity"
 msgstr "Запускать регулярно"
 
-#: admin.py:165
+#: admin.py:209
 msgid "Active"
 msgstr "Активно"
 
-#: admin.py:166
+#: admin.py:210
 msgid "Not active"
 msgstr "Неактивно"
 
-#: admin.py:191
+#: admin.py:234
 msgid "Run now"
 msgstr "Запустить сейчас"
 
-#: admin.py:203
+#: admin.py:248
 msgid "Last scan"
 msgstr "Последнее сканирование"
 
-#: admin.py:225
+#: admin.py:261
 msgid "Tasks"
 msgstr "Задачи"
 
-#: admin.py:236 models.py:204
+#: admin.py:279 models.py:230
 msgid "Default scan profiles"
 msgstr "Профили сканирования по умолчанию"
 
-#: extra_settings.py:6
+#: extra_settings.py:12
 msgid "JIRA"
 msgstr "JIRA"
 
-#: extra_settings.py:7 settings.py:47
+#: extra_settings.py:13 settings.py:165
 msgid "e-mail"
 msgstr ""
 
-#: extra_settings.py:8 settings.py:46
+#: extra_settings.py:14 settings.py:164
 msgid "None"
 msgstr ""
 
-#: models.py:68 templates/admin/user_settings.html:25
+#: models.py:68 templates/admin/user_settings.html:27
 msgid "Interface language"
 msgstr "Язык интерфейса"
 
-#: models.py:70 templates/admin/user_settings.html:33
+#: models.py:72 templates/admin/user_settings.html:35
 msgid "Notification"
 msgstr "Уведомления"
 
-#: models.py:80 models.py:97 models.py:125 models.py:198 models.py:211
-#: models.py:223
+#: models.py:90 models.py:110 models.py:134 models.py:220 models.py:238
+#: models.py:256
 msgid "id"
 msgstr "ID"
 
-#: models.py:81 models.py:98
+#: models.py:91 models.py:111
 msgid "Name"
 msgstr "Название"
 
-#: models.py:82
+#: models.py:92
 msgid "Short description"
 msgstr "Краткое описание"
 
-#: models.py:83
+#: models.py:94
 msgid "w3af-profile"
 msgstr "w3af-профиль"
 
-#: models.py:85 models.py:103 models.py:131
+#: models.py:96 models.py:116 models.py:142
 msgid "User"
 msgstr "Пользователь"
 
-#: models.py:88
+#: models.py:100
 msgid "scan profile"
 msgstr "профиль сканирования"
 
-#: models.py:89 templates/admin/base.html:74
+#: models.py:101 templates/admin/base.html:61
 msgid "Scan profiles"
 msgstr "Профили сканирования"
 
-#: models.py:99
+#: models.py:112
 msgid "URL"
 msgstr "URL"
 
-#: models.py:102
-msgid "Comment"
-msgstr "JIRA ID"
-
-#: models.py:104
+#: models.py:118
 msgid "Last scan date"
 msgstr "Дата последнего сканирования"
 
-#: models.py:109 templates/admin/base.html:70
+#: models.py:125 templates/admin/base.html:57
 msgid "Targets"
 msgstr "Цели"
 
-#: models.py:132 models.py:200
+#: models.py:135
+msgid "Task name"
+msgstr "Название задачи"
+
+#: models.py:144 models.py:226
 msgid "Target"
 msgstr "Цель"
 
-#: models.py:135
+#: models.py:147
 msgid "Cron string"
 msgstr "cron-строка"
 
-#: models.py:136
+#: models.py:149
 msgid "Time"
 msgstr "Время"
 
-#: models.py:137
+#: models.py:151
 msgid "Repeat each"
 msgstr "Повторять каждый (-ую)"
 
-#: models.py:141
+#: models.py:156
 msgid "Day number"
 msgstr "Номер дня"
 
-#: models.py:143
+#: models.py:161
 msgid "Day of week"
 msgstr "День недели"
 
-#: models.py:148
+#: models.py:166
 msgid "scan task"
 msgstr "задача на сканирование"
 
-#: models.py:149
+#: models.py:167
 msgid "scan tasks"
 msgstr "задачи на сканирование"
 
-#: models.py:199 models.py:213 models.py:217
+#: models.py:223 models.py:241 models.py:246
 msgid "Profile"
 msgstr "Профиль"
 
-#: models.py:203
+#: models.py:229
 msgid "Default scan profile"
 msgstr "Профиль сканирования по умолчанию"
 
-#: models.py:215
+#: models.py:244
 msgid "Scan"
 msgstr "Сканирование"
 
-#: models.py:218
+#: models.py:247
 msgid "Profiles"
 msgstr "Профили"
 
-#: models.py:224
+#: models.py:257
 msgid "Scan task"
 msgstr "Задача на сканирования"
 
-#: models.py:229
+#: models.py:265
 msgid "Scan finish"
 msgstr "Сканирование завершено"
 
-#: models.py:231
+#: models.py:269
 msgid "Report"
 msgstr "Отчёт"
 
-#: models.py:253
+#: models.py:292
 msgid "scan"
 msgstr "сканирование"
 
-#: models.py:254
+#: models.py:293
 msgid "scans"
 msgstr "сканирования"
 
-#: settings.py:39
+#: settings.py:45 settings.py:141
 msgid "Russian"
 msgstr "Русский"
 
-#: settings.py:40
+#: settings.py:46 settings.py:142
 msgid "English"
 msgstr "Английский"
 
-#: settings.py:148
+#: settings.py:169
 msgid "Monday"
 msgstr "Понедельник"
 
-#: settings.py:148
+#: settings.py:169
 msgid "Tuesday"
 msgstr "Вторник"
 
-#: settings.py:148
+#: settings.py:169
 msgid "Wednesday"
 msgstr "Среда"
 
-#: settings.py:148
+#: settings.py:169
 msgid "Thursday"
 msgstr "Четверг"
 
-#: settings.py:149
+#: settings.py:170
 msgid "Friday"
 msgstr "Пятница"
 
-#: settings.py:149
+#: settings.py:170
 msgid "Saturday"
 msgstr "Суббота"
 
-#: settings.py:149
+#: settings.py:170
 msgid "Sunday"
 msgstr "Воскресенье"
 
-#: settings.py:160
+#: settings.py:180
 msgid "never"
 msgstr "никогда"
 
-#: settings.py:160
+#: settings.py:180
 msgid "daily"
 msgstr "ежедневно"
 
-#: settings.py:160
+#: settings.py:180
 msgid "weekly"
 msgstr "еженедельно"
 
-#: settings.py:160
+#: settings.py:180
 msgid "monthly"
 msgstr "ежемесячно"
+
+#: settings.py:232
+msgid "Comment"
+msgstr "JIRA ID"
 
 #: templates/404.html:4 templates/404.html.py:8
 msgid "Page not found"
@@ -299,8 +311,7 @@ msgstr ""
 msgid "We're sorry, but the requested page could not be found."
 msgstr ""
 
-#: templates/500.html:4 templates/admin/base.html:90
-#: templates/admin/user_settings.html:6
+#: templates/500.html:4 templates/admin/base.html:75
 msgid "Home"
 msgstr "Домой"
 
@@ -322,125 +333,101 @@ msgid ""
 "mail and should be fixed shortly. Thanks for your patience."
 msgstr ""
 
-#: templates/test.html:6
-#, python-format
-msgid "In %(offset)s hour(s), it will be %(dt)s."
-msgstr ""
-
-#: templates/admin/base.html:29
+#: templates/admin/base.html:25
 msgid "Web Application scanner W3AF"
 msgstr "Сканер уязвимостей веб-приложений"
 
-#: templates/admin/base.html:33
+#: templates/admin/base.html:31
 msgid "Welcome,"
 msgstr "Добро пожаловать,"
 
-#: templates/admin/base.html:38 templates/admin/user_settings.html:5
-msgid "Documentation"
-msgstr "Документация"
-
-#: templates/admin/base.html:46 templates/admin/user_settings.html:5
-msgid "Change password"
-msgstr "Изменить пароль"
-
-#: templates/admin/base.html:48
+#: templates/admin/base.html:34 templates/admin/user_settings.html:7
 msgid " User Settings"
 msgstr "Настройки пользователя"
 
-#: templates/admin/base.html:56 templates/admin/user_settings.html:5
+#: templates/admin/base.html:39
+msgid "Documentation"
+msgstr "Документация"
+
+#: templates/admin/base.html:41
+msgid "Change password"
+msgstr "Изменить пароль"
+
+#: templates/admin/base.html:43
 msgid "Log out"
 msgstr "Выйти"
 
-#: templates/admin/base.html:66
+#: templates/admin/base.html:53
 msgid "Scan tasks"
 msgstr "Задачи на сканирование"
 
-#: templates/admin/base.html:78
+#: templates/admin/base.html:65
 msgid "Users"
 msgstr "Пользователи"
 
-#: templates/admin/index.html:17
-#, python-format
-msgid "Models available in the %(name)s application."
-msgstr ""
-
-#: templates/admin/index.html:18
-#, python-format
-msgid "%(name)s"
-msgstr ""
-
-#: templates/admin/index.html:28
-msgid "Add"
-msgstr "Добавить"
-
-#: templates/admin/index.html:34
-msgid "Change"
-msgstr "Изменить"
-
-#: templates/admin/index.html:44
-msgid "You don't have permission to edit anything."
-msgstr "У вас не достаточно прав"
-
-#: templates/admin/index.html:55
-msgid "Recent Actions"
-msgstr "Последние действия"
-
-#: templates/admin/index.html:56
-msgid "My Actions"
-msgstr "Мои действия"
-
-#: templates/admin/index.html:69
-msgid "Unknown content"
-msgstr "Неизвестное содержание"
-
-#: templates/admin/user_settings.html:6
-msgid "Password change"
-msgstr "Изменить пароль"
-
-#: templates/admin/user_settings.html:8 templates/admin/user_settings.html:20
+#: templates/admin/user_settings.html:10 templates/admin/user_settings.html:22
 msgid "User settings"
 msgstr "Настройки пользователя"
 
-#: templates/admin/user_settings.html:16
-#: templates/admin/auth/change_list.html:21
-#: templates/admin/w3af_webui/scantask/change_form.html:11
+#: templates/admin/user_settings.html:18
 msgid "Please correct the error below."
 msgid_plural "Please correct the errors below."
 msgstr[0] ""
 msgstr[1] ""
 
-#: templates/admin/user_settings.html:29
+#: templates/admin/user_settings.html:31
 msgid "List per page"
 msgstr "Количество строк на страницу в постраничных таблицах"
 
-#: templates/admin/user_settings.html:41
+#: templates/admin/user_settings.html:43
 msgid "Change my settings"
 msgstr "Изменить мои настройки"
 
-#: templates/admin/auth/change_list.html:12
-#, python-format
-msgid "Add %(name)s"
-msgstr "Добавить %(name)s"
-
+#: templates/admin/auth/change_form.html:7
 #: templates/admin/w3af_webui/change_form.html:7
 msgid "History"
 msgstr "История"
 
+#: templates/admin/auth/change_form.html:8
 #: templates/admin/w3af_webui/change_form.html:8
 msgid "View on site"
 msgstr "Посмотреть на сайте"
 
-#: templates/admin/w3af_webui/target/change_form.html:6
+#: templates/admin/w3af_webui/target/change_form.html:8
 msgid "Available URL"
 msgstr "Доступный URL"
 
-#: templates/admin/w3af_webui/target/change_form.html:7
+#: templates/admin/w3af_webui/target/change_form.html:9
 msgid "Unavailable URL"
 msgstr "Недоступный URL"
 
-#: templates/admin/w3af_webui/target/change_form.html:8
+#: templates/admin/w3af_webui/target/change_form.html:10
 msgid "Invalid URL"
 msgstr "Неправильный URL"
+
+#~ msgid "Add"
+#~ msgstr "Добавить"
+
+#~ msgid "Change"
+#~ msgstr "Изменить"
+
+#~ msgid "You don't have permission to edit anything."
+#~ msgstr "У вас не достаточно прав"
+
+#~ msgid "Recent Actions"
+#~ msgstr "Последние действия"
+
+#~ msgid "My Actions"
+#~ msgstr "Мои действия"
+
+#~ msgid "Unknown content"
+#~ msgstr "Неизвестное содержание"
+
+#~ msgid "Password change"
+#~ msgstr "Изменить пароль"
+
+#~ msgid "Add %(name)s"
+#~ msgstr "Добавить %(name)s"
 
 #~ msgid "JIRA ID"
 #~ msgstr "JIRA ID"

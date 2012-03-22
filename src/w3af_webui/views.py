@@ -26,15 +26,15 @@ def r(request, template, **kwargs):
                               context_instance=RequestContext(request))
 
 def root(request):
-    return redirect('/admin/w3af_webui/scan/')
+    return redirect('/w3af_webui/scan/')
 
 def run_now(request):
     if not 'id' in request.GET:
         raise Http404
     id = request.GET['id']
     obj = ScanTask.objects.get(id=id)
-    obj.run()
-    return redirect('/admin/w3af_webui/scantask/')
+    obj.run(request.user)
+    return redirect('/w3af_webui/scantask/')
 
 def stop_scan(request):
     if not 'id' in request.GET:

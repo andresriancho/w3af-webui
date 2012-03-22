@@ -46,23 +46,23 @@
         <!-- custom menu -->        
             <div style="font-weight:bold; color:red; padding:10px; border:0px solid black; margin: 10px 10px 10px 10px">
             {% if perms.w3af_webui.change_scan %} 
-            <a href="/admin/w3af_webui/scan/">{% trans 'Scans' %}</a> 
+            <a href="/w3af_webui/scan/">{% trans 'Scans' %}</a> 
             {% endif %}
             {% if perms.w3af_webui.change_scantask %} 
             |
-            <a href="/admin/w3af_webui/scantask/">{% trans 'Scan tasks' %}</a>
+            <a href="/w3af_webui/scantask/">{% trans 'Scan tasks' %}</a>
             {% endif %}
             {% if perms.w3af_webui.change_target %} 
             |
-            <a href="/admin/w3af_webui/target/">{% trans 'Targets' %}</a>
+            <a href="/w3af_webui/target/">{% trans 'Targets' %}</a>
             {% endif %}
             {% if perms.w3af_webui.change_scanprofile %} 
             |
-            <a href="/admin/w3af_webui/scanprofile/">{% trans 'Scan profiles' %}</a>
+            <a href="/w3af_webui/scanprofile/">{% trans 'Scan profiles' %}</a>
             {% endif %}
             {% if perms.auth.change_user %} 
             |
-            <a href="/admin/auth/user/">{% trans 'Users' %}</a>
+            <a href="/auth/user/">{% trans 'Users' %}</a>
             {% endif %}
         </div>
         {% endif %}
