@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
+from django import forms
 
 from w3af_webui.models import ScanProfile
 from w3af_webui.models import Target
@@ -44,18 +45,19 @@ class CustomUserAdmin(UserAdmin):
         obj.is_staff=True
         obj.save()
 
+
 # Base class for ModelAdmin
 class W3AF_ModelAdmin(admin.ModelAdmin):
     def changelist_view(self, request, extra_context=None):
         self.list_per_page = request.user.get_profile().list_per_page
-        """
-        if(request.user.has_perm('w3af_webui.view_all_data')):
-            self.list_display = list(self.default_list_display) + ['user']
-        else:
-            self.list_display = self.default_list_display
-        """
-        return super(W3AF_ModelAdmin, self).changelist_view(request,
-                                                            extra_context)
+        if (request.user.has_perm('w3af_webui.view_all_data') and
+                                 'user' not in self.list_display):
+            self.list_display.append('user')
+        if (not request.user.has_perm('w3af_webui.view_all_data') and
+                                         'user' in self.list_display):
+            self.list_display.remove('user')
+        return super(W3AF_ModelAdmin, self).changelist_view(
+                     request, extra_context)
 
 
 class ScanProfileAdmin(W3AF_ModelAdmin):
@@ -68,10 +70,11 @@ class ScanProfileAdmin(W3AF_ModelAdmin):
         return ScanProfile.objects.filter(user=request.user)
 
 
-class ScanAdmin(admin.ModelAdmin):
+class ScanAdmin(W3AF_ModelAdmin):
     search_fields = ['scan_task__name', 'scan_task__comment']
     default_list_display = ('icon', 'scan_task', 'comment', 'start', 'finish',
-                            'report_or_stop','show_log', )
+                            'report_or_stop','show_log', 'user', )
+    #list_display = ('scan_task', 'start', 'user') # default_list_display
     list_display = default_list_display
     ordering = ('-start',)
     list_display_links = ('report_or_stop', )
@@ -80,10 +83,12 @@ class ScanAdmin(admin.ModelAdmin):
     def stop_action(self, request, queryset):
         for selected_obj in queryset:
             selected_obj.unlock_task()
+
     stop_action.short_description = u'%s' % _('Stop selected')
 
     def comment(self, obj):
         return mark_safe(obj.scan_task.comment)
+
     comment.short_description = _('Description')
 
     def stop_process(self, obj):
@@ -93,6 +98,7 @@ class ScanAdmin(admin.ModelAdmin):
                              _('Stop'),
                              ))
         return ''
+
     stop_process.short_description = _('Action')
     stop_process.allow_tags = True
 
@@ -101,6 +107,7 @@ class ScanAdmin(admin.ModelAdmin):
                          obj.scan_task.id,
                          obj.scan_task.name,
                         ))
+
     scan_task_link.short_description = _('Task name')
     scan_task_link.allow_tags = True
 
@@ -115,6 +122,7 @@ class ScanAdmin(admin.ModelAdmin):
             '<img src="%s/w3af_webui/icons/%s"/>' % (
             settings.STATIC_URL, icon,
             ))
+
     icon.short_description = _('Status')
     icon.allow_tags = True
 
@@ -124,47 +132,30 @@ class ScanAdmin(admin.ModelAdmin):
                             (obj.id, _('Show report')))
         return mark_safe(u'<a href="/stop_scan?id=%s">%s</a>' %
                          (obj.id, _('Stop scan')))
+
     report_or_stop.short_description = _('Action')
     report_or_stop.allow_tags = True
+
     def show_log(self, obj):
         return mark_safe(
             u'<a target=_blanck href="/show_report_txt/%s/">%s</a>' %
             (obj.id, _('Show log'))
             )
+
     show_log.short_description = _('Show log')
     show_log.allow_tags = True
+
     def has_add_permission(self, request):
-        return False
-    def queryset(self, request):
+         return False
+
+    def  queryset(self, request):
         if request.user.has_perm('w3af_webui.view_all_data'):
             return Scan.objects.all()
         return Scan.objects.filter(scan_task__user=request.user)
-    """
-    def get_form(self, request, obj=None, **kwargs):
-        if request.user.has_perm('w3af_webui.view_all_data'):
-            #self.list_display = tuple(
-            #                          list(self.default_list_display) +
-            #                          ['user']
-            #                          )
-        else:
-            self.exclude = ('user')
-            #self.list_display = tuple(self.default_list_display)
-        return super(ScanAdmin,self).get_form(request, obj=None,
-                                              **kwargs)
-    """
+
     def changelist_view(self, request, extra_context=None):
         extra_context = {'title': u'%s' % _('Scans'), }
         self.list_per_page = request.user.get_profile().list_per_page
-        """
-        if(request.user.has_perm('w3af_webui.view_all_data')):
-            print 'view all'
-            self.list_display = tuple(
-                                      list(self.default_list_display) +
-                                      ['user']
-                                      )
-        else:
-            self.list_display = tuple(self.default_list_display)
-        """
         return super(ScanAdmin, self).changelist_view(request,
                                                       extra_context)
 
@@ -202,9 +193,8 @@ class ProfileInline(admin.StackedInline):
 class ScanTaskAdmin(W3AF_ModelAdmin):
     '''Class for view scans in admin'''
     inlines = (ProfileInline, )
-    default_list_display = ['name', 'target_name', 'comment', 'get_report', 'schedule',
+    list_display = ['name', 'target_name', 'comment', 'get_report', 'schedule',
                     'get_status', 'do_action', ]
-    list_display = default_list_display
     ordering = ('-id',)
     fieldsets = (
                 (None, {
@@ -225,18 +215,22 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
             settings.SCAN_REPEAT[settings.SCAN_REPEAT_KEYS[0]]):
             return _('Schedule')
         return _('One-time')
+
     schedule.short_description = _('Run regularity')
     schedule.allow_tags = True
+
     def get_status(self, obj):
         if obj.status == settings.TASK_STATUS['lock']:
             return  _('Active')
         return  _('Not active')
+
     get_status.short_description = _('Status')
     get_status.allow_tags = True
 
     def target_name(self, obj):
         return mark_safe(u'<a href="../target/%s/">'
                         u'%s</a>' % (obj.target.id, obj.target.name))
+
     target_name.short_description = _('target')
     target_name.allow_tags = True
 
@@ -256,6 +250,7 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
                          obj.id,
                          _('Run now'),
                         ))
+
     do_action.short_description = _('Action')
     do_action.allow_tags = True
 
@@ -268,6 +263,7 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
                             ))
         except:
             return ''
+
     get_report.short_description = _('Last scan')
     get_report.allow_tags = True
 
@@ -276,14 +272,16 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
             return ScanTask.objects.all()
         return ScanTask.objects.filter(user=request.user)
 
-    def save_model(self, request, obj, form, change):
+    def  save_model(self, request, obj, form, change):
          obj.save(user=request.user)
 
     def changelist_view(self, request, extra_context=None):
         extra_context = {'title': u'%s' % _('Tasks'), }
         return super(ScanTaskAdmin, self).changelist_view(request,
                                                           extra_context)
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        """choose targets only for current user"""
         if db_field.name == "target":
             kwargs["queryset"] = Target.objects.filter(user=request.user)
         return super(ScanTaskAdmin, self).formfield_for_foreignkey(

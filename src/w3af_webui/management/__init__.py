@@ -28,10 +28,25 @@ def create_superuser():
     superuser.is_staff = True
     superuser.save()
 
+
+def create_extra_permission():
+    codename = 'view_all_data'
+    description = 'Can use other user`s objects'
+    try:
+        Permission.objects.get(codename=codename)
+    except Permission.DoesNotExist:
+        permission_content_type = ContentType.objects.get(
+                            app_label='auth', name='permission')
+        Permission.objects.create(codename=codename,
+                                  name=description,
+                                  content_type=permission_content_type)
+
+
 def init_user_group(app, **kwargs):
     if app != 'w3af_webui':
         return
     create_superuser()
+    create_extra_permission()
     # user groups
     need_groups_names = ('Scan', 'ScanProfile', 'ScanTask', 'Target',)
     for name in need_groups_names:
@@ -53,12 +68,12 @@ def init_user_group(app, **kwargs):
     for permission in Permission.objects.filter(
                             content_type=ContentType.objects.filter(
                             app_label='auth', name='user')):
-        g_name = '%s_auth_manage' % app
+        group_name = '%s_auth_manage' % app
         try:
-            ag = Group.objects.get(name=g_name)
+            group_obj = Group.objects.get(name=group_name)
         except Group.DoesNotExist:
-            ag = Group(name=g_name)
-            ag.save()
-        ag.permissions.add(permission)
+            group_obj = Group(name=group_name)
+            group_obj.save()
+        group_obj.permissions.add(permission)
 
 post_migrate.connect(init_user_group)

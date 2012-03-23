@@ -33,6 +33,7 @@ from w3af_webui.management.commands.w3af_run import get_report_path
 from w3af_webui.management.commands.w3af_run import send_notification
 from w3af_webui.management import init_user_group
 from w3af_webui.management import create_superuser
+from w3af_webui.management import create_extra_permission
 from w3af_webui.notification import send_mail
 
 class TestInitUserGroup(TestCase):
@@ -49,6 +50,12 @@ class TestInitUserGroup(TestCase):
         self.assertEqual(0, User.objects.count())
         create_superuser()
         self.assertEqual(1, User.objects.count())
+
+    def test_create_permission(self):
+        #self.assertEqual(0, User.objects.count())
+        create_extra_permission()
+        #self.assertEqual(1, User.objects.count())
+
 
 class TestView(unittest.TestCase):
     def setUp(self):
