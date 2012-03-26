@@ -27,11 +27,11 @@ urlpatterns = patterns('w3af_webui.views',
 if settings.DEBUG:
 # Обработка статичный файлов на сервере разработки
     urlpatterns += patterns('',
-            (r'^static/(?P<path>.*)$', 'django.views.static.serve', { 
+            (r'^static/(?P<path>.*)$', 'django.views.static.serve', {
              'document_root': settings.STATIC_ROOT
              }),
             (r'^media/(?P<path>.*)$',
-             'django.views.static.serve', { 
+             'django.views.static.serve', {
              'document_root':
              settings.MEDIA_ROOT
              }),

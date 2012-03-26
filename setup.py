@@ -25,7 +25,7 @@ py_depends = {
 py_version_depends = {
     'django': '1.4',
 }
-    
+
 def check_py_dependencies():
     result = True
     for depend in py_depends:
@@ -51,8 +51,8 @@ def check_version_dependencies():
                     cur_version,
                     depend,
                     version,
-                ) 
-                print 'Can not find %s %s' % (depend, version) 
+                )
+                print 'Can not find %s %s' % (depend, version)
                 result = False
             else:
                 print 'OK'
@@ -72,7 +72,7 @@ def check_system_dependencies():
                      depend, -retcode
                 )
             else:
-                print 'OK' 
+                print 'OK'
         except OSError, e:
             print "Execution failed:", e
             result=False
@@ -98,7 +98,7 @@ setup(
     author_email = 'svetleo@yandex-team.ru',
     packages = dirs,
     package_dir = {'w3af_web': 'src'},
-    package_data = {'w3af_web.w3af_webui': 
+    package_data = {'w3af_web.w3af_webui':
                                 ['templates/*.html',
                                 'templates/admin/*.html',
                                 'templates/admin/auth/*.html',

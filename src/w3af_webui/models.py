@@ -177,11 +177,6 @@ class ScanTask(models.Model):
         #                )
 
     def save(self, *args, **kwargs):
-        try:
-            self.user = kwargs['user']
-            del kwargs['user']
-        except Exception:
-            pass
         repeat_period = self.repeat_each
         functions = {1: generate_cron_never, 2: generate_cron_daily,
                      3: generate_cron_weekly, 4: generate_cron_monthly,}

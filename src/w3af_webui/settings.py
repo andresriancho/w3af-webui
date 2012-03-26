@@ -52,8 +52,8 @@ LOCALE_PATHS = (os.path.join(_PATH, 'locale'),)
 
 # Language code for this installation. All choices can be found here:
 # http://www.i18nguy.com/unicode/language-identifiers.html
-LANGUAGE_CODE = 'en-EN'
 LANGUAGE_CODE = 'ru-RU'
+LANGUAGE_CODE = 'en-EN'
 
 SITE_ID = 1
 

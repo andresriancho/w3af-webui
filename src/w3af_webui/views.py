@@ -25,8 +25,10 @@ def r(request, template, **kwargs):
                               kwargs,
                               context_instance=RequestContext(request))
 
+
 def root(request):
     return redirect('/w3af_webui/scan/')
+
 
 def run_now(request):
     if not 'id' in request.GET:
@@ -36,6 +38,7 @@ def run_now(request):
     obj.run(request.user)
     return redirect('/w3af_webui/scantask/')
 
+
 def stop_scan(request):
     if not 'id' in request.GET:
         raise Http404
@@ -44,6 +47,7 @@ def stop_scan(request):
     message = 'Scan was stoped by user.'
     obj.unlock_task(message)
     return redirect(request.META['HTTP_REFERER'])
+
 
 def get_select_code(select_value, data_array, element_id):
     result = '<select name="%s" id="%s">' % (element_id, element_id)
@@ -98,6 +102,7 @@ def user_settings(request):
     return render_to_response("admin/user_settings.html", context,
             context_instance=RequestContext(request))
 
+
 @login_required
 def show_report_txt(request, scan_id):
     try:
@@ -111,6 +116,8 @@ def show_report_txt(request, scan_id):
     except:
         raise Http404
 
+
+@login_required
 def show_report(request, scan_id):
     try:
         obj = Scan.objects.get(id=scan_id)
@@ -121,6 +128,7 @@ def show_report(request, scan_id):
                                   context_instance=RequestContext(request))
     except:
         raise Http404
+
 
 def check_url(request):
     url = request.GET.get('url', '') + '/'

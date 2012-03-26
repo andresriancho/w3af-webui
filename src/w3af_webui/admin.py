@@ -48,6 +48,11 @@ class CustomUserAdmin(UserAdmin):
 
 # Base class for ModelAdmin
 class W3AF_ModelAdmin(admin.ModelAdmin):
+    def save_model(self, request, obj, form, change):
+        if not obj.user:
+            obj.user = request.user
+        obj.save()
+
     def changelist_view(self, request, extra_context=None):
         self.list_per_page = request.user.get_profile().list_per_page
         if (request.user.has_perm('w3af_webui.view_all_data') and
@@ -272,9 +277,6 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
             return ScanTask.objects.all()
         return ScanTask.objects.filter(user=request.user)
 
-    def  save_model(self, request, obj, form, change):
-         obj.save(user=request.user)
-
     def changelist_view(self, request, extra_context=None):
         extra_context = {'title': u'%s' % _('Tasks'), }
         return super(ScanTaskAdmin, self).changelist_view(request,
@@ -297,6 +299,7 @@ class TargetAdmin(W3AF_ModelAdmin):
         all_profiles = ProfilesTargets.objects.filter(target=obj)
         profile_names = [x.scan_profile.name for x in all_profiles]
         return ','.join(profile_names)
+
     get_profiles.short_description = _('Default scan profiles')
     get_profiles.allow_tags = True
 
@@ -304,11 +307,6 @@ class TargetAdmin(W3AF_ModelAdmin):
         if request.user.has_perm('w3af_webui.view_all_data'):
             return Target.objects.all()
         return Target.objects.filter(user=request.user)
-
-    def save_model(self, request, obj, form, change):
-        if not obj.user:
-            obj.user = request.user
-        obj.save()
 
 
 admin.site.register(Target, TargetAdmin)

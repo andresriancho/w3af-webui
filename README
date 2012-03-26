@@ -46,9 +46,9 @@ Make database init: ::
 
 Dont forget to edit /etc/mysql/my.cnf: ::
 
-    # [mysqld]
-    # ...
-    # transaction-isolation  = READ-COMMITTED
+     [mysqld]
+     ...
+     transaction-isolation  = READ-COMMITTED
 
 and restart mysql: ::
 
