@@ -66,6 +66,7 @@ def get_select_code(select_value, data_array, element_id):
 @csrf_protect
 @login_required
 def user_settings(request):
+    print 'USER SETTINGS VIEW!'
     profile = request.user.get_profile()
     if request.method == 'POST':
         iface_lang = request.POST['iface_lang']

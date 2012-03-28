@@ -54,15 +54,25 @@ class W3AF_ModelAdmin(admin.ModelAdmin):
             obj.user = request.user
         obj.save()
 
+    def get_user(self, obj):
+        return mark_safe(u"<a href='/auth/user/%s'>%s</a> " % (
+               obj.user.id,
+               obj.user.username,
+               ))
+
+    get_user.short_description = _('User')
+    get_user.allow_tags = True
+    get_user.admin_order_field = 'user__username'
+
     def changelist_view(self, request, extra_context=None):
         self.list_per_page = request.user.get_profile().list_per_page
         if (request.user.has_perm('w3af_webui.view_all_data') and
-                                 'user' not in self.list_display):
-            self.list_display.append('user')
+                                 'get_user' not in self.list_display):
+            self.list_display.append('get_user')
             self.search_fields.append('user__username')
         if (not request.user.has_perm('w3af_webui.view_all_data') and
-                                         'user' in self.list_display):
-            self.list_display.remove('user')
+                                         'get_user' in self.list_display):
+            self.list_display.remove('get_user')
             self.search_fields.remove('user__username')
         return super(W3AF_ModelAdmin, self).changelist_view(
                      request, extra_context)
@@ -80,8 +90,8 @@ class ScanProfileAdmin(W3AF_ModelAdmin):
 
 class ScanAdmin(W3AF_ModelAdmin):
     search_fields = ['scan_task__name', 'scan_task__comment']
-    list_display = ['icon', 'scan_task', 'comment', 'start', 'finish',
-                    'report_or_stop','show_log', 'user', ]
+    list_display = ['icon', 'scan_task_link', 'comment', 'start', 'finish',
+                    'report_or_stop','show_log', ]
     ordering = ('-start',)
     list_display_links = ('report_or_stop', )
     actions = ['stop_action', 'delete_selected']
@@ -116,6 +126,7 @@ class ScanAdmin(W3AF_ModelAdmin):
 
     scan_task_link.short_description = _('Task name')
     scan_task_link.allow_tags = True
+    scan_task_link.admin_order_field = 'scan_task__name'
 
     def icon(self, obj):
         icons_status = {
@@ -131,6 +142,7 @@ class ScanAdmin(W3AF_ModelAdmin):
 
     icon.short_description = _('Status')
     icon.allow_tags = True
+    icon.admin_order_field = 'status'
 
     def report_or_stop(self, obj):
         if obj.status != settings.SCAN_STATUS['in_process']:
@@ -241,6 +253,7 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
 
     target_name.short_description = _('target')
     target_name.allow_tags = True
+    target_name.admin_order_field = 'target__name'
 
     def do_action(self, obj):
         if obj.status == settings.TASK_STATUS['lock']:

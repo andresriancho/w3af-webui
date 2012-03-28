@@ -72,8 +72,8 @@ class TestView(unittest.TestCase):
                                    status=settings.TASK_STATUS['free'],
                                    target=self.target,
                                    last_updated='0',)
-        self.scan = Scan.objects.create(scan_task=self.scan_task,
-                                        data='test')
+        self.scan = Scan.objects.create(scan_task=self.scan_task,)
+
     def tearDown(self):
         self.user.delete()
         self.profile.delete()
@@ -81,9 +81,10 @@ class TestView(unittest.TestCase):
         self.scan_task.delete()
         self.scan.delete()
 
-    def _test_user_settings(self):
+    def test_user_settings(self):
         # Issue a GET request.
-        response = self.client.get('/user_settings/', )
+        response = self.client.get('/user_settings/',
+                                   follow=True)
         # Check that the response is 200 OK.
         self.assertEqual(response.status_code, 200)
         #self.assertIn(response.status_code,[200, 302])
@@ -96,10 +97,13 @@ class TestView(unittest.TestCase):
 
     def test_show_report(self):
         # Issue a GET request.
-        response = self.client.get('/show_report/%s/' % self.scan.id)
-        # Check that the response is 200 OK.
-        self.assertEqual(response.status_code, 200)
+        print self.scan.id
+        response = self.client.get('/show_report/%s/' % self.scan.id,
+                                   follow=True)
+        # Check that the response is 404 OK - report file does not exist
+        self.assertEqual(response.status_code, 404)
 
+    def test_fail_show_report(self):
         # Issue a GET request without id in queryset.
         response = self.client.get('/show_report/xxx')
         # Check that redirect done.
@@ -148,17 +152,20 @@ class TestView(unittest.TestCase):
         # Check that redirect done.
         self.assertEqual(response.status_code, 404)
 
+
 class TestScanProfile(TestCase):
     def test_add(self):
         self.assertEqual(0, ScanProfile.objects.count())
         ScanProfile.objects.create()
         self.assertEqual(1, ScanProfile.objects.count())
 
+
 class TestTarget(TestCase):
     def test_add(self):
         self.assertEqual(0, Target.objects.count())
         Target.objects.create()
         self.assertEqual(1, Target.objects.count())
+
 
 class TestScanModel(TestCase):
     def setUp(self):
@@ -222,6 +229,7 @@ class TestScanModel(TestCase):
         result = scan_fail.unlock_task(message)
         self.assertFalse(result, 'невозмозно завершить просесс со статусом fail')
         self.assertEqual(scan_fail.status, settings.SCAN_STATUS['fail'])
+
 
 class TestScanTaskModel(TestCase):
     def setUp(self):
@@ -303,6 +311,7 @@ class TestScanTaskModel(TestCase):
         self.assertTrue(mock_create_scan.called)
         self.assertTrue(mock_delay.called)
 
+
 class TestProfileModel(TestCase):
      def test_user_post_save(self):
         self.assertEqual(0, Profile.objects.count())
@@ -310,6 +319,7 @@ class TestProfileModel(TestCase):
         self.assertEqual(1, Profile.objects.count())
         new_user.save()
         self.assertEqual(1, Profile.objects.count())
+
 
 class TestCommonFunction(TestCase):
     def test_generate_cron_daily(self):
@@ -343,6 +353,7 @@ class TestCommonFunction(TestCase):
         self.assertEqual(False, result)
         self.assertFalse(mock_kill.called)
 
+
 class TestGetSelectCode(TestCase):
     def test_get_select_code(self):
         list_per_page_values = (
@@ -359,6 +370,7 @@ class TestGetSelectCode(TestCase):
         self.assertIn('</option>', select_code)
         self.assertIn('selected', select_code)
         self.assertIn('list_per_page', select_code)
+
 
 class TestW3afRun(TestCase):
     def setUp(self):
@@ -483,6 +495,7 @@ class TestW3afRun(TestCase):
         self.target.delete()
         Scan.objects.all().delete()
 
+
 class TestModelAdmin(unittest.TestCase):
     def setUp(self):
         # Every test needs a client.
@@ -574,10 +587,6 @@ class TestModelAdmin(unittest.TestCase):
         # Check that the response is 200 OK.
         self.assertEqual(response.status_code, 200)
 
-    def _test_user_settings(self):
-        response = self.client.get('/user_settings/', follow=True)
-        # Check that the response is 200 OK.
-        self.assertEqual(response.status_code, 200)
 
 class TestFindScans(TestCase):
     def setUp(self):
@@ -604,6 +613,7 @@ class TestFindScans(TestCase):
         self.scan_task.save()
         call_command('find_scans')
         self.assertTrue(mock_run.called)
+
 
 class TestSendMail(TestCase):
     def setUp(self):
