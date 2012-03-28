@@ -41,6 +41,7 @@ class CustomUserAdmin(UserAdmin):
                                ),
                 }),
     )
+
     def save_model(self, request, obj, form, change):
         obj.is_staff=True
         obj.save()
@@ -58,16 +59,18 @@ class W3AF_ModelAdmin(admin.ModelAdmin):
         if (request.user.has_perm('w3af_webui.view_all_data') and
                                  'user' not in self.list_display):
             self.list_display.append('user')
+            self.search_fields.append('user__username')
         if (not request.user.has_perm('w3af_webui.view_all_data') and
                                          'user' in self.list_display):
             self.list_display.remove('user')
+            self.search_fields.remove('user__username')
         return super(W3AF_ModelAdmin, self).changelist_view(
                      request, extra_context)
 
 
 class ScanProfileAdmin(W3AF_ModelAdmin):
-    default_list_display = ['name', 'short_comment']
-    list_display = default_list_display
+    list_display = ['name', 'short_comment']
+    search_fields = ['name', 'short_comment']
 
     def queryset(self, request):
         if(request.user.has_perm('w3af_webui.view_all_data')):
@@ -77,10 +80,8 @@ class ScanProfileAdmin(W3AF_ModelAdmin):
 
 class ScanAdmin(W3AF_ModelAdmin):
     search_fields = ['scan_task__name', 'scan_task__comment']
-    default_list_display = ('icon', 'scan_task', 'comment', 'start', 'finish',
-                            'report_or_stop','show_log', 'user', )
-    #list_display = ('scan_task', 'start', 'user') # default_list_display
-    list_display = default_list_display
+    list_display = ['icon', 'scan_task', 'comment', 'start', 'finish',
+                    'report_or_stop','show_log', 'user', ]
     ordering = ('-start',)
     list_display_links = ('report_or_stop', )
     actions = ['stop_action', 'delete_selected']
@@ -173,6 +174,7 @@ class ProfileTargetInline(admin.StackedInline):
         (None, { 'classes': ('extrapretty' ),
         'fields': (( 'scan_profile'), )}), )
 
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "scan_profile":
             kwargs["queryset"] = ScanProfile.objects.filter(user=request.user)
@@ -201,6 +203,7 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
     list_display = ['name', 'target_name', 'comment', 'get_report', 'schedule',
                     'get_status', 'do_action', ]
     ordering = ('-id',)
+    search_fields = ['name', 'comment', 'target__name', 'target__url',]
     fieldsets = (
                 (None, {
                     'fields' : ('name', 'target', 'comment', 'start', ),
@@ -292,8 +295,8 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
 
 class TargetAdmin(W3AF_ModelAdmin):
     inlines = (ProfileTargetInline,)
-    default_list_display = ('name', 'url', 'get_profiles', 'last_scan')
-    list_display = list(default_list_display)
+    list_display = ['name', 'url', 'get_profiles', 'last_scan']
+    search_fields = ['name', 'url']
 
     def get_profiles(self, obj):
         all_profiles = ProfilesTargets.objects.filter(target=obj)

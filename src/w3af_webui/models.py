@@ -222,7 +222,7 @@ class ScanTask(models.Model):
 class ProfilesTargets(models.Model):
     id = models.AutoField(_('id'), primary_key=True)
     scan_profile = models.ForeignKey(ScanProfile,
-                                     blank=True,
+                                     blank=False,
                                      verbose_name=_('Profile'))
     target = models.ForeignKey(Target,
                                blank=True,
