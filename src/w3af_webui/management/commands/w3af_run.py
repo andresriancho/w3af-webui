@@ -66,14 +66,14 @@ def get_profile(scan_task, report_path, report_file):
     config.set('target', 'target', scan_task.target.url)
     try:
         config.add_section(settings.W3AF_OUTPUT_PLUGIN)
-        config.add_section('output.textFile')
+        config.add_section(settings.W3AF_LOG_PLUGIN)
     except Exception, e:
         logger.error('can not add output plugin %s' % e)
     config.set(settings.W3AF_OUTPUT_PLUGIN, 'fileName', report_file)
-    config.set('output.textFile', 'fileName', report_file[:-5] + '.txt')
-    config.set('output.textFile', 'httpFileName',
+    config.set(settings.W3AF_LOG_PLUGIN, 'fileName', report_file[:-5] + '.txt')
+    config.set(settings.W3AF_LOG_PLUGIN, 'httpFileName',
                report_file[:-5] + '-http.txt')
-    config.set('output.textFile', 'verbose', 'False')
+    config.set(settings.W3AF_LOG_PLUGIN, 'verbose', 'False')
     with open(profile_fh.name, 'wb') as configfile:
         config.write(configfile)
     print >> sys.stderr, profile_fh.name

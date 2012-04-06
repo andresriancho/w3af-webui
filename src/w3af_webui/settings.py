@@ -150,6 +150,7 @@ SCAN_DEFAULT_PROFILE = "\n"
 
 # This output plugin will be added automaticaly for all scans
 W3AF_OUTPUT_PLUGIN = 'output.htmlFile' # default output plugin for all scans
+W3AF_LOG_PLUGIN = 'output.textFile' # default log plugin for all scans
 
 # Shell command for w3af scaner
 W3AF_RUN = 'w3af_console'
