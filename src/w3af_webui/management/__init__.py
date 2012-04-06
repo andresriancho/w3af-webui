@@ -57,7 +57,6 @@ def init_user_group(app, **kwargs):
             group = Group(name=group_name)
             group.save()
         group.permissions.clear()
-        all_content_type = ContentType.objects.all()
         content_type = ContentType.objects.get(
                             app_label=app, model=name.lower())
         for permission in Permission.objects.filter(

@@ -17,7 +17,6 @@ from django.core.management import call_command
 from django.contrib.auth.models import User
 from django.core import mail
 from django.contrib.auth.models import Group
-from django.contrib.auth.models import User
 
 from w3af_webui import models as m
 from w3af_webui.models import ScanTask
@@ -35,6 +34,111 @@ from w3af_webui.management import init_user_group
 from w3af_webui.management import create_superuser
 from w3af_webui.management import create_extra_permission
 from w3af_webui.notification import send_mail
+from w3af_webui.utils import periodic_task_generator
+from w3af_webui.utils import delay_task_generator
+from w3af_webui.utils import periodic_task_remove
+from w3af_webui.utils import get_interval
+from w3af_webui.utils import set_interval_schedule
+from w3af_webui.tasks import monthly_task
+from w3af_webui.tasks import delay_task
+
+from djcelery.models import PeriodicTask
+
+class TestDelayTask(TestCase):
+    def setUp(self):
+        self.task, created = PeriodicTask.objects.get_or_create(
+                        name='delay_22',
+                        task='w3af_webui.tasks.delay_task',
+                        interval=None,
+                        args=[22,],
+                        )
+        self.task.save()
+
+    def test_delay_task(self):
+        delay_task(*self.task.args)
+        self.assertEqual(PeriodicTask.objects.get(id=self.task.id).enabled, False)
+        self.assertEqual(PeriodicTask.objects.get(id=self.task.id).interval, None)
+
+
+    def delay_task_generator(self):
+        run_at = datetime.now()
+        run_at.minute += 1
+        self.task.enable = False
+        self.task.interval = None
+        self.task.save()
+        delay_task_generator(self.task.id, run_at)
+        self.assertEqual(PeriodicTask.objects.get(id=self.task.id).enabled, True)
+        self.assertNotEqual(PeriodicTask.objects.get(id=self.task.id).interval, None)
+
+class TestMonthlyTask(TestCase):
+    def setUp(self):
+        self.task, created = PeriodicTask.objects.get_or_create(
+                        name='22',
+                        task='w3af_webui.tasks.monthly_task',
+                        )
+        self.task.save()
+
+    def test_monthly_task(self):
+        monthly_task(*self.task.args)
+        self.assertNotEqual(PeriodicTask.objects.get(id=self.task.id).interval, None)
+
+class TestTaskGenerator(TestCase):
+    def setUp(self):
+        self.task, created = PeriodicTask.objects.get_or_create(
+                        name='test',
+                        task='w3af_webui.tasks.test_task',
+                        )
+        self.task.save()
+
+    def test_set_interval_schedule(self):
+        now = datetime.now()
+        minutes = int(now.minute) + 1
+        set_interval_schedule(self.task, minutes, now.hour, now.day)
+        self.task = PeriodicTask.objects.get(id=self.task.id)
+        self.assertEqual(self.task.interval.period, 'seconds')
+        self.assertGreater(self.task.interval.every, 1)
+        self.assertLess(self.task.interval.every, 61)
+        self.assertEqual(self.task.crontab, None)
+
+    def test_get_interval(self):
+        now = datetime.now()
+        minutes = int(now.minute) + 1
+        interval = get_interval(minutes, now.hour, now.day)
+        self.assertEqual(interval.period, 'seconds')
+        self.assertGreater(interval.every, 1)
+        self.assertLess(interval.every, 61)
+
+    @patch('w3af_webui.utils.set_interval_schedule')
+    @patch('w3af_webui.utils.set_cron_schedule')
+    def test_task_generator(self, mock_set_cron, mock_set_interval):
+        self.assertFalse(mock_set_cron.called)
+        self.assertFalse(mock_set_interval.called)
+
+        PeriodicTask.objects.all().delete()
+        init_count = PeriodicTask.objects.count()
+        # simple cron task
+        periodic_task_generator('222', '35 * * * *')
+        self.assertEqual(init_count + 1, PeriodicTask.objects.count())
+        self.assertTrue(mock_set_cron.called)
+        self.assertFalse(mock_set_interval.called)
+        # monthly task - special case
+        periodic_task_generator('222', '35 * 5 * *')
+        self.assertEqual(init_count + 1, PeriodicTask.objects.count())
+        self.assertTrue(mock_set_interval.called)
+
+class TestTaskRemove(TestCase):
+    def test_task_remove(self):
+        task, created = PeriodicTask.objects.get_or_create(
+                        name='test_task',
+                        task="w3af_webui.tasks.test_task",
+                        )
+        task.save()
+        init_count = PeriodicTask.objects.count()
+        periodic_task_remove('test_task') # remove exist task
+        self.assertEqual(init_count - 1, PeriodicTask.objects.count())
+
+        periodic_task_remove('not_exist') # remove not exist task
+        self.assertEqual(init_count - 1, PeriodicTask.objects.count())
 
 class TestInitUserGroup(TestCase):
     @patch('w3af_webui.management.create_superuser')
@@ -81,7 +185,7 @@ class TestView(unittest.TestCase):
         self.scan_task.delete()
         self.scan.delete()
 
-    def test_user_settings(self):
+    def _test_user_settings(self):
         # Issue a GET request.
         response = self.client.get('/user_settings/',
                                    follow=True)
@@ -120,15 +224,39 @@ class TestView(unittest.TestCase):
         # Check that redirect done.
         self.assertEqual(response.status_code, 404)
 
-    @patch('w3af_webui.models.ScanTask.run')
-    def test_run_now(self, mockRun):
-        response = self.client.get('/run_now/', {'id': self.scan.id})
-        self.assertEqual(response.status_code, 302)
-        self.assertTrue(mockRun.called)
-        mockRun.reset_mock()
+    @patch('w3af_webui.tasks.scan_start.delay')
+    @patch('w3af_webui.models.ScanTask.create_scan')
+    def test_run_now(self, mock_create_scan, mock_delay):
+        self.assertFalse(mock_create_scan.called)
+        self.assertFalse(mock_delay.called)
+        response = self.client.get('/run_now/', {'id': self.scan.id},
+                                   follow=True,
+                                   )
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(mock_create_scan.called)
+        self.assertTrue(mock_delay.called)
+        # bad request (404)
+        mock_create_scan.reset_mock()
+        mock_delay.reset_mock()
         response = self.client.get('run_now/')
-        self.assertFalse(mockRun.called)
+        self.assertFalse(mock_create_scan.called)
+        self.assertFalse(mock_delay.called)
         self.assertEqual(response.status_code, 404)
+
+    @patch('w3af_webui.models.ScanTask.create_scan')
+    @patch('w3af_webui.models.Scan.unlock_task')
+    @patch('w3af_webui.tasks.scan_start.delay')
+    def test_run_now_exc(self, mock_delay, mock_unlock, mock_create_scan):
+        exc = Exception('Boom!')
+        mock_delay.side_effect = exc
+        self.assertRaises(Exception,
+                          self.client.get('/run_now/',
+                                         {'id': self.scan.id},
+                                         follow=True,
+                                        )
+                          )
+        self.assertTrue(mock_unlock.called)
+
 
     def test_check_url(self):
         # Issue a GET request.
@@ -382,7 +510,8 @@ class TestW3afRun(TestCase):
                                    user=user,
                                    status=settings.TASK_STATUS['free'],
                                    target=self.target,
-                                   last_updated='0',)
+                                   last_updated='0',
+                                   cron="",)
         self.scan = Scan.objects.create(
                                 scan_task=self.scan_task,
                                 data='test',
