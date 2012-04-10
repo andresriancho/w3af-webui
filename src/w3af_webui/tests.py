@@ -30,6 +30,7 @@ from w3af_webui.management.commands.w3af_run import fail_scan
 from w3af_webui.management.commands.w3af_run import get_profile
 from w3af_webui.management.commands.w3af_run import get_report_path
 from w3af_webui.management.commands.w3af_run import send_notification
+from w3af_webui.management.commands.w3af_run import post_finish
 from w3af_webui.management import init_user_group
 from w3af_webui.management import create_superuser
 from w3af_webui.management import create_extra_permission
@@ -41,11 +42,31 @@ from w3af_webui.utils import get_interval
 from w3af_webui.utils import set_interval_schedule
 from w3af_webui.tasks import monthly_task
 from w3af_webui.tasks import delay_task
+from w3af_webui.tasks import scan_create_start
+from w3af_webui.models import kill_process
+from w3af_webui.admin import generate_cron_daily
+from w3af_webui.admin import generate_cron_monthly
+from w3af_webui.admin import generate_cron_weekly
 
 from djcelery.models import PeriodicTask
 
+class TestCreateStartTask(TestCase):
+    def  setUp(self):
+        self.scan_task = any_model(ScanTask,
+                                   status=settings.TASK_STATUS['free'],
+                                   last_updated='0',)
+        self.scan_task.save()
+
+    @patch('django.core.management.call_command')
+    def test_fail_scan_create_start(self, mock_call_command):
+        self.assertRaises(ScanTask.DoesNotExist,
+                          scan_create_start,
+                          -1,
+                          )
+
+
 class TestDelayTask(TestCase):
-    def setUp(self):
+    def  setUp(self):
         self.task, created = PeriodicTask.objects.get_or_create(
                         name='delay_22',
                         task='w3af_webui.tasks.delay_task',
@@ -54,10 +75,13 @@ class TestDelayTask(TestCase):
                         )
         self.task.save()
 
-    def test_delay_task(self):
-        delay_task(*self.task.args)
+    @patch('w3af_webui.tasks.scan_create_start')
+    def test_delay_task(self, mock_create_start):
+        self.assertFalse(mock_create_start.called)
+        delay_task(self.task.args[0])
         self.assertEqual(PeriodicTask.objects.get(id=self.task.id).enabled, False)
         self.assertEqual(PeriodicTask.objects.get(id=self.task.id).interval, None)
+        self.assertTrue(mock_create_start.called)
 
 
     def delay_task_generator(self):
@@ -70,17 +94,23 @@ class TestDelayTask(TestCase):
         self.assertEqual(PeriodicTask.objects.get(id=self.task.id).enabled, True)
         self.assertNotEqual(PeriodicTask.objects.get(id=self.task.id).interval, None)
 
+
 class TestMonthlyTask(TestCase):
     def setUp(self):
         self.task, created = PeriodicTask.objects.get_or_create(
                         name='22',
                         task='w3af_webui.tasks.monthly_task',
+                        args=[22],
                         )
         self.task.save()
 
-    def test_monthly_task(self):
+    @patch('w3af_webui.tasks.scan_create_start')
+    def test_monthly_task(self, mock_create_start):
+        self.assertFalse(mock_create_start.called)
         monthly_task(*self.task.args)
         self.assertNotEqual(PeriodicTask.objects.get(id=self.task.id).interval, None)
+        self.assertTrue(mock_create_start.called)
+
 
 class TestTaskGenerator(TestCase):
     def setUp(self):
@@ -126,6 +156,7 @@ class TestTaskGenerator(TestCase):
         self.assertEqual(init_count + 1, PeriodicTask.objects.count())
         self.assertTrue(mock_set_interval.called)
 
+
 class TestTaskRemove(TestCase):
     def test_task_remove(self):
         task, created = PeriodicTask.objects.get_or_create(
@@ -139,6 +170,7 @@ class TestTaskRemove(TestCase):
 
         periodic_task_remove('not_exist') # remove not exist task
         self.assertEqual(init_count - 1, PeriodicTask.objects.count())
+
 
 class TestInitUserGroup(TestCase):
     @patch('w3af_webui.management.create_superuser')
@@ -249,6 +281,11 @@ class TestView(unittest.TestCase):
     def test_run_now_exc(self, mock_delay, mock_unlock, mock_create_scan):
         exc = Exception('Boom!')
         mock_delay.side_effect = exc
+        mock_create_scan.return_value = self.scan
+        self.client.get('/run_now/',
+                       {'id': self.scan.id},
+                       follow=True,
+                       )
         self.assertRaises(Exception,
                           self.client.get('/run_now/',
                                          {'id': self.scan.id},
@@ -387,58 +424,6 @@ class TestScanTaskModel(TestCase):
         self.assertEqual(scan.scan_task, scan_task)
         self.assertNotEqual(scan.start, '0')
 
-    def test_save(self):
-        scan_task = any_model(ScanTask,
-                              status=settings. TASK_STATUS['free'],
-                              last_updated='0',
-                              comment='start',
-                              repeat_each_day=0,
-                              repeat_each_weekday=0,)
-        scan_task.comment = 'test comment'
-        #never
-        scan_task.repeat_each = 1 # never 
-        scan_task.save()
-        self.assertEqual('test comment', scan_task.comment)
-        self.assertEqual('', scan_task.cron)
-        #daily
-        scan_task.repeat_each = 2 # daily
-        scan_task.repeat_at = time(12, 30)
-        scan_task.save()
-        self.assertEqual('30 12 * * *', scan_task.cron)
-        #weekly
-        scan_task.repeat_each = 3
-        scan_task.repeat_each_weekday = 1
-        scan_task.save()
-        self.assertEqual('30 12 * * 1', scan_task.cron)
-        #monthly
-        scan_task.repeat_each = 4
-        scan_task.repeat_each_day = 21
-        scan_task.save()
-        self.assertEqual( '30 12 21 * *', scan_task.cron)
-
-    @patch('w3af_webui.models.Scan.unlock_task')
-    @patch('w3af_webui.tasks.scan_start.delay')
-    def test_run_exc(self, mock_delay, mock_unlock):
-        scan_task = any_model(ScanTask,
-                              status=settings.TASK_STATUS['free'],
-                              last_updated='0')
-        exc = Exception('Boom!')
-        mock_delay.side_effect = exc
-        self.assertRaises(Exception, scan_task.run)
-        self.assertTrue(mock_unlock.called)
-
-    @patch('w3af_webui.tasks.scan_start.delay')
-    @patch('w3af_webui.models.ScanTask.create_scan')
-    def test_run(self, mock_create_scan, mock_delay):
-        scan_task = any_model(ScanTask,
-                              status=settings.TASK_STATUS['free'],
-                              last_updated='0')
-        self.assertEqual(scan_task.status, settings.TASK_STATUS['free'])
-        self.assertFalse(mock_delay.called)
-        scan_task.run()
-        self.assertTrue(mock_create_scan.called)
-        self.assertTrue(mock_delay.called)
-
 
 class TestProfileModel(TestCase):
      def test_user_post_save(self):
@@ -451,33 +436,33 @@ class TestProfileModel(TestCase):
 
 class TestCommonFunction(TestCase):
     def test_generate_cron_daily(self):
-        cron = m.generate_cron_daily(day=-9090, weekday=-1,
+        cron = generate_cron_daily(day=-9090, weekday=-1,
                                      hour_min=time(12, 30),)
         self.assertEqual('30 12 * * *', cron)
 
     def test_generate_cron_weekly(self):
-        cron = m.generate_cron_weekly(day=-9090, weekday=1,
+        cron = generate_cron_weekly(day=-9090, weekday=1,
                                       hour_min=time(12, 30),)
         self.assertEqual('30 12 * * 1', cron)
 
     def test_generate_cron_monthly(self):
-        cron = m.generate_cron_monthly(day=21, weekday=1,
+        cron = generate_cron_monthly(day=21, weekday=1,
                                        hour_min=time(12, 30),)
         self.assertEqual('30 12 21 * *', cron)
 
     @patch('os.kill')
     def test_kill_process(self, mock_kill):
         proc = Popen(['python'], stdout=PIPE, stderr=PIPE)
-        result = m.kill_process(proc.pid)
+        result = kill_process(proc.pid)
         self.assertEqual(True, result)
         self.assertTrue(mock_kill.called)
 
         mock_kill.reset_mock()
-        result = m.kill_process('w')
+        result = kill_process('w')
         self.assertEqual(False, result)
         self.assertFalse(mock_kill.called)
 
-        result = m.kill_process('1')
+        result = kill_process('1')
         self.assertEqual(False, result)
         self.assertFalse(mock_kill.called)
 
@@ -589,12 +574,12 @@ class TestW3afRun(TestCase):
         self.assertTrue(mock_fail_scan.called)
 
     @patch('w3af_webui.management.commands.w3af_run.wait_process_finish')
-    @patch('w3af_webui.management.commands.w3af_run.fail_scan')
+    @patch('w3af_webui.management.commands.w3af_run.post_finish')
     @patch('w3af_webui.management.commands.w3af_run.send_notification')
     @patch('w3af_webui.management.commands.w3af_run.get_profile')
     @patch('w3af_webui.management.commands.w3af_run.get_report_path')
     def test_w3af_run(self, mock_report_path, mock_get_profile,
-                      mock_notify, mock_fail_scan, mock_wait_process):
+                      mock_notify, mock_post_finish, mock_wait_process):
         test_report_path = 'test_report/'
         try:
             os.mkdir(test_report_path)
@@ -606,17 +591,42 @@ class TestW3afRun(TestCase):
         mock_wait_process.return_value = 1 # return error
         call_command('w3af_run', self.scan.id)
         self.assertTrue(mock_wait_process.called)
-        self.assertTrue(mock_fail_scan.called)
+        self.assertTrue(mock_post_finish.called)
         # process terminated without error
         mock_wait_process.return_value = 0 # return error
-        mock_fail_scan.reset_mock()
+        mock_post_finish.reset_mock()
         mock_wait_process.reset_mock()
         call_command('w3af_run', self.scan.id)
         self.assertTrue(mock_wait_process.called)
+        self.assertTrue(mock_post_finish.called)
         self.assertTrue(mock_report_path.called)
         self.assertTrue(mock_get_profile.called)
-        self.assertFalse(mock_fail_scan.called)
         rmtree(test_report_path)
+
+    @patch('w3af_webui.management.commands.w3af_run.fail_scan')
+    def test_post_finish(self, mock_fail_scan):
+        # bad returncode
+        self.assertFalse(mock_fail_scan.called)
+        post_finish(self.scan, -9)
+        self.assertTrue(mock_fail_scan.called)
+        # returncode ok, but task was stoped by user 
+        self.scan.status = settings.SCAN_STATUS['fail']
+        self.scan.save()
+        mock_fail_scan.reset_mock()
+        post_finish(self.scan, 0)
+        self.assertFalse(mock_fail_scan.called)
+        self.assertEqual(Scan.objects.get(pk=int(self.scan.id)).status,
+                         settings.SCAN_STATUS['fail'])
+        # ok returncode and status
+        mock_fail_scan.reset_mock()
+        self.scan.status = settings.SCAN_STATUS['in_process']
+        self.scan.save()
+        post_finish(self.scan, 0)
+        self.assertFalse(mock_fail_scan.called)
+        self.assertEqual(Scan.objects.get(pk=int(self.scan.id)).status,
+                         settings.SCAN_STATUS['done'])
+
+
 
     def tearDown(self):
         self.scan.delete()
@@ -717,6 +727,7 @@ class TestModelAdmin(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
 
 
+"""
 class TestFindScans(TestCase):
     def setUp(self):
         Scan.objects.all().delete()
@@ -742,7 +753,7 @@ class TestFindScans(TestCase):
         self.scan_task.save()
         call_command('find_scans')
         self.assertTrue(mock_run.called)
-
+"""
 
 class TestSendMail(TestCase):
     def setUp(self):

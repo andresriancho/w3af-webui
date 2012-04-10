@@ -16,15 +16,20 @@ logger = getLogger(__name__)
 
 @task()
 def delay_task(*args, **kwargs):
+    """
+    Run task at time
+    args = PeriodicTask.id
+    """
     try:
         task_id = args[0]
+        print 'task id = %s' % task_id
         task = PeriodicTask.objects.get(task='w3af_webui.tasks.delay_task',
                                         name='delay_%s' % task_id,
                                         )
         task.interval = None
         task.enabled = False
         task.save()
-        scan_create_start(*args)
+        scan_create_start(task_id)
     except Exception, e:
         logger.error("delay task exception %s" % e)
         raise Exception, e
@@ -48,7 +53,7 @@ def monthly_task(*args, **kwargs):
                     ))
         task.interval = interval
         task.save()
-        scan_create_start.delay(*args)
+        scan_create_start(task_id)
     except Exception, e:
         logger.error("monthly task exception %s" % e)
         raise Exception, e
@@ -60,7 +65,6 @@ def scan_start(*args, **kwargs):
     Start exist scan
     args = [scan_id, ]
     '''
-    print 'scan_ start %s' % args
     try:
         call_command('w3af_run', *args)
     except Exception, e:
@@ -73,15 +77,16 @@ def scan_create_start(*args, **kwargs):
     '''Start scan task and create new scan for it
     args = [scan_task_id, ]
     '''
-    print 'scan task start %s' % args
     try:
         scan_task = ScanTask.objects.get(pk=int(args[0]))
         scan = scan_task.create_scan(scan_task.user)
         call_command('w3af_run', scan.id)
+    except ScanTask.DoesNotExist, e:
+        logger.error("task.py scan_create_start exception %s" % e)
+        raise ScanTask.DoesNotExist, e
     except Exception, e:
-        logger.error("task.py scan_start exception %s" % e)
+        logger.error("task.py scan_create_start exception %s" % e)
         message = (' There was some problems with celery and '
                    ' this task was failed by find_scan celery task')
         scan.unlock_task(message)
         raise Exception, e
-

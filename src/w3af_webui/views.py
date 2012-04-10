@@ -41,11 +41,13 @@ def run_now(request):
     try:
         scan_start.delay(scan.id)
     except Exception, e:
-        print 'exception run now'
-        logger.error('run_row run fail %s' % e)
-        message = (' There was some problems with celery and '
-                   ' this task was failed by find_scan celery task')
-        scan.unlock_task(message)
+        print 'exception run now %s' % e
+        print scan.id
+        scan.unlock_task()
+        logger.error('run_row fail %s' % e)
+        #message = (' There was some problems with celery and '
+        #           ' this task was failed by find_scan celery task')
+        #scan.unlock_task(message)
     return redirect('/w3af_webui/scantask/')
 
 

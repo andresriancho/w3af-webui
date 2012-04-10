@@ -223,7 +223,8 @@ class ProfileTargetInline(admin.StackedInline):
 
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "scan_profile":
+        if (db_field.name == "scan_profile" and
+            not request.user.has_perm('w3af_webui.view_all_data')):
             kwargs["queryset"] = ScanProfile.objects.filter(user=request.user)
         return super(ProfileTargetInline, self).formfield_for_foreignkey(
                     db_field, request, **kwargs)
@@ -238,7 +239,8 @@ class ProfileInline(admin.StackedInline):
         'fields': (( 'scan_profile'), )}), )
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "scan_profile":
+        if (db_field.name == "scan_profile" and
+            not request.user.has_perm('w3af_webui.view_all_data')):
             kwargs["queryset"] = ScanProfile.objects.filter(user=request.user)
         return super(ProfileInline, self).formfield_for_foreignkey(
                     db_field, request, **kwargs)
@@ -335,10 +337,11 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         """choose targets only for current user"""
-        if db_field.name == "target":
-            kwargs["queryset"] = Target.objects.filter(user=request.user)
+        if (db_field.name == "target" and
+            not request.user.has_perm('w3af_webui.view_all_data')):
+                kwargs["queryset"] = Target.objects.filter(user=request.user)
         return super(ScanTaskAdmin, self).formfield_for_foreignkey(
-                    db_field, request, **kwargs)
+                     db_field, request, **kwargs)
 
     def save_model(self, request, obj, form, change):
         obj.user = request.user
@@ -359,10 +362,8 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
         if obj.cron != cron_string: # cron changed
             obj.cron = cron_string
             if obj.cron:
-                print "generate %s" % obj.cron
                 periodic_task_generator(obj.id, obj.cron)
             else:
-                print "remove"
                 periodic_task_remove(obj.id)
         obj.save()
 

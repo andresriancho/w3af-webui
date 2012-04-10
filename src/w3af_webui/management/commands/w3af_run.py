@@ -103,9 +103,12 @@ def fail_scan(scan_id, message):
 
 
 def post_finish(scan, returncode):
+    """
+    Change scan status to done if returncode and scan status is ok
+    """
     if int(returncode) != 0:
         # process terminated with error
-        fail_scan(scan_id,
+        fail_scan(scan.id,
                   'w3af process return code %s' %
                   returncode)
         return
@@ -137,7 +140,6 @@ def wait_process_finish(scan, process):
     target.last_scan = finish_time
     target.save()
     logger.info('w3af Process return code %s' % process.returncode)
-    post_finish(scan, process.returncode)
     return process.returncode
 
 
@@ -171,9 +173,10 @@ class Command(BaseCommand):
                                     profile_fname],
                                     stdout=PIPE,
                                     stderr=PIPE)
-                    wait_process_finish(scan, process)
-            except Scan.DoesNotExist:
-                logger.error('scan object does not exist')
+                    returncode = wait_process_finish(scan, process)
+                    post_finish(scan, returncode)
+            except Scan.DoesNotExist, e:
+                logger.error('scan object does not exist %s' % e)
                 raise Scan.DoesNotExist
             except Exception, e:
                 logger.error('w3af_run exception: %s' % e)

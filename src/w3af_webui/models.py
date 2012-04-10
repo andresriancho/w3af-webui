@@ -24,39 +24,6 @@ def kill_process(str_pid):
         return False
 
 
-def generate_cron_daily(*args, **kwargs):
-    if not kwargs['hour_min']:
-        return ''
-    return '%d %d * * *' % (
-        kwargs['hour_min'].minute,
-        kwargs['hour_min'].hour,
-    )
-
-
-def generate_cron_weekly(*args, **kwargs):
-    if not kwargs['hour_min'] or not kwargs['weekday']:
-        return ''
-    return '%d %d * * %d' % (
-        kwargs['hour_min'].minute,
-        kwargs['hour_min'].hour,
-        kwargs['weekday'],
-    )
-
-
-def generate_cron_monthly(*args, **kwargs):
-    if not kwargs['hour_min'] or not kwargs['day']:
-        return ''
-    return '%d %d %d * *' % (
-        kwargs['hour_min'].minute,
-        kwargs['hour_min'].hour,
-        kwargs['day'],
-    )
-
-
-def generate_cron_never(*args, **kwargs):
-    return ''
-
-
 class Profile(models.Model):
     NOTIFY_STATUS = tuple((ind, value['label'])
                      for ind, value in enumerate(settings.NOTIFY_MODULES))
@@ -251,6 +218,7 @@ class Scan(models.Model):
         scan_task.save()
 
     def unlock_task(self, text_comment='unlock task'):
+        print 'unlock task'
         if self.status != settings.SCAN_STATUS['in_process']:
             return False
         kill_process(self.pid)
