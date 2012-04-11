@@ -124,7 +124,6 @@ def post_finish(scan, returncode):
 
 
 def wait_process_finish(scan, process):
-    print 'wait process'
     scan.pid = process.pid
     scan.save()
     while process.returncode is None:

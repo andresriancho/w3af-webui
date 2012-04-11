@@ -60,10 +60,6 @@ def monthly_task(*args, **kwargs):
 
 
 @task()
-def test_task(*args, **kwargs):
-    print 'test task'
-
-@task()
 def scan_start(*args, **kwargs):
     '''
     Start exist scan
@@ -76,6 +72,7 @@ def scan_start(*args, **kwargs):
         raise Exception, e
 
 
+@task()
 def scan_create_start(*args, **kwargs):
     '''Start scan task and create new scan for it
     args = [scan_task_id, ]
