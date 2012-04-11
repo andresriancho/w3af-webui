@@ -8,6 +8,7 @@ from django.template.context import RequestContext
 from django.shortcuts import HttpResponse
 from django.http import HttpResponseNotFound
 from django.http import Http404
+from django.http import HttpResponseForbidden
 from django.shortcuts import render_to_response
 from django.shortcuts import redirect
 from django.utils import translation
@@ -17,6 +18,7 @@ from django.conf import settings
 from w3af_webui.models import ScanTask
 from w3af_webui.models import Scan
 from w3af_webui.models import Profile
+from w3af_webui.tasks import scan_start
 
 logger = getLogger(__name__)
 
@@ -34,8 +36,18 @@ def run_now(request):
     if not 'id' in request.GET:
         raise Http404
     id = request.GET['id']
-    obj = ScanTask.objects.get(id=id)
-    obj.run(request.user)
+    scan_task = ScanTask.objects.get(id=id)
+    scan = scan_task.create_scan(request.user)
+    try:
+        scan_start.delay(scan.id)
+    except Exception, e:
+        print 'exception run now %s' % e
+        print scan.id
+        scan.unlock_task()
+        logger.error('run_row fail %s' % e)
+        #message = (' There was some problems with celery and '
+        #           ' this task was failed by find_scan celery task')
+        #scan.unlock_task(message)
     return redirect('/w3af_webui/scantask/')
 
 
@@ -108,6 +120,9 @@ def user_settings(request):
 def show_report_txt(request, scan_id):
     try:
         obj = Scan.objects.get(id=scan_id)
+        if (not request.user.has_perm('w3af_webui.view_all_data') and
+            obj.user != request.user):
+            return HttpResponseForbidden()
         filename = obj.data[:-5] + '.txt'
         if os.access(filename , os.F_OK):
             f = open(filename, 'rb')
@@ -122,12 +137,16 @@ def show_report_txt(request, scan_id):
 def show_report(request, scan_id):
     try:
         obj = Scan.objects.get(id=scan_id)
+        if (not request.user.has_perm('w3af_webui.view_all_data') and
+            obj.user != request.user):
+            return HttpResponseForbidden()
         context = {'result_message': obj.result_message, }
         if os.access(obj.data , os.F_OK):
             context['report_link'] = obj.data
         return render_to_response("admin/show_report.html", context,
                                   context_instance=RequestContext(request))
-    except:
+    except Exception, e:
+        print 'exception %s' % e
         raise Http404
 
 

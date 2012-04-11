@@ -10,8 +10,6 @@ from django.contrib.auth.models import User
 from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 
-from w3af_webui.tasks import scan_start
-
 logger = getLogger(__name__)
 
 def kill_process(str_pid):
@@ -24,39 +22,6 @@ def kill_process(str_pid):
     except Exception, e:
         logger.error('models.kill_process error: can not kill process: %s' % e)
         return False
-
-
-def generate_cron_daily(*args, **kwargs):
-    if not kwargs['hour_min']:
-        return ''
-    return '%d %d * * *' % (
-        kwargs['hour_min'].minute,
-        kwargs['hour_min'].hour,
-    )
-
-
-def generate_cron_weekly(*args, **kwargs):
-    if not kwargs['hour_min'] or not kwargs['weekday']:
-        return ''
-    return '%d %d * * %d' % (
-        kwargs['hour_min'].minute,
-        kwargs['hour_min'].hour,
-        kwargs['weekday'],
-    )
-
-
-def generate_cron_monthly(*args, **kwargs):
-    if not kwargs['hour_min'] or not kwargs['day']:
-        return ''
-    return '%d %d %d * *' % (
-        kwargs['hour_min'].minute,
-        kwargs['hour_min'].hour,
-        kwargs['day'],
-    )
-
-
-def generate_cron_never(*args, **kwargs):
-    return ''
 
 
 class Profile(models.Model):
@@ -176,23 +141,6 @@ class ScanTask(models.Model):
         #                 self.name,
         #                )
 
-    def save(self, *args, **kwargs):
-        repeat_period = self.repeat_each
-        functions = {1: generate_cron_never, 2: generate_cron_daily,
-                     3: generate_cron_weekly, 4: generate_cron_monthly,}
-        self.cron = functions.get(repeat_period, generate_cron_never)(
-                        day=self.repeat_each_day,
-                        weekday=self.repeat_each_weekday,
-                        hour_min=self.repeat_at,
-                    )
-        if self.cron:
-            logger.info('Setup cron string "%s" for scan id=%s '
-                        '(repeat period is "%s")' % (
-                            self.cron,
-                            self.id,
-                            repeat_period,
-                        ))
-        return super(ScanTask, self).save(*args, **kwargs)
 
     def create_scan(self, user):
         scan = Scan.objects.create(scan_task=self,
@@ -202,21 +150,6 @@ class ScanTask(models.Model):
         self.last_updated = datetime.now()
         self.save()
         return scan
-
-    def run(self, *args):
-        user = self.user
-        if(args):
-            user = args[0]
-        scan = self.create_scan(user)
-        try:
-            scan_start.delay(scan.id)
-        except Exception, e:
-            print 'Scantask.run exception '
-            logger.error('ScanTask run fail %s' % e)
-            message = (' There was some problems with celery and '
-                       ' this task was failed by find_scan celery task')
-            scan.unlock_task(message)
-            raise Exception, e
 
 
 class ProfilesTargets(models.Model):
@@ -292,6 +225,7 @@ class Scan(models.Model):
         self.status = settings.SCAN_STATUS['fail']
         self.result_message = text_comment
         self.save()
+        logger.info('scan %s was failed' % self.id)
         return True
 
     class Meta:

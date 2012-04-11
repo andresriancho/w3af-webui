@@ -121,6 +121,7 @@ BROKER_USER = "guest"
 BROKER_PASSWORD = "guest"
 CELERYD_CONCURRENCY = 10
 CELERYD_LOG_LEVEL = "INFO"
+CELERYBEAT_SCHEDULER = "djcelery.schedulers.DatabaseScheduler"
 
 # Table name for user profile
 AUTH_PROFILE_MODULE = 'w3af_webui.Profile'
@@ -290,7 +291,7 @@ INSTALLED_APPS += (
     #'django_any',
     
     'djcelery',
-    'ghettoq',
+    #'ghettoq',
     'djkombu',
     
     'w3af_webui',
@@ -299,5 +300,5 @@ INSTALLED_APPS += (
     #'django_coverage',
 )
 
-import djcelery
-djcelery.setup_loader()
+#import djcelery
+#djcelery.setup_loader()

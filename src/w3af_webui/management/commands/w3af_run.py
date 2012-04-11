@@ -12,11 +12,11 @@ from logging import getLogger
 import ConfigParser
 
 from django.core.management.base import BaseCommand
+from django.conf import settings
 
 from w3af_webui.models import ProfilesTasks
 from w3af_webui.models import ProfilesTargets
 from w3af_webui.models import Scan
-from django.conf import settings
 
 W3AF_POLL_PERIOD = 15 # seconds
 logger = getLogger(__name__)
@@ -37,6 +37,7 @@ def send_notification(scan):
     except Exception, e:
         logger.error('can not send notification: %s' % e)
         return False
+
 
 def get_profile(scan_task, report_path, report_file):
     profiles_tasks = ProfilesTasks.objects.filter(
@@ -79,6 +80,7 @@ def get_profile(scan_task, report_path, report_file):
     print >> sys.stderr, profile_fh.name
     return profile_fh.name
 
+
 def get_report_path():
     start = datetime.now()
     report_path = '%s/%s/%s/%s/'\
@@ -89,6 +91,7 @@ def get_report_path():
         logger.info('Report path alresdy exist %s' % e)
     return report_path
 
+
 def fail_scan(scan_id, message):
     '''set scan tatus to fail and set message to result_message '''
     scan = Scan.objects.get(pk=int(scan_id))
@@ -97,6 +100,28 @@ def fail_scan(scan_id, message):
     scan.status = settings.SCAN_STATUS['fail']
     scan.save()
     scan.set_task_status_free()
+
+
+def post_finish(scan, returncode):
+    """
+    Change scan status to done if returncode and scan status is ok
+    """
+    if int(returncode) != 0:
+        # process terminated with error
+        fail_scan(scan.id,
+                  'w3af process return code %s' % returncode,
+                  )
+        return
+    # process terminated successfully
+    if (Scan.objects.get(pk=int(scan.id)).status ==
+        settings.SCAN_STATUS['fail']):
+        return
+    scan.result_message = ''
+    if not send_notification(scan):
+        scan.result_message = 'Can not send notification'
+    scan.status = settings.SCAN_STATUS['done']
+    scan.save()
+
 
 def wait_process_finish(scan, process):
     scan.pid = process.pid
@@ -116,6 +141,7 @@ def wait_process_finish(scan, process):
     logger.info('w3af Process return code %s' % process.returncode)
     return process.returncode
 
+
 class Command(BaseCommand):
     args = '<scan_id>'
     help = (u'command w3af_run start process w3af_console for defined scan_id')
@@ -123,6 +149,9 @@ class Command(BaseCommand):
         for scan_id in args:
             try:
                 scan = Scan.objects.get(pk=int(scan_id))
+                if (Scan.objects.get(pk=int(scan_id)).status !=
+                    settings.SCAN_STATUS['in_process']):
+                    return { } # scan was stopped by user
                 report_path = get_report_path()
                 with NamedTemporaryFile(delete=False,
                                         suffix='.html',
@@ -138,29 +167,15 @@ class Command(BaseCommand):
                     profile_fname = get_profile(scan.scan_task,
                                                 report_path,
                                                 output.name)
-                    if (Scan.objects.get(pk=int(scan_id)).status !=
-                        settings.SCAN_STATUS['in_process']):
-                        return { } # scan was stopped by user
                     process = Popen([settings.W3AF_RUN,
                                     '--no-update', '-P',
                                     profile_fname],
                                     stdout=PIPE,
                                     stderr=PIPE)
                     returncode = wait_process_finish(scan, process)
-                    if int(returncode) != 0:
-                        # process terminated with error
-                        fail_scan(scan_id,
-                                  'w3af process return code %s' %
-                                   returncode)
-                        return {}
-                    # process terminated successfully
-                    scan.result_message = ''
-                    if not send_notification(scan):
-                        scan.result_message = 'Can not send notification'
-                    scan.status = settings.SCAN_STATUS['done']
-                    scan.save()
-            except Scan.DoesNotExist:
-                logger.error('scan object does not exist')
+                    post_finish(scan, returncode)
+            except Scan.DoesNotExist, e:
+                logger.error('scan object does not exist %s' % e)
                 raise Scan.DoesNotExist
             except Exception, e:
                 logger.error('w3af_run exception: %s' % e)

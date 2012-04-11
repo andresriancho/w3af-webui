@@ -8,7 +8,6 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from django import forms
 
 from w3af_webui.models import ScanProfile
 from w3af_webui.models import Target
@@ -16,8 +15,44 @@ from w3af_webui.models import ScanTask
 from w3af_webui.models import Scan
 from w3af_webui.models import ProfilesTasks
 from w3af_webui.models import ProfilesTargets
+from w3af_webui.utils import delay_task_generator
+from w3af_webui.utils import periodic_task_generator
+from w3af_webui.utils import periodic_task_remove
 
 logger = getLogger(__name__)
+
+def generate_cron_daily(*args, **kwargs):
+    if not kwargs['hour_min']:
+        return ''
+    return '%d %d * * *' % (
+        kwargs['hour_min'].minute,
+        kwargs['hour_min'].hour,
+    )
+
+
+def generate_cron_weekly(*args, **kwargs):
+    if not kwargs['hour_min'] or not kwargs['weekday']:
+        return ''
+    return '%d %d * * %d' % (
+        kwargs['hour_min'].minute,
+        kwargs['hour_min'].hour,
+        kwargs['weekday'],
+    )
+
+
+def generate_cron_monthly(*args, **kwargs):
+    if not kwargs['hour_min'] or not kwargs['day']:
+        return ''
+    return '%d %d %d * *' % (
+        kwargs['hour_min'].minute,
+        kwargs['hour_min'].hour,
+        kwargs['day'],
+    )
+
+
+def generate_cron_never(*args, **kwargs):
+    return ''
+
 
 class CustomUserAdmin(UserAdmin):
     list_filter = ()
@@ -47,8 +82,8 @@ class CustomUserAdmin(UserAdmin):
         obj.save()
 
 
-# Base class for ModelAdmin
 class W3AF_ModelAdmin(admin.ModelAdmin):
+    """ Base class for ModelAdmin """
     def save_model(self, request, obj, form, change):
         if not obj.user:
             obj.user = request.user
@@ -92,7 +127,7 @@ class ScanAdmin(W3AF_ModelAdmin):
     search_fields = ['scan_task__name', 'scan_task__comment']
     list_display = ['icon', 'scan_task_link', 'comment', 'start', 'finish',
                     'report_or_stop','show_log', ]
-    ordering = ('-start',)
+    ordering = ('-id',)
     list_display_links = ('report_or_stop', )
     actions = ['stop_action', 'delete_selected']
 
@@ -169,7 +204,7 @@ class ScanAdmin(W3AF_ModelAdmin):
     def  queryset(self, request):
         if request.user.has_perm('w3af_webui.view_all_data'):
             return Scan.objects.all()
-        return Scan.objects.filter(scan_task__user=request.user)
+        return Scan.objects.filter(user=request.user)
 
     def changelist_view(self, request, extra_context=None):
         extra_context = {'title': u'%s' % _('Scans'), }
@@ -188,7 +223,8 @@ class ProfileTargetInline(admin.StackedInline):
 
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "scan_profile":
+        if (db_field.name == "scan_profile" and
+            not request.user.has_perm('w3af_webui.view_all_data')):
             kwargs["queryset"] = ScanProfile.objects.filter(user=request.user)
         return super(ProfileTargetInline, self).formfield_for_foreignkey(
                     db_field, request, **kwargs)
@@ -203,7 +239,8 @@ class ProfileInline(admin.StackedInline):
         'fields': (( 'scan_profile'), )}), )
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == "scan_profile":
+        if (db_field.name == "scan_profile" and
+            not request.user.has_perm('w3af_webui.view_all_data')):
             kwargs["queryset"] = ScanProfile.objects.filter(user=request.user)
         return super(ProfileInline, self).formfield_for_foreignkey(
                     db_field, request, **kwargs)
@@ -300,10 +337,36 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         """choose targets only for current user"""
-        if db_field.name == "target":
-            kwargs["queryset"] = Target.objects.filter(user=request.user)
+        if (db_field.name == "target" and
+            not request.user.has_perm('w3af_webui.view_all_data')):
+                kwargs["queryset"] = Target.objects.filter(user=request.user)
         return super(ScanTaskAdmin, self).formfield_for_foreignkey(
-                    db_field, request, **kwargs)
+                     db_field, request, **kwargs)
+
+    def save_model(self, request, obj, form, change):
+        obj.user = request.user
+        if not obj.start and obj.id:
+            periodic_task_remove('delay_%s' % obj.id)
+        if obj.start:
+            obj.save()
+            delay_task_generator(obj.id, obj.start)
+        functions = {1: generate_cron_never,
+                     2: generate_cron_daily,
+                     3: generate_cron_weekly,
+                     4: generate_cron_monthly,}
+        cron_string = functions.get(obj.repeat_each, generate_cron_never)(
+                                            day=obj.repeat_each_day,
+                                            weekday=obj.repeat_each_weekday,
+                                            hour_min=obj.repeat_at,
+                                            )
+        if obj.cron != cron_string: # cron changed
+            obj.save()
+            obj.cron = cron_string
+            if obj.cron:
+                periodic_task_generator(obj.id, obj.cron)
+            else:
+                periodic_task_remove(obj.id)
+        obj.save()
 
 
 class TargetAdmin(W3AF_ModelAdmin):
