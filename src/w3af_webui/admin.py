@@ -345,21 +345,22 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         obj.user = request.user
-        if obj.start:
-            delay_task_generator(obj.id, obj.start)
-        else:
+        if not obj.start and obj.id:
             periodic_task_remove('delay_%s' % obj.id)
-        repeat_period = obj.repeat_each
+        if obj.start:
+            obj.save()
+            delay_task_generator(obj.id, obj.start)
         functions = {1: generate_cron_never,
                      2: generate_cron_daily,
                      3: generate_cron_weekly,
                      4: generate_cron_monthly,}
-        cron_string = functions.get(repeat_period, generate_cron_never)(
-                                                        day=obj.repeat_each_day,
-                                                        weekday=obj.repeat_each_weekday,
-                                                        hour_min=obj.repeat_at,
-                                                        )
+        cron_string = functions.get(obj.repeat_each, generate_cron_never)(
+                                            day=obj.repeat_each_day,
+                                            weekday=obj.repeat_each_weekday,
+                                            hour_min=obj.repeat_at,
+                                            )
         if obj.cron != cron_string: # cron changed
+            obj.save()
             obj.cron = cron_string
             if obj.cron:
                 periodic_task_generator(obj.id, obj.cron)

@@ -10,20 +10,7 @@ from djcelery.models import IntervalSchedule
 from djcelery.models import CrontabSchedule
 
 logger = getLogger(__name__)
-"""
-@task()
-def scan_create_start(*args, **kwargs):
-    '''Start scan job by report id
-    args = [scan_task_id, ]
-    '''
-    print 'scan_ start %s' % args
-    try:
-        scan_task = ScanTask.objects.get(pk=int(args[0]))
-        scan = scan_task.run()
-        call_command('w3af_run', scan.id)
-    except Exception, exc:
-        logger.error("task.py scan_start exception %s" % exc)
-"""
+
 def periodic_task_remove(task_name):
     tasks = PeriodicTask.objects.filter(name=task_name)
     if tasks:
@@ -38,7 +25,6 @@ def get_interval(minutes, hour, day_of_month):
                                hour,
                                minutes,
                                )
-    print 'time this month = %s' % time_this_month
     if time_this_month > now:
         delta = time_this_month - now
     else:
@@ -46,7 +32,6 @@ def get_interval(minutes, hour, day_of_month):
     #interval = IntervalSchedule.from_schedule(schedule(timedelta(minutes=delta)))
     interval = IntervalSchedule.from_schedule(schedule(delta))
     interval.save()
-    print interval
     return interval
 
     minutes_now = datetime.now().minute
@@ -59,6 +44,7 @@ def get_interval(minutes, hour, day_of_month):
     return interval
 
 def set_cron_schedule(task, minutes, hour, day_of_week):
+    print (minutes, hour, day_of_week)
     task.task = 'w3af_webui.tasks.scan_create_start'
     cron = CrontabSchedule.from_schedule(crontab(minute=minutes,
                                                  hour=hour,
@@ -70,15 +56,11 @@ def set_cron_schedule(task, minutes, hour, day_of_week):
     task.save()
 
 def set_interval_schedule(task, minutes, hour, day_of_month):
-    print 'minutes = %s' % minutes
-    print 'hour = %s' % hour
-    print 'day of month = %s' % day_of_month
     task.task = 'w3af_webui.tasks.monthly_task'
     interval = get_interval(int(minutes), int(hour), int(day_of_month))
     task.interval = interval
     task.crontab = None
     task.save()
-    print 'task interval = %s' % task.interval
 
 def delay_task_generator(task_id, run_at):
     if run_at is None or run_at < datetime.now():
@@ -111,5 +93,4 @@ def periodic_task_generator(task_id, cron_string):
         set_cron_schedule(task, minutes, hour, day_of_week)
     else:
         set_interval_schedule(task, minutes, hour, day_of_month)
-    print 'task interval = %s' % task.interval
 
