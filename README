@@ -5,7 +5,7 @@ w3af Web User Interface
 Intro
 =====
 
-This project provides web interface for w3af_ and is mostly built on:
+This project provides web interface for w3af (http://w3af.org/) and is mostly built on:
 
 * Django (https://www.djangoproject.com/).
 * Celery (http://celeryproject.org/)
@@ -28,7 +28,7 @@ Install required dependences:
 * cronex                Download from https://github.com/jameseric/cronex
 
 These commands should help you with the installation process, please run from the w3af_webui 
-root directory (where setup.py lives):
+root directory (where setup.py lives): ::
 
     sudo easy_install django-kombu django-celery celery ghettoq south django-extensions
     sudo apt-get update
