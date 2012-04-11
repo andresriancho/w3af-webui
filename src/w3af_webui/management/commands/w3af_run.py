@@ -12,11 +12,11 @@ from logging import getLogger
 import ConfigParser
 
 from django.core.management.base import BaseCommand
+from django.conf import settings
 
 from w3af_webui.models import ProfilesTasks
 from w3af_webui.models import ProfilesTargets
 from w3af_webui.models import Scan
-from django.conf import settings
 
 W3AF_POLL_PERIOD = 15 # seconds
 logger = getLogger(__name__)
