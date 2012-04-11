@@ -109,8 +109,8 @@ def post_finish(scan, returncode):
     if int(returncode) != 0:
         # process terminated with error
         fail_scan(scan.id,
-                  'w3af process return code %s' %
-                  returncode)
+                  'w3af process return code %s' % returncode,
+                  )
         return
     # process terminated successfully
     if (Scan.objects.get(pk=int(scan.id)).status ==
