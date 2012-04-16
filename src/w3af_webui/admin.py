@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 from django.contrib import messages
+from django.contrib.admin.actions import delete_selected
 
 from w3af_webui.models import ScanProfile
 from w3af_webui.models import Target
@@ -141,7 +142,6 @@ class ScanAdmin(W3AF_ModelAdmin):
                                    obj.scan_task,
                                  )
                 return
-        from django.contrib.admin.actions import delete_selected
         return delete_selected(self, request, queryset)
 
     delete_selected.short_description = _('Delete selected '
@@ -273,6 +273,7 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
     list_display = ['name', 'target_name', 'comment', 'get_report', 'schedule',
                     'get_status', 'do_action', ]
     ordering = ('-id',)
+    actions = ['delete_selected']
     search_fields = ['name', 'comment', 'target__name', 'target__url',]
     fieldsets = (
                 (None, {
@@ -388,6 +389,25 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
             else:
                 periodic_task_remove(obj.id)
         obj.save()
+
+    def has_delete_permission(self, request, obj=None):
+        if obj and obj.status == settings.TASK_STATUS['lock']:
+            return False
+        return True
+
+    def delete_selected(self, request, queryset):
+        for obj in queryset:
+            if obj.status == settings.TASK_STATUS['lock']:
+                messages.error(request,
+                                 _('Cannot delete task in process. '
+                                   'Stop task "%s" and try again') %
+                                   obj.name,
+                                 )
+                return
+        return delete_selected(self, request, queryset)
+
+    delete_selected.short_description = _('Delete selected '
+                                          '%(verbose_name_plural)s')
 
 
 class TargetAdmin(W3AF_ModelAdmin):
