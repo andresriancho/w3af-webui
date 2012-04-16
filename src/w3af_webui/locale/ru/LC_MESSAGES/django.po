@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-03-22 10:25+0300\n"
-"PO-Revision-Date: 2012-03-22 10:25+0300\n"
+"POT-Creation-Date: 2012-04-16 15:55+0400\n"
+"PO-Revision-Date: 2012-04-16 15:55+0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -18,99 +18,116 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 
-#: admin.py:31
+#: admin.py:67
 msgid "Personal info"
 msgstr ""
 
-#: admin.py:37
+#: admin.py:73
 msgid "Permissions"
 msgstr ""
 
-#: admin.py:72
-msgid "Stop selected"
-msgstr "Остановить выделенное"
+#: admin.py:98 models.py:61 models.py:81 models.py:107 models.py:211
+msgid "User"
+msgstr "Пользователь"
 
-#: admin.py:76 models.py:141 models.py:263
-msgid "Scan start"
-msgstr "Начало сканирования"
+#: admin.py:138
+#, python-format
+msgid "Cannot delete scan in process.Stop scan \"%s\" and try again"
+msgstr ""
+"Невозможно удалить работающее сканирование. Остановите \"%s\" и попробуйте "
+"снова"
 
-#: admin.py:83
-msgid "Finish"
-msgstr "Финиш"
+#: admin.py:146
+#, python-format
+msgid "Delete selected %(verbose_name_plural)s"
+msgstr ""
 
-#: admin.py:88 models.py:145
+#: admin.py:152
+msgid "Scans stoped successfully."
+msgstr "Сканирования успешно остановлены"
+
+#: admin.py:154
+#, python-format
+msgid "Stop selected %(verbose_name_plural)s"
+msgstr "Остановить выбранные %(verbose_name_plural)s"
+
+#: admin.py:159 models.py:110
 msgid "Description"
 msgstr "Описание"
 
-#: admin.py:94 admin.py:230
+#: admin.py:165 admin.py:325
 msgid "Stop"
 msgstr "Остановить"
 
-#: admin.py:97 admin.py:128 admin.py:236
+#: admin.py:169 admin.py:205 admin.py:332
 msgid "Action"
 msgstr "Действие"
 
-#: admin.py:105 admin.py:217 models.py:124
-msgid "target"
-msgstr "цель"
+#: admin.py:178 models.py:100
+msgid "Task name"
+msgstr "Название задачи"
 
-#: admin.py:119 admin.py:211 models.py:137 models.py:259
+#: admin.py:194 admin.py:304 models.py:102 models.py:195
 msgid "Status"
 msgstr "Статус"
 
-#: admin.py:125
+#: admin.py:201
 msgid "Show report"
 msgstr "Показать отчёт"
 
-#: admin.py:127
+#: admin.py:203
 msgid "Stop scan"
 msgstr "Остановить сканирование"
 
-#: admin.py:133 admin.py:135
+#: admin.py:211 admin.py:214
 msgid "Show log"
 msgstr "Показать лог"
 
-#: admin.py:144 templates/admin/base.html:49
+#: admin.py:230 templates/admin/base.html:49
 msgid "Scans"
 msgstr "Сканирования"
 
-#: admin.py:190
+#: admin.py:280
 msgid "Repeating"
 msgstr "Повторять"
 
-#: admin.py:203
+#: admin.py:293
 msgid "Schedule"
 msgstr "Расписание"
 
-#: admin.py:204
+#: admin.py:294
 msgid "One-time"
 msgstr "Одноразово"
 
-#: admin.py:205
+#: admin.py:296
 msgid "Run regularity"
 msgstr "Запускать регулярно"
 
-#: admin.py:209
+#: admin.py:301
 msgid "Active"
 msgstr "Активно"
 
-#: admin.py:210
+#: admin.py:302
 msgid "Not active"
 msgstr "Неактивно"
 
-#: admin.py:234
+#: admin.py:311 models.py:89
+msgid "target"
+msgstr "цель"
+
+#: admin.py:329
 msgid "Run now"
 msgstr "Запустить сейчас"
 
-#: admin.py:248
+#: admin.py:345
 msgid "Last scan"
 msgstr "Последнее сканирование"
 
-#: admin.py:261
+#: admin.py:354
 msgid "Tasks"
 msgstr "Задачи"
 
-#: admin.py:279 models.py:230
+#: admin.py:402 models.py:166
 msgid "Default scan profiles"
 msgstr "Профили сканирования по умолчанию"
 
@@ -118,188 +135,184 @@ msgstr "Профили сканирования по умолчанию"
 msgid "JIRA"
 msgstr "JIRA"
 
-#: extra_settings.py:13 settings.py:165
+#: extra_settings.py:13 settings.py:167
 msgid "e-mail"
 msgstr ""
 
-#: extra_settings.py:14 settings.py:164
+#: extra_settings.py:14 settings.py:166
 msgid "None"
 msgstr ""
 
-#: models.py:68 templates/admin/user_settings.html:27
+#: models.py:33 templates/admin/user_settings.html:27
 msgid "Interface language"
 msgstr "Язык интерфейса"
 
-#: models.py:72 templates/admin/user_settings.html:35
+#: models.py:37 templates/admin/user_settings.html:35
 msgid "Notification"
 msgstr "Уведомления"
 
-#: models.py:90 models.py:110 models.py:134 models.py:220 models.py:238
-#: models.py:256
+#: models.py:55 models.py:75 models.py:99 models.py:156 models.py:174
+#: models.py:192
 msgid "id"
 msgstr "ID"
 
-#: models.py:91 models.py:111
+#: models.py:56 models.py:76
 msgid "Name"
 msgstr "Название"
 
-#: models.py:92
+#: models.py:57
 msgid "Short description"
 msgstr "Краткое описание"
 
-#: models.py:94
+#: models.py:59
 msgid "w3af-profile"
 msgstr "w3af-профиль"
 
-#: models.py:96 models.py:116 models.py:142
-msgid "User"
-msgstr "Пользователь"
-
-#: models.py:100
+#: models.py:65
 msgid "scan profile"
 msgstr "профиль сканирования"
 
-#: models.py:101 templates/admin/base.html:61
+#: models.py:66 templates/admin/base.html:61
 msgid "Scan profiles"
 msgstr "Профили сканирования"
 
-#: models.py:112
+#: models.py:77
 msgid "URL"
 msgstr "URL"
 
-#: models.py:118
+#: models.py:83
 msgid "Last scan date"
 msgstr "Дата последнего сканирования"
 
-#: models.py:125 templates/admin/base.html:57
+#: models.py:90 templates/admin/base.html:57
 msgid "Targets"
 msgstr "Цели"
 
-#: models.py:135
-msgid "Task name"
-msgstr "Название задачи"
+#: models.py:106 models.py:199
+msgid "Scan start"
+msgstr "Начало сканирования"
 
-#: models.py:144 models.py:226
+#: models.py:109 models.py:162
 msgid "Target"
 msgstr "Цель"
 
-#: models.py:147
+#: models.py:112
 msgid "Cron string"
 msgstr "cron-строка"
 
-#: models.py:149
+#: models.py:114
 msgid "Time"
 msgstr "Время"
 
-#: models.py:151
+#: models.py:116
 msgid "Repeat each"
 msgstr "Повторять каждый (-ую)"
 
-#: models.py:156
+#: models.py:121
 msgid "Day number"
 msgstr "Номер дня"
 
-#: models.py:161
+#: models.py:126
 msgid "Day of week"
 msgstr "День недели"
 
-#: models.py:166
+#: models.py:131
 msgid "scan task"
 msgstr "задача на сканирование"
 
-#: models.py:167
+#: models.py:132
 msgid "scan tasks"
 msgstr "задачи на сканирование"
 
-#: models.py:223 models.py:241 models.py:246
+#: models.py:159 models.py:177 models.py:182
 msgid "Profile"
 msgstr "Профиль"
 
-#: models.py:229
+#: models.py:165
 msgid "Default scan profile"
 msgstr "Профиль сканирования по умолчанию"
 
-#: models.py:244
+#: models.py:180
 msgid "Scan"
 msgstr "Сканирование"
 
-#: models.py:247
+#: models.py:183
 msgid "Profiles"
 msgstr "Профили"
 
-#: models.py:257
+#: models.py:193
 msgid "Scan task"
 msgstr "Задача на сканирования"
 
-#: models.py:265
+#: models.py:201
 msgid "Scan finish"
 msgstr "Сканирование завершено"
 
-#: models.py:269
+#: models.py:205
 msgid "Report"
 msgstr "Отчёт"
 
-#: models.py:292
+#: models.py:232
 msgid "scan"
 msgstr "сканирование"
 
-#: models.py:293
+#: models.py:233
 msgid "scans"
 msgstr "сканирования"
 
-#: settings.py:45 settings.py:141
+#: settings.py:45 settings.py:142
 msgid "Russian"
 msgstr "Русский"
 
-#: settings.py:46 settings.py:142
+#: settings.py:46 settings.py:143
 msgid "English"
 msgstr "Английский"
 
-#: settings.py:169
+#: settings.py:171
 msgid "Monday"
 msgstr "Понедельник"
 
-#: settings.py:169
+#: settings.py:171
 msgid "Tuesday"
 msgstr "Вторник"
 
-#: settings.py:169
+#: settings.py:171
 msgid "Wednesday"
 msgstr "Среда"
 
-#: settings.py:169
+#: settings.py:171
 msgid "Thursday"
 msgstr "Четверг"
 
-#: settings.py:170
+#: settings.py:172
 msgid "Friday"
 msgstr "Пятница"
 
-#: settings.py:170
+#: settings.py:172
 msgid "Saturday"
 msgstr "Суббота"
 
-#: settings.py:170
+#: settings.py:172
 msgid "Sunday"
 msgstr "Воскресенье"
 
-#: settings.py:180
+#: settings.py:182
 msgid "never"
 msgstr "никогда"
 
-#: settings.py:180
+#: settings.py:182
 msgid "daily"
 msgstr "ежедневно"
 
-#: settings.py:180
+#: settings.py:182
 msgid "weekly"
 msgstr "еженедельно"
 
-#: settings.py:180
+#: settings.py:182
 msgid "monthly"
 msgstr "ежемесячно"
 
-#: settings.py:232
+#: settings.py:234
 msgid "Comment"
 msgstr "JIRA ID"
 
@@ -404,6 +417,12 @@ msgstr "Недоступный URL"
 #: templates/admin/w3af_webui/target/change_form.html:10
 msgid "Invalid URL"
 msgstr "Неправильный URL"
+
+#~ msgid "Stop selected"
+#~ msgstr "Остановить выделенное"
+
+#~ msgid "Finish"
+#~ msgstr "Финиш"
 
 #~ msgid "Add"
 #~ msgstr "Добавить"

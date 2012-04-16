@@ -131,11 +131,27 @@ class ScanAdmin(W3AF_ModelAdmin):
     list_display_links = ('report_or_stop', )
     actions = ['stop_action', 'delete_selected']
 
+    def delete_selected(self, request, queryset):
+        for obj in queryset:
+            if obj.status == settings.SCAN_STATUS['in_process']:
+                self.message_user(request,
+                                  _('Cannot delete scan in process.'
+                                    'Stop scan "%s" and try again') %
+                                    obj.scan_task,
+                                )
+                return
+        from django.contrib.admin.actions import delete_selected
+        return delete_selected(self, request, queryset)
+
+    delete_selected.short_description = _('Delete selected '
+                                          '%(verbose_name_plural)s')
+
     def stop_action(self, request, queryset):
         for selected_obj in queryset:
             selected_obj.unlock_task()
+        self.message_user(request, _('Scans stoped successfully.'))
 
-    stop_action.short_description = u'%s' % _('Stop selected')
+    stop_action.short_description = _('Stop selected %(verbose_name_plural)s')
 
     def comment(self, obj):
         return mark_safe(obj.scan_task.comment)
@@ -200,6 +216,10 @@ class ScanAdmin(W3AF_ModelAdmin):
 
     def has_add_permission(self, request):
          return False
+
+    def delete_model(self, request, obj):
+        print 'delete_model!'
+        super(ScanAdmin, self).delete_model(request, obj)
 
     def  queryset(self, request):
         if request.user.has_perm('w3af_webui.view_all_data'):
