@@ -8,6 +8,7 @@ from django.utils.translation import ugettext_lazy as _
 from django.conf import settings
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
+from django.contrib import messages
 
 from w3af_webui.models import ScanProfile
 from w3af_webui.models import Target
@@ -134,11 +135,11 @@ class ScanAdmin(W3AF_ModelAdmin):
     def delete_selected(self, request, queryset):
         for obj in queryset:
             if obj.status == settings.SCAN_STATUS['in_process']:
-                self.message_user(request,
-                                  _('Cannot delete scan in process.'
-                                    'Stop scan "%s" and try again') %
-                                    obj.scan_task,
-                                )
+                messages.error(request,
+                                 _('Cannot delete scan in process.'
+                                   'Stop scan "%s" and try again') %
+                                   obj.scan_task,
+                                 )
                 return
         from django.contrib.admin.actions import delete_selected
         return delete_selected(self, request, queryset)
@@ -149,7 +150,7 @@ class ScanAdmin(W3AF_ModelAdmin):
     def stop_action(self, request, queryset):
         for selected_obj in queryset:
             selected_obj.unlock_task()
-        self.message_user(request, _('Scans stoped successfully.'))
+        self.messages.success(request, _('Scans stoped successfully.'))
 
     stop_action.short_description = _('Stop selected %(verbose_name_plural)s')
 
