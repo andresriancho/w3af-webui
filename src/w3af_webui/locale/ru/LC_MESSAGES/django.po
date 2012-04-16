@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-04-16 15:55+0400\n"
-"PO-Revision-Date: 2012-04-16 15:55+0400\n"
+"POT-Creation-Date: 2012-04-16 16:57+0400\n"
+"PO-Revision-Date: 2012-04-16 17:00+0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -18,116 +18,123 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 
-#: admin.py:67
+#: admin.py:69
 msgid "Personal info"
 msgstr ""
 
-#: admin.py:73
+#: admin.py:75
 msgid "Permissions"
 msgstr ""
 
-#: admin.py:98 models.py:61 models.py:81 models.py:107 models.py:211
+#: admin.py:100 models.py:61 models.py:81 models.py:107 models.py:211
 msgid "User"
 msgstr "Пользователь"
 
-#: admin.py:138
+#: admin.py:140
 #, python-format
 msgid "Cannot delete scan in process.Stop scan \"%s\" and try again"
 msgstr ""
 "Невозможно удалить работающее сканирование. Остановите \"%s\" и попробуйте "
 "снова"
 
-#: admin.py:146
+#: admin.py:147 admin.py:409
 #, python-format
 msgid "Delete selected %(verbose_name_plural)s"
 msgstr ""
 
-#: admin.py:152
+#: admin.py:153
 msgid "Scans stoped successfully."
 msgstr "Сканирования успешно остановлены"
 
-#: admin.py:154
+#: admin.py:155
 #, python-format
 msgid "Stop selected %(verbose_name_plural)s"
 msgstr "Остановить выбранные %(verbose_name_plural)s"
 
-#: admin.py:159 models.py:110
+#: admin.py:160 models.py:110
 msgid "Description"
 msgstr "Описание"
 
-#: admin.py:165 admin.py:325
+#: admin.py:166 admin.py:327
 msgid "Stop"
 msgstr "Остановить"
 
-#: admin.py:169 admin.py:205 admin.py:332
+#: admin.py:170 admin.py:206 admin.py:334
 msgid "Action"
 msgstr "Действие"
 
-#: admin.py:178 models.py:100
+#: admin.py:179 models.py:100
 msgid "Task name"
 msgstr "Название задачи"
 
-#: admin.py:194 admin.py:304 models.py:102 models.py:195
+#: admin.py:195 admin.py:306 models.py:102 models.py:195
 msgid "Status"
 msgstr "Статус"
 
-#: admin.py:201
+#: admin.py:202
 msgid "Show report"
 msgstr "Показать отчёт"
 
-#: admin.py:203
+#: admin.py:204
 msgid "Stop scan"
 msgstr "Остановить сканирование"
 
-#: admin.py:211 admin.py:214
+#: admin.py:212 admin.py:215
 msgid "Show log"
 msgstr "Показать лог"
 
-#: admin.py:230 templates/admin/base.html:49
+#: admin.py:231 templates/admin/base.html:49
 msgid "Scans"
 msgstr "Сканирования"
 
-#: admin.py:280
+#: admin.py:282
 msgid "Repeating"
 msgstr "Повторять"
 
-#: admin.py:293
+#: admin.py:295
 msgid "Schedule"
 msgstr "Расписание"
 
-#: admin.py:294
+#: admin.py:296
 msgid "One-time"
 msgstr "Одноразово"
 
-#: admin.py:296
+#: admin.py:298
 msgid "Run regularity"
 msgstr "Запускать регулярно"
 
-#: admin.py:301
+#: admin.py:303
 msgid "Active"
 msgstr "Активно"
 
-#: admin.py:302
+#: admin.py:304
 msgid "Not active"
 msgstr "Неактивно"
 
-#: admin.py:311 models.py:89
+#: admin.py:313 models.py:89
 msgid "target"
 msgstr "цель"
 
-#: admin.py:329
+#: admin.py:331
 msgid "Run now"
 msgstr "Запустить сейчас"
 
-#: admin.py:345
+#: admin.py:347
 msgid "Last scan"
 msgstr "Последнее сканирование"
 
-#: admin.py:354
+#: admin.py:356
 msgid "Tasks"
 msgstr "Задачи"
 
-#: admin.py:402 models.py:166
+#: admin.py:402
+#, fuzzy, python-format
+msgid "Cannot delete task in process. Stop task \"%s\" and try again"
+msgstr ""
+"Невозможно удалить работающую задачу. Остановите задачу \"%s\" и попробуйте "
+"снова"
+
+#: admin.py:423 models.py:166
 msgid "Default scan profiles"
 msgstr "Профили сканирования по умолчанию"
 
