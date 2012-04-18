@@ -138,7 +138,7 @@ class VulnerabilityInline(admin.StackedInline):
     readonly_fields = ['security_level',
                        'security_type',
                        'description',
-                       'http_transaction',
+                       #'http_transaction',
                        ]
 
     def has_delete_permission(self, request):
@@ -146,6 +146,7 @@ class VulnerabilityInline(admin.StackedInline):
 
     def has_add_permission(self, request):
         return False
+
 
 class ScanAdmin(W3AF_ModelAdmin):
     inlines = (VulnerabilityInline, )

@@ -75,8 +75,7 @@ def get_profile(scan_task, report_path, report_file):
     except Exception, e:
         logger.error('can not add output plugin %s' % e)
     config.set(settings.W3AF_OUTPUT_PLUGIN, 'fileName', report_file)
-    #xml_report = report_file[:-5] + '.xml'
-    xml_report = 'home/svetleo/tmp/w3af.xml'
+    xml_report = report_file[:-5] + '.xml'
     config.set('output.xmlFile', 'fileName', xml_report)
     config.set(settings.W3AF_LOG_PLUGIN, 'fileName', report_file[:-5] + '.txt')
     config.set(settings.W3AF_LOG_PLUGIN, 'httpFileName',
@@ -110,55 +109,65 @@ def fail_scan(scan_id, message):
 
 
 def save_vulnerabilities(scan, xml_report):
-    tree = etree.parse('/home/svetleo/tmp/w3af.xml')
-    issues = list(tree.getiterator(tag='vulnerability'))
-    for issue in issues:
-        print 'severity %s' % issue.get('severity')
-        print 'type %s' % issue.get('plugin')
-        type_name = issue.get('plugin')
-        vuln_type, created = VulnerabilityType.objects.get_or_create(name=type_name)
-        description = issue.getiterator(tag='description')[0]
-        print 'desc = %s' % description.text
-        request = issue.getiterator(tag='httprequest')[0]
-        status = request.getiterator(tag='status')[0]
-        http_transaction = status.text
-        headers = request.getiterator(tag='headers')[0]
-        header_list = list(headers.getiterator(tag='header'))
-        for header in header_list:
-            http_transaction += '%s: %s\n' % (
-                               header.get('field'),
-                               header.get('content'),
-                               )
-        print 'http %s' % http_transaction
-        Vulnerability.objects.create(scan=scan,
-                                     security_level=1,
-                                     security_type=vuln_type,
-                                     description=description,
-                                     http_transaction=http_transaction,
-                                     )
+    try:
+        tree = etree.parse(xml_report)
+        issues = list(tree.getiterator(tag='vulnerability'))
+        for issue in issues:
+            severity = issue.get('severity')
+            type_name = issue.get('plugin')
+            vuln_type, created = VulnerabilityType.objects.get_or_create(
+                                    name=type_name)
+            description = issue.getiterator(tag='description')[0].text
+            request = issue.getiterator(tag='httprequest')[0]
+            status = request.getiterator(tag='status')[0]
+            http_transaction = status.text
+            headers = request.getiterator(tag='headers')[0]
+            header_list = list(headers.getiterator(tag='header'))
+            for header in header_list:
+                http_transaction += '%s: %s\n' % (
+                                   header.get('field'),
+                                   header.get('content'),
+                                   )
+            Vulnerability.objects.create(scan=scan,
+                                         security_level=severity,
+                                         security_type=vuln_type,
+                                         description=description,
+                                         http_transaction=http_transaction,
+                                         )
+            return True
+    except Exception, e:
+        logger.error('Cannot parse xml report for scan %s: %s' % (
+                      scan.id, e))
+        return False
 
 
 def post_finish(scan, returncode, xml_report):
     """
     Change scan status to done if returncode and scan status is ok
     """
-    if int(returncode) != 0:
-        # process terminated with error
+    is_valid_xml = save_vulnerabilities(scan, xml_report)
+    if int(returncode) != 0 or not is_valid_xml:
+        # process terminated with error or fail xml report
         fail_scan(scan.id,
-                  'w3af process return code %s' % returncode,
-                  )
+                  'w3af process return code %s' % returncode)
         return
     # process terminated successfully
     if (Scan.objects.get(pk=int(scan.id)).status ==
         settings.SCAN_STATUS['fail']):
-        return
+            return
     scan.result_message = ''
     if not send_notification(scan):
         scan.result_message = 'Can not send notification'
     scan.status = settings.SCAN_STATUS['done']
     scan.save()
 
-def  wait_process_finish(scan, process):
+
+def  wait_process_finish(scan, profile_fname):
+    process = Popen([settings.W3AF_RUN,
+                    '--no-update', '-P',
+                    profile_fname],
+                    stdout=PIPE,
+                    stderr=PIPE)
     scan.pid = process.pid
     scan.save()
     while process.returncode is None:
@@ -202,19 +211,16 @@ class Command(BaseCommand):
                     (profile_fname, xml_report) = get_profile(scan.scan_task,
                                                               report_path,
                                                               output.name)
-                    process = Popen([settings.W3AF_RUN,
-                                    '--no-update', '-P',
-                                    profile_fname],
-                                    stdout=PIPE,
-                                    stderr=PIPE)
-                    returncode = wait_process_finish(scan, process)
+                    returncode = wait_process_finish(scan, profile_fname)
                     post_finish(scan, returncode, xml_report)
+                    #if os.access(xml_report, os.F_OK):
+                    #    os.remove(xml_report)
             except Scan.DoesNotExist, e:
                 logger.error('scan object does not exist %s' % e)
                 raise Scan.DoesNotExist
             except Exception, e:
                 logger.error('w3af_run exception: %s' % e)
                 fail_scan(scan_id, ' w3af_run exception: %s' % e)
-                raise Exception, e
+                raise
                 #raise CommandError('w3af scan fail %s' % e)
         return {}

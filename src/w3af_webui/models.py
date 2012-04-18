@@ -255,7 +255,7 @@ class VulnerabilityType(models.Model):
 class Vulnerability(models.Model):
     id = models.AutoField(_('id'), primary_key=True)
     scan = models.ForeignKey(Scan, verbose_name=_('Scan'))
-    security_level = models.IntegerField(_('Security level'))
+    security_level = models.CharField(_('Security level'), max_length=30)
     security_type = models.ForeignKey(VulnerabilityType,
                                       verbose_name=_('Security type'))
     description = models.TextField(_('Description'), blank=True, null=True)

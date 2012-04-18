@@ -1,13 +1,15 @@
 # -*- coding: utf-8 -*-
 from logging import getLogger
-from datetime import timedelta
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 
 from celery.schedules import crontab
 from celery.schedules import schedule
 from djcelery.models import PeriodicTask
 from djcelery.models import IntervalSchedule
 from djcelery.models import CrontabSchedule
+
+logger = getLogger(__name__)
 
 def periodic_task_remove(task_name):
     tasks = PeriodicTask.objects.filter(name=task_name)
@@ -49,14 +51,14 @@ def set_interval_schedule(task, minutes, hour, day_of_month):
     task.crontab = None
     task.save()
 
-def delay_task_generator(task_id, run_at):
+def delay_task_generator(scan_task_id, run_at):
     if run_at is None or run_at < datetime.now():
         print 'Time in past'
         return
-    task_name = 'delay_%s' % task_id
+    task_name = 'delay_%s' % scan_task_id
     task, created = PeriodicTask.objects.get_or_create(
                         name=task_name,
-                        args=[int(task_id)],
+                        args=[int(scan_task_id)],
                         task = 'w3af_webui.tasks.delay_task',
                     )
     delta = run_at - datetime.now()

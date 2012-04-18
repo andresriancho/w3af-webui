@@ -2,6 +2,9 @@
 import os.path
 from datetime import timedelta
 from django.utils.translation import ugettext_lazy as _
+BASE_PATH = os.path.dirname(os.path.dirname(__file__))
+TEST_DISCOVERY_ROOT = os.path.join(BASE_PATH, "tests")
+TEST_RUNNER = "tests.runner.DiscoveryRunner"
 
 # ---------- Personal settings -----------------
 ADMINS = (
