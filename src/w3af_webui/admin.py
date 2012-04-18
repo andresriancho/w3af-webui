@@ -15,6 +15,7 @@ from w3af_webui.models import ScanTask
 from w3af_webui.models import Scan
 from w3af_webui.models import ProfilesTasks
 from w3af_webui.models import ProfilesTargets
+from w3af_webui.models import Vulnerability
 from w3af_webui.utils import delay_task_generator
 from w3af_webui.utils import periodic_task_generator
 from w3af_webui.utils import periodic_task_remove
@@ -123,12 +124,39 @@ class ScanProfileAdmin(W3AF_ModelAdmin):
         return ScanProfile.objects.filter(user=request.user)
 
 
+class VulnerabilityInline(admin.StackedInline):
+    model = Vulnerability
+    extra = 0
+    can_delete = False
+    max_num = 0
+    fieldsets = (
+        (None, {'fields': ( 'security_level', )}),
+        (None, {'fields': ('security_type', )}),
+        (None, {'fields': ('description', )}),
+        (None, {'fields': ('http_transaction', )}),
+        )
+    readonly_fields = ['security_level',
+                       'security_type',
+                       'description',
+                       'http_transaction',
+                       ]
+
+    def has_delete_permission(self, request):
+        return False
+
+    def has_add_permission(self, request):
+        return False
+
 class ScanAdmin(W3AF_ModelAdmin):
+    inlines = (VulnerabilityInline, )
+    fields = ['scan_task_link', 'icon', 'get_target' ]
+    readonly_fields = ['scan_task_link', 'icon', 'get_target', ]
     search_fields = ['scan_task__name', 'scan_task__comment']
     list_display = ['icon', 'scan_task_link', 'comment', 'start', 'finish',
                     'report_or_stop','show_log', ]
     ordering = ('-id',)
-    list_display_links = ('report_or_stop', )
+    list_display_links = ('icon', )
+    #list_display_links = ('report_or_stop', )
     actions = ['stop_action', 'delete_selected']
 
     def stop_action(self, request, queryset):
@@ -136,6 +164,11 @@ class ScanAdmin(W3AF_ModelAdmin):
             selected_obj.unlock_task()
 
     stop_action.short_description = u'%s' % _('Stop selected')
+
+    def get_target(self, obj):
+        return mark_safe(obj.scan_task.target)
+
+    get_target.short_description = _('Target')
 
     def comment(self, obj):
         return mark_safe(obj.scan_task.comment)
@@ -205,6 +238,15 @@ class ScanAdmin(W3AF_ModelAdmin):
         if request.user.has_perm('w3af_webui.view_all_data'):
             return Scan.objects.all()
         return Scan.objects.filter(user=request.user)
+
+    def change_view(self, request, object_id, extra_context=None):
+        scan = Scan.objects.all().get(pk=object_id)
+        extra_context = {'title': u'%s %s' % (
+                                  _('Scan'),
+                                  scan.scan_task.target.url,
+                                  ) }
+        return super(ScanAdmin, self).change_view(request, object_id,
+                                                  extra_context)
 
     def changelist_view(self, request, extra_context=None):
         extra_context = {'title': u'%s' % _('Scans'), }

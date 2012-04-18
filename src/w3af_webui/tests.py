@@ -31,6 +31,7 @@ from w3af_webui.management.commands.w3af_run import get_profile
 from w3af_webui.management.commands.w3af_run import get_report_path
 from w3af_webui.management.commands.w3af_run import send_notification
 from w3af_webui.management.commands.w3af_run import post_finish
+from w3af_webui.management.commands.w3af_run import save_vulnerabilities
 from w3af_webui.management import init_user_group
 from w3af_webui.management import create_superuser
 from w3af_webui.management import create_extra_permission
@@ -626,7 +627,8 @@ class TestW3afRun(TestCase):
         self.assertEqual(Scan.objects.get(pk=int(self.scan.id)).status,
                          settings.SCAN_STATUS['done'])
 
-
+    def test_save_vulner(self):
+        save_vulnerabilities(self.scan, '/home/svetleo/tmp/w3af.xml')
 
     def tearDown(self):
         self.scan.delete()

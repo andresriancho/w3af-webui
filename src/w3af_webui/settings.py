@@ -157,7 +157,7 @@ W3AF_LOG_PLUGIN = 'output.textFile' # default log plugin for all scans
 W3AF_RUN = 'w3af_console'
 
 # Notification about scan finish. You can write your own notification module and 
-# link up it here. Date format: 
+# link up it here. Data format: 
 # {'label': 'notification name', 
 #  'id': 'notification_string_id', 
 #  'module': 'python module witch send notification'},

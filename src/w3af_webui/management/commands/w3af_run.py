@@ -10,6 +10,7 @@ from subprocess import Popen
 from subprocess import PIPE
 from logging import getLogger
 import ConfigParser
+import xml.etree.ElementTree as etree
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -17,6 +18,8 @@ from django.conf import settings
 from w3af_webui.models import ProfilesTasks
 from w3af_webui.models import ProfilesTargets
 from w3af_webui.models import Scan
+from w3af_webui.models import Vulnerability
+from w3af_webui.models import VulnerabilityType
 
 W3AF_POLL_PERIOD = 15 # seconds
 logger = getLogger(__name__)
@@ -68,9 +71,13 @@ def get_profile(scan_task, report_path, report_file):
     try:
         config.add_section(settings.W3AF_OUTPUT_PLUGIN)
         config.add_section(settings.W3AF_LOG_PLUGIN)
+        config.add_section('output.xmlFile')
     except Exception, e:
         logger.error('can not add output plugin %s' % e)
     config.set(settings.W3AF_OUTPUT_PLUGIN, 'fileName', report_file)
+    #xml_report = report_file[:-5] + '.xml'
+    xml_report = 'home/svetleo/tmp/w3af.xml'
+    config.set('output.xmlFile', 'fileName', xml_report)
     config.set(settings.W3AF_LOG_PLUGIN, 'fileName', report_file[:-5] + '.txt')
     config.set(settings.W3AF_LOG_PLUGIN, 'httpFileName',
                report_file[:-5] + '-http.txt')
@@ -78,7 +85,7 @@ def get_profile(scan_task, report_path, report_file):
     with open(profile_fh.name, 'wb') as configfile:
         config.write(configfile)
     print >> sys.stderr, profile_fh.name
-    return profile_fh.name
+    return (profile_fh.name, xml_report)
 
 
 def get_report_path():
@@ -102,7 +109,36 @@ def fail_scan(scan_id, message):
     scan.set_task_status_free()
 
 
-def post_finish(scan, returncode):
+def save_vulnerabilities(scan, xml_report):
+    tree = etree.parse('/home/svetleo/tmp/w3af.xml')
+    issues = list(tree.getiterator(tag='vulnerability'))
+    for issue in issues:
+        print 'severity %s' % issue.get('severity')
+        print 'type %s' % issue.get('plugin')
+        type_name = issue.get('plugin')
+        vuln_type, created = VulnerabilityType.objects.get_or_create(name=type_name)
+        description = issue.getiterator(tag='description')[0]
+        print 'desc = %s' % description.text
+        request = issue.getiterator(tag='httprequest')[0]
+        status = request.getiterator(tag='status')[0]
+        http_transaction = status.text
+        headers = request.getiterator(tag='headers')[0]
+        header_list = list(headers.getiterator(tag='header'))
+        for header in header_list:
+            http_transaction += '%s: %s\n' % (
+                               header.get('field'),
+                               header.get('content'),
+                               )
+        print 'http %s' % http_transaction
+        Vulnerability.objects.create(scan=scan,
+                                     security_level=1,
+                                     security_type=vuln_type,
+                                     description=description,
+                                     http_transaction=http_transaction,
+                                     )
+
+
+def post_finish(scan, returncode, xml_report):
     """
     Change scan status to done if returncode and scan status is ok
     """
@@ -122,8 +158,7 @@ def post_finish(scan, returncode):
     scan.status = settings.SCAN_STATUS['done']
     scan.save()
 
-
-def wait_process_finish(scan, process):
+def  wait_process_finish(scan, process):
     scan.pid = process.pid
     scan.save()
     while process.returncode is None:
@@ -164,16 +199,16 @@ class Command(BaseCommand):
                     scan.data = output.name
                     scan.result_message = 'Scan in process now \n'
                     scan.save()
-                    profile_fname = get_profile(scan.scan_task,
-                                                report_path,
-                                                output.name)
+                    (profile_fname, xml_report) = get_profile(scan.scan_task,
+                                                              report_path,
+                                                              output.name)
                     process = Popen([settings.W3AF_RUN,
                                     '--no-update', '-P',
                                     profile_fname],
                                     stdout=PIPE,
                                     stderr=PIPE)
                     returncode = wait_process_finish(scan, process)
-                    post_finish(scan, returncode)
+                    post_finish(scan, returncode, xml_report)
             except Scan.DoesNotExist, e:
                 logger.error('scan object does not exist %s' % e)
                 raise Scan.DoesNotExist
