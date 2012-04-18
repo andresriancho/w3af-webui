@@ -120,13 +120,13 @@ def save_vulnerabilities(scan, xml_report):
             description = issue.getiterator(tag='description')[0].text
             request = issue.getiterator(tag='httprequest')[0]
             status = request.getiterator(tag='status')[0]
-            http_transaction = status.text
+            http_transaction = status.text.strip() + '\n'
             headers = request.getiterator(tag='headers')[0]
             header_list = list(headers.getiterator(tag='header'))
             for header in header_list:
                 http_transaction += '%s: %s\n' % (
-                                   header.get('field'),
-                                   header.get('content'),
+                        header.get('field').strip(),
+                        header.get('content').strip(),
                                    )
             Vulnerability.objects.create(scan=scan,
                                          security_level=severity,

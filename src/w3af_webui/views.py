@@ -18,6 +18,7 @@ from django.conf import settings
 from w3af_webui.models import ScanTask
 from w3af_webui.models import Scan
 from w3af_webui.models import Profile
+from w3af_webui.models import Vulnerability
 from w3af_webui.tasks import scan_start
 
 logger = getLogger(__name__)
@@ -78,7 +79,6 @@ def get_select_code(select_value, data_array, element_id):
 @csrf_protect
 @login_required
 def user_settings(request):
-    print 'USER SETTINGS VIEW!'
     profile = request.user.get_profile()
     if request.method == 'POST':
         iface_lang = request.POST['iface_lang']
@@ -132,9 +132,35 @@ def show_report_txt(request, scan_id):
     except:
         raise Http404
 
-
 @login_required
 def show_report(request, scan_id):
+    scan = Scan.objects.get(id=scan_id)
+    if (not request.user.has_perm('w3af_webui.view_all_data') and
+        scan.user != request.user):
+        return HttpResponseForbidden()
+    class Issue:
+        __slots__ = ['plugin',
+                     'severity',
+                     'desc',
+                     'http_trans',
+                    ]
+    vuln_list = []
+    vulnerabilities = Vulnerability.objects.filter(scan=scan)
+    for vuln in vulnerabilities:
+        vulnerability = Issue()
+        vulnerability.plugin = vuln.security_type
+        vulnerability.severity = vuln.security_level
+        vulnerability.desc = vuln.description
+        vulnerability.http_trans = vuln.http_transaction
+        vuln_list.append(vulnerability)
+    context = {'target': scan.scan_task.target.url,
+               'vulns': vuln_list,
+               }
+    return render_to_response("admin/w3af_webui/vulnerabilities.html", context,
+                              context_instance=RequestContext(request))
+
+@login_required
+def old_show_report(request, scan_id):
     try:
         obj = Scan.objects.get(id=scan_id)
         if (not request.user.has_perm('w3af_webui.view_all_data') and
@@ -146,7 +172,7 @@ def show_report(request, scan_id):
         return render_to_response("admin/show_report.html", context,
                                   context_instance=RequestContext(request))
     except Exception, e:
-        print 'exception %s' % e
+        logger.error('View show_report fail %s' % e)
         raise Http404
 
 

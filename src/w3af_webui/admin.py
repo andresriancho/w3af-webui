@@ -157,6 +157,7 @@ class ScanAdmin(W3AF_ModelAdmin):
                     'report_or_stop','show_log', ]
     ordering = ('-id',)
     list_display_links = ('icon', )
+    list_display_links = ('scan_task_link', )
     #list_display_links = ('report_or_stop', )
     actions = ['stop_action', 'delete_selected']
 

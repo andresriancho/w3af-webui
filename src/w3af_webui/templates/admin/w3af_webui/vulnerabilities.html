@@ -1,0 +1,38 @@
+{% extends "admin/base.html" %}
+{% load i18n adminmedia %}
+{% load url from future %}
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet"
+type="text/css" href="{{ STATIC_URL }}admin/css/forms.css" />{% endblock %}
+            {% block user_settings_link %}
+                {% trans ' User Settings' %} /
+            {% endblock %}
+
+
+{% block title %}{% trans 'Vulnerability Report' %}{% endblock %}
+
+{% block content %}
+        <style>
+        </style>
+<h2>Scan information</h2>
+<table class="targets">
+    <tr>
+        <th>Targets</th>
+        <td>{{ target|escape }}</td>
+    </tr>
+</table>
+<h2>Security Issues</h2>
+{% if vulns %}
+{% for vuln in vulns %}
+<table class="issues">
+    <tr><th colspan="2">{{ vuln.plugin }} / {{ vuln.severity }}</th></tr>
+    <tr><th>Issue</th><td>{{ vuln.desc|escape }}</td></tr>
+    <tr><th>HTTP Transaction</td><td><textarea readonly="true">{{ vuln.http_trans|escape }}</textarea></td></tr>
+</table>
+<br />
+<br />
+{% endfor %}
+{% else %}
+    <p>There is no security issue was found.</p>
+{% endif %}
+
+{% endblock %}
