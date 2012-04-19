@@ -24,12 +24,12 @@ type="text/css" href="{{ STATIC_URL }}admin/css/forms.css" />{% endblock %}
 {% if vulns %}
 {% for vuln in vulns %}
 <form action="" method="post">{% csrf_token %}
-<input type=hidden id=vuln_id value={{ vuln.id }} />
+<input type=hidden name=vuln_id value={{ vuln.id }} />
 <table class="issues">
     <tr><th colspan="2">{{ vuln.plugin }} / {{ vuln.severity }}</th></tr>
     <tr><th>Issue</th><td>{{ vuln.desc|escape }}</td></tr>
     <tr><th>HTTP Transaction</td><td><textarea readonly="true">{{ vuln.http_trans|escape }}</textarea></td></tr>
-    <tr><th><input type=submit value='Post in JIRA'/></th><td></td></tr>
+    <tr><th>{{ extra_element }}</th><td></td></tr>
 </table>
 <br />
 <br />

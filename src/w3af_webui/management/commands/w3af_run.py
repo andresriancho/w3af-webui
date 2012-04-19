@@ -117,7 +117,7 @@ def save_vulnerabilities(scan, xml_report):
             type_name = issue.get('plugin')
             vuln_type, created = VulnerabilityType.objects.get_or_create(
                                     name=type_name)
-            description = issue.getiterator(tag='description')[0].text
+            description = issue.getiterator(tag='description')[0].text.strip()
             request = issue.getiterator(tag='httprequest')[0]
             status = request.getiterator(tag='status')[0]
             http_transaction = status.text.strip() + '\n'
@@ -129,8 +129,8 @@ def save_vulnerabilities(scan, xml_report):
                         header.get('content').strip(),
                                    )
             Vulnerability.objects.create(scan=scan,
-                                         security_level=severity,
-                                         security_type=vuln_type,
+                                         severity=severity,
+                                         vuln_type=vuln_type,
                                          description=description,
                                          http_transaction=http_transaction,
                                          )

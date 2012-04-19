@@ -255,7 +255,7 @@ class VulnerabilityType(models.Model):
 class Vulnerability(models.Model):
     id = models.AutoField(_('id'), primary_key=True)
     scan = models.ForeignKey(Scan, verbose_name=_('Scan'))
-    severity = models.CharField(_('Security level'), max_length=30,
+    severity = models.CharField(_('Severity'), max_length=30,
                                null=True)
     vuln_type = models.ForeignKey(VulnerabilityType,
                                   verbose_name=_('Vulnerability type'),
@@ -267,7 +267,7 @@ class Vulnerability(models.Model):
                                         )
 
     def __unicode__(self):
-        return u'%s' % self.security_type
+        return u'%s' % self.vuln_type
 
     class Meta:
         verbose_name = _('Vulnerability')

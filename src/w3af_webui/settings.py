@@ -170,6 +170,9 @@ NOTIFY_MODULES = (
     {'label': _('e-mail'), 'id': 'Mail', 'module': 'w3af_webui.notification.send_mail'},
 )
 
+VULN_POST_MODULE = {}
+
+
 # Week day name
 WEEK_DAY_NAME = (_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'),
                  _('Friday'), _('Saturday'), _('Sunday'))

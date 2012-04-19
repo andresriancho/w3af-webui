@@ -124,23 +124,6 @@ class ScanProfileAdmin(W3AF_ModelAdmin):
         return ScanProfile.objects.filter(user=request.user)
 
 
-class VulnerabilityInline(admin.StackedInline):
-    model = Vulnerability
-    extra = 0
-    can_delete = False
-    max_num = 0
-    fieldsets = (
-        (None, {'fields': ( 'security_level', )}),
-        (None, {'fields': ('security_type', )}),
-        (None, {'fields': ('description', )}),
-        (None, {'fields': ('http_transaction', )}),
-        )
-    readonly_fields = ['security_level',
-                       'security_type',
-                       'description',
-                       #'http_transaction',
-                       ]
-
     def has_delete_permission(self, request):
         return False
 
@@ -149,8 +132,6 @@ class VulnerabilityInline(admin.StackedInline):
 
 
 class ScanAdmin(W3AF_ModelAdmin):
-    inlines = (VulnerabilityInline, )
-    fields = ['scan_task_link', 'icon', 'get_target' ]
     readonly_fields = ['scan_task_link', 'icon', 'get_target', ]
     search_fields = ['scan_task__name', 'scan_task__comment']
     list_display = ['icon', 'scan_task_link', 'comment', 'start', 'finish',

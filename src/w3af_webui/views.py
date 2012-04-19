@@ -3,6 +3,7 @@ import os
 import urllib2
 from logging import getLogger
 
+from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
 from django.template.context import RequestContext
 from django.shortcuts import HttpResponse
@@ -14,6 +15,8 @@ from django.shortcuts import redirect
 from django.utils import translation
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.utils.safestring import mark_safe
+from django.contrib import messages
 
 from w3af_webui.models import ScanTask
 from w3af_webui.models import Scan
@@ -132,15 +135,34 @@ def show_report_txt(request, scan_id):
     except:
         raise Http404
 
+
+def get_extra_button():
+    if ('label' not in settings.VULN_POST_MODULE or
+        'module' not in settings.VULN_POST_MODULE):
+            return ''
+    return mark_safe(u'<input type=submit value="%s"/>' %
+                           settings.VULN_POST_MODULE['label'] )
+
+
 @login_required
 def show_report(request, scan_id, vuln_id=None):
-    #if request.method == 'POST':
-    #    vuln_id = request.POST['vuln_id']
-    #    post_in_jira(vuln_id)
+    print 'show_report in view!'
+    if request.method == 'POST':
+        vuln_id = request.POST['vuln_id']
+        post_module = __import__(settings.VULN_POST_MODULE['module'],
+                                 fromlist=[''])
+        if 'post_vulnerability' in dir(post_module):
+            if post_module.post_vulnerability(vuln_id, request.user):
+                messages.success(request,
+                                  _('This action finished successfully'))
+            else:
+                messages.success(request,
+                                 _('Someting go wrong. Cannot do this action'))
     scan = Scan.objects.get(id=scan_id)
     if (not request.user.has_perm('w3af_webui.view_all_data') and
         scan.user != request.user):
         return HttpResponseForbidden()
+
     class Issue:
         __slots__ = ['id',
                      'plugin',
@@ -148,37 +170,23 @@ def show_report(request, scan_id, vuln_id=None):
                      'desc',
                      'http_trans',
                     ]
+
     vuln_list = []
     vulnerabilities = Vulnerability.objects.filter(scan=scan)
     for vuln in vulnerabilities:
         vulnerability = Issue()
         vulnerability.id = vuln.id
-        vulnerability.plugin = vuln.security_type
-        vulnerability.severity = vuln.security_level
+        vulnerability.plugin = vuln.vuln_type
+        vulnerability.severity = vuln.severity
         vulnerability.desc = vuln.description
         vulnerability.http_trans = vuln.http_transaction
         vuln_list.append(vulnerability)
     context = {'target': scan.scan_task.target.url,
                'vulns': vuln_list,
+               'extra_element': get_extra_button(),
                }
     return render_to_response("admin/w3af_webui/vulnerabilities.html", context,
                               context_instance=RequestContext(request))
-
-@login_required
-def old_show_report(request, scan_id):
-    try:
-        obj = Scan.objects.get(id=scan_id)
-        if (not request.user.has_perm('w3af_webui.view_all_data') and
-            obj.user != request.user):
-            return HttpResponseForbidden()
-        context = {'result_message': obj.result_message, }
-        if os.access(obj.data , os.F_OK):
-            context['report_link'] = obj.data
-        return render_to_response("admin/show_report.html", context,
-                                  context_instance=RequestContext(request))
-    except Exception, e:
-        logger.error('View show_report fail %s' % e)
-        raise Http404
 
 
 def check_url(request):

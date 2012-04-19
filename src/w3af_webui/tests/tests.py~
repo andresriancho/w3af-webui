@@ -20,7 +20,6 @@ from w3af_webui.models import Target
 from w3af_webui.models import ScanProfile
 from w3af_webui.models import Scan
 from w3af_webui.models import Profile
-from w3af_webui.views import get_select_code
 from w3af_webui.management import init_user_group
 from w3af_webui.management import create_superuser
 from w3af_webui.management import create_extra_permission
@@ -106,131 +105,6 @@ class TestInitUserGroup(TestCase):
         #self.assertEqual(0, User.objects.count())
         create_extra_permission()
         #self.assertEqual(1, User.objects.count())
-
-
-class TestView(unittest.TestCase):
-    def setUp(self):
-        # Every test needs a client.
-        self.user = User.objects.create_user('new_unittest1', 'test@example.com',
-                                        'new_test_password')
-        self.user.save()
-        self.client = Client()
-        self.client.login(username='new_unittest1',
-                          password='new_test_password')
-        self.profile = any_model(ScanProfile)
-        self.target = any_model(Target)
-        self.scan_task = any_model(ScanTask,
-                                   status=settings.TASK_STATUS['free'],
-                                   target=self.target,
-                                   last_updated='0',)
-        self.scan = Scan.objects.create(scan_task=self.scan_task,)
-
-    def tearDown(self):
-        self.user.delete()
-        self.profile.delete()
-        self.target.delete()
-        self.scan_task.delete()
-        self.scan.delete()
-
-    def _test_user_settings(self):
-        # Issue a GET request.
-        response = self.client.get('/user_settings/',
-                                   follow=True)
-        # Check that the response is 200 OK.
-        self.assertEqual(response.status_code, 200)
-        #self.assertIn(response.status_code,[200, 302])
-        response = self.client.post('/user_settings/',
-                                    {'list_per_page': '90',
-                                    'iface_lang': 'RU',
-                                    'notification': '0', })
-        self.assertIn('selected',
-                      response.context.__getitem__('form').notification)
-
-    def test_show_report(self):
-        # Issue a GET request.
-        print self.scan.id
-        response = self.client.get('/show_report/%s/' % self.scan.id,
-                                   follow=True)
-        # Check that the response is 404 OK - report file does not exist
-        self.assertEqual(response.status_code, 404)
-
-    def test_fail_show_report(self):
-        # Issue a GET request without id in queryset.
-        response = self.client.get('/show_report/xxx')
-        # Check that redirect done.
-        self.assertEqual(response.status_code, 404)
-
-    def _test_show_report_txt(self):
-        # Issue a GET request.
-        response = self.client.get('/show_report_txt/%s/' % self.scan.id)
-        # Check that the response is 200 OK.
-        #self.assertIn(response.status_code,[200, 302])
-        self.assertEqual(response.status_code, 200)
-        # Issue a GET request without id in queryset.
-        response = self.client.get('/show_report_txt/xxx')
-        # Check that redirect done.
-        self.assertEqual(response.status_code, 404)
-
-    @patch('w3af_webui.tasks.scan_start.delay')
-    @patch('w3af_webui.models.ScanTask.create_scan')
-    def test_run_now(self, mock_create_scan, mock_delay):
-        self.assertFalse(mock_create_scan.called)
-        self.assertFalse(mock_delay.called)
-        response = self.client.get('/run_now/', {'id': self.scan.id},
-                                   follow=True,
-                                   )
-        self.assertEqual(response.status_code, 200)
-        self.assertTrue(mock_create_scan.called)
-        self.assertTrue(mock_delay.called)
-        # bad request (404)
-        mock_create_scan.reset_mock()
-        mock_delay.reset_mock()
-        response = self.client.get('run_now/')
-        self.assertFalse(mock_create_scan.called)
-        self.assertFalse(mock_delay.called)
-        self.assertEqual(response.status_code, 404)
-
-    @patch('w3af_webui.models.ScanTask.create_scan')
-    @patch('w3af_webui.models.Scan.unlock_task')
-    @patch('w3af_webui.tasks.scan_start.delay')
-    def test_run_now_exc(self, mock_delay, mock_unlock, mock_create_scan):
-        exc = Exception('Boom!')
-        mock_delay.side_effect = exc
-        mock_create_scan.return_value = self.scan
-        self.client.get('/run_now/',
-                       {'id': self.scan.id},
-                       follow=True,
-                       )
-        self.assertRaises(Exception,
-                          self.client.get('/run_now/',
-                                         {'id': self.scan.id},
-                                         follow=True,
-                                        )
-                          )
-        self.assertTrue(mock_unlock.called)
-
-
-    def test_check_url(self):
-        # Issue a GET request.
-        response = self.client.get('/check_url/',
-                                  {'url':
-                                   'http://w3af.sourceforge.net/'})
-        # Check that the response is 200 OK.
-        self.assertEqual(response.status_code, 200)
-        response = self.client.get('/check_url/',
-                                  {'url': 'test.test'})
-        self.assertEqual(response.status_code, 404)
-
-    def test_stop_scan(self):
-        # Issue a GET request.
-        #self.client.META['HTTP_REFERER'] = '/w3af_webui/scan/'
-        #response = self.client.get('/stop_scan/', { 'id': self.scan.id})
-        # Check that the response is 200 OK.
-        #self.assertEqual(response.status_code, 302)
-        # Issue a GET request without id in queryset.
-        response = self.client.get('/stop_scan/')
-        # Check that redirect done.
-        self.assertEqual(response.status_code, 404)
 
 
 class TestScanProfile(TestCase):
@@ -380,24 +254,6 @@ class TestCommonFunction(TestCase):
         result = kill_process('1')
         self.assertEqual(False, result)
         self.assertFalse(mock_kill.called)
-
-
-class TestGetSelectCode(TestCase):
-    def test_get_select_code(self):
-        list_per_page_values = (
-            ('10', '10'),
-            ('30', '30'),
-            ('50', '50'),
-            ('70', '70'),
-            ('90', '90'),
-            ('100', '100'),
-            )
-        select_code = get_select_code('50', list_per_page_values, 'list_per_page')
-        self.assertIn('select', select_code)
-        self.assertIn('</select>', select_code)
-        self.assertIn('</option>', select_code)
-        self.assertIn('selected', select_code)
-        self.assertIn('list_per_page', select_code)
 
 
 class TestModelAdmin(unittest.TestCase):
