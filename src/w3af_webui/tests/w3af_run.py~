@@ -2,7 +2,6 @@
 import os
 from mock import patch
 from shutil import rmtree
-from tempfile import NamedTemporaryFile
 
 from django.test import TestCase
 from django_any.models import any_model
@@ -21,7 +20,6 @@ from w3af_webui.models import Target
 from w3af_webui.models import ScanProfile
 from w3af_webui.models import ProfilesTasks
 from w3af_webui.models import Scan
-from w3af_webui.models import Profile
 from w3af_webui.models import Vulnerability
 
 class TestW3afRun(TestCase):
@@ -180,7 +178,7 @@ class TestW3afRun(TestCase):
             'tttttt'
             '</status>'
             '<headers>'
-            '<header content="narod.yandex.ru" field="Host"/>'
+            '<header content="test.test-domain.ru" field="Host"/>'
             '</headers>'
             '</httprequest>'
             '</vulnerability>'

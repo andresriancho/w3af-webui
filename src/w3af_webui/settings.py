@@ -292,11 +292,11 @@ INSTALLED_APPS += (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     #'django_any',
-    
+
     'djcelery',
     #'ghettoq',
     'djkombu',
-    
+
     'w3af_webui',
     'south',
     'django_extensions',

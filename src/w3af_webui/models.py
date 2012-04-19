@@ -249,15 +249,17 @@ class VulnerabilityType(models.Model):
     class Meta:
         verbose_name = _('Type of vulnerability')
         verbose_name_plural = _('Types of vulnerability')
-        db_table = u'vulnerability_type'
+        db_table = u'vulnerability_types'
 
 
 class Vulnerability(models.Model):
     id = models.AutoField(_('id'), primary_key=True)
     scan = models.ForeignKey(Scan, verbose_name=_('Scan'))
-    security_level = models.CharField(_('Security level'), max_length=30)
-    security_type = models.ForeignKey(VulnerabilityType,
-                                      verbose_name=_('Security type'))
+    severity = models.CharField(_('Security level'), max_length=30,
+                               null=True)
+    vuln_type = models.ForeignKey(VulnerabilityType,
+                                  verbose_name=_('Vulnerability type'),
+                                  null=True)
     description = models.TextField(_('Description'), blank=True, null=True)
     http_transaction = models.TextField(_('HTTP Transaction'),
                                         blank=True,
@@ -270,5 +272,5 @@ class Vulnerability(models.Model):
     class Meta:
         verbose_name = _('Vulnerability')
         verbose_name_plural = _('Vulnerabilities')
-        db_table = u'vulnerability'
+        db_table = u'vulnerabilities'
 

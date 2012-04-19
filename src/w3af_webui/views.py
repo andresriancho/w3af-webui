@@ -133,13 +133,17 @@ def show_report_txt(request, scan_id):
         raise Http404
 
 @login_required
-def show_report(request, scan_id):
+def show_report(request, scan_id, vuln_id=None):
+    #if request.method == 'POST':
+    #    vuln_id = request.POST['vuln_id']
+    #    post_in_jira(vuln_id)
     scan = Scan.objects.get(id=scan_id)
     if (not request.user.has_perm('w3af_webui.view_all_data') and
         scan.user != request.user):
         return HttpResponseForbidden()
     class Issue:
-        __slots__ = ['plugin',
+        __slots__ = ['id',
+                     'plugin',
                      'severity',
                      'desc',
                      'http_trans',
@@ -148,6 +152,7 @@ def show_report(request, scan_id):
     vulnerabilities = Vulnerability.objects.filter(scan=scan)
     for vuln in vulnerabilities:
         vulnerability = Issue()
+        vulnerability.id = vuln.id
         vulnerability.plugin = vuln.security_type
         vulnerability.severity = vuln.security_level
         vulnerability.desc = vuln.description

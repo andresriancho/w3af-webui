@@ -178,7 +178,7 @@ class TestW3afRun(TestCase):
             'tttttt'
             '</status>'
             '<headers>'
-            '<header content="narod.yandex.ru" field="Host"/>'
+            '<header content="test.test-domain.ru" field="Host"/>'
             '</headers>'
             '</httprequest>'
             '</vulnerability>'
