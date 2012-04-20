@@ -85,12 +85,14 @@ def user_settings(request):
     profile = request.user.get_profile()
     if request.method == 'POST':
         iface_lang = request.POST['iface_lang']
-        profile.list_per_page = request.POST['list_per_page']
         profile.lang_ui = iface_lang
+        profile.list_per_page = request.POST['list_per_page']
         profile.notification = request.POST['notification']
         profile.save()
         translation.activate(iface_lang)
         request.LANGUAGE_CODE = iface_lang
+        messages.success(request,
+                         _('Your settings has been changed successfully'))
     class Form:
         __slots__ = ['list_per_page_code',
                      'iface_lang',
@@ -144,25 +146,29 @@ def get_extra_button():
                            settings.VULN_POST_MODULE['label'] )
 
 
+def get_vulnerability_module():
+    return __import__(settings.VULN_POST_MODULE['module'],
+                      fromlist=[''])
+
+
+@csrf_protect
 @login_required
-def show_report(request, scan_id, vuln_id=None):
-    print 'show_report in view!'
-    if request.method == 'POST':
-        vuln_id = request.POST['vuln_id']
-        post_module = __import__(settings.VULN_POST_MODULE['module'],
-                                 fromlist=[''])
-        if 'post_vulnerability' in dir(post_module):
-            if post_module.post_vulnerability(vuln_id, request.user):
-                messages.success(request,
-                                  _('This action finished successfully'))
-            else:
-                messages.success(request,
-                                 _('Someting go wrong. Cannot do this action'))
+def show_report(request, scan_id):
     scan = Scan.objects.get(id=scan_id)
     if (not request.user.has_perm('w3af_webui.view_all_data') and
         scan.user != request.user):
+        logger.info('fobbiden page for user %s' % request.user)
         return HttpResponseForbidden()
-
+    if request.method == 'POST':
+        vuln_id = request.POST['vuln_id']
+        post_module = get_vulnerability_module()
+        if 'post_vulnerability' in dir(post_module):
+            if post_module.post_vulnerability(vuln_id, request.user):
+                messages.success(request,
+                                 _('This action finished successfully'))
+            else:
+                messages.error(request,
+                               _('Someting go wrong. Cannot do this action'))
     class Issue:
         __slots__ = ['id',
                      'plugin',

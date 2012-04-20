@@ -35,8 +35,8 @@ LOGGING = {
 test_flags = ['--with-django', '--with-freshen', 'test', 'jenkins', 'test_coverage']
 IS_TEST = bool(filter(lambda x: x in sys.argv, test_flags))
 if IS_TEST:
-    DATABASES = { 
-        'default': { 
+    DATABASES = {
+        'default': {
             'ENGINE': 'django.db.backends.sqlite3',
             'NAME': 'testing.db',
             'TEST_CHARSET': 'utf8',
