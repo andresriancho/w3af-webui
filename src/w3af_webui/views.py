@@ -21,8 +21,7 @@ from django.contrib import messages
 from w3af_webui.models import ScanTask
 from w3af_webui.models import Scan
 from w3af_webui.models import Profile
-from w3af_webui.models import Vulnerability
-from w3af_webui.tasks import scan_start
+
 
 logger = getLogger(__name__)
 
@@ -45,13 +44,8 @@ def run_now(request):
     try:
         scan_start.delay(scan.id)
     except Exception, e:
-        print 'exception run now %s' % e
-        print scan.id
         scan.unlock_task()
         logger.error('run_row fail %s' % e)
-        #message = (' There was some problems with celery and '
-        #           ' this task was failed by find_scan celery task')
-        #scan.unlock_task(message)
     return redirect('/w3af_webui/scantask/')
 
 
