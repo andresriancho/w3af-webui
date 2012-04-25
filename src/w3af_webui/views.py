@@ -21,7 +21,8 @@ from django.contrib import messages
 from w3af_webui.models import ScanTask
 from w3af_webui.models import Scan
 from w3af_webui.models import Profile
-
+from w3af_webui.models import Vulnerability
+from w3af_webui.tasks import scan_start
 
 logger = getLogger(__name__)
 

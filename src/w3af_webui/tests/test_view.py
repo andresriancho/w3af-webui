@@ -1,8 +1,5 @@
 #-*- coding: utf-8 -*-
 from mock import patch
-import datetime as dt
-from datetime import datetime
-from dateutil.relativedelta import relativedelta
 
 from django.conf import settings
 from django.test import TestCase
@@ -11,20 +8,12 @@ from django.utils import unittest
 from django.contrib.auth.models import User
 from django.test.client import Client
 from django.test.client import RequestFactory
-from django.http import Http404
 from django.test.utils import override_settings
 
-from w3af_webui.utils import periodic_task_generator
-from w3af_webui.utils import delay_task_generator
-from w3af_webui.utils import periodic_task_remove
-from w3af_webui.utils import set_cron_schedule
-from w3af_webui.utils import get_interval
-from w3af_webui.utils import set_interval_schedule
 from w3af_webui.models import ScanTask
 from w3af_webui.models import Target
 from w3af_webui.models import ScanProfile
 from w3af_webui.models import Scan
-from w3af_webui.models import Profile
 from w3af_webui.models import Vulnerability
 from w3af_webui.views import get_select_code
 from w3af_webui.views import get_extra_button
@@ -134,22 +123,24 @@ class TestView(unittest.TestCase):
 
     @patch('w3af_webui.tasks.scan_start.delay')
     @patch('w3af_webui.models.ScanTask.create_scan')
-    def test_run_now(self, mock_create_scan, mock_delay):
+    def test_run_now_200(self, mock_create_scan, mock_delay):
         self.assertFalse(mock_create_scan.called)
         self.assertFalse(mock_delay.called)
         response = self.client.get('/run_now/', {'id': self.scan.id},
                                    follow=True,
                                    )
         self.assertEqual(response.status_code, 200)
-        self.assertTrue(mock_create_scan.called)
-        self.assertTrue(mock_delay.called)
+        self.assertTrue(mock_create_scan.called, 'create_scan does not call')
+        self.assertTrue(mock_delay.called, 'delay function does not call')
+
+    @patch('w3af_webui.tasks.scan_start.delay')
+    @patch('w3af_webui.models.ScanTask.create_scan')
+    def test_run_now_404(self, mock_create_scan, mock_delay):
         # bad request (404)
-        mock_create_scan.reset_mock()
-        mock_delay.reset_mock()
         response = self.client.get('run_now/')
         self.assertFalse(mock_create_scan.called)
         self.assertFalse(mock_delay.called)
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(response.status_code, 404, 'Must return 404')
 
     @patch('w3af_webui.models.ScanTask.create_scan')
     @patch('w3af_webui.models.Scan.unlock_task')
