@@ -26,6 +26,15 @@ from w3af_webui.tasks import scan_start
 
 logger = getLogger(__name__)
 
+list_per_page_values = (
+            ('10', '10'),
+            ('30', '30'),
+            ('50', '50'),
+            ('70', '70'),
+            ('90', '90'),
+            ('100', '100'),
+            )
+
 def r(request, template, **kwargs):
     return render_to_response(template,
                               kwargs,
@@ -94,14 +103,6 @@ def user_settings(request):
                      'notification',
                     ]
     form = Form()
-    list_per_page_values = (
-            ('10', '10'),
-            ('30', '30'),
-            ('50', '50'),
-            ('70', '70'),
-            ('90', '90'),
-            ('100', '100'),
-            )
     form.list_per_page_code = get_select_code(str(profile.list_per_page),
                                               list_per_page_values,
                                               'list_per_page')
@@ -145,10 +146,9 @@ def get_vulnerability_module():
     return __import__(settings.VULN_POST_MODULE['module'],
                       fromlist=[''])
 
-
 @csrf_protect
 @login_required
-def show_report(request, scan_id):
+def post_vulnerability(request, scan_id):
     scan = Scan.objects.get(id=scan_id)
     if (not request.user.has_perm('w3af_webui.view_all_data') and
         scan.user != request.user):
@@ -164,6 +164,24 @@ def show_report(request, scan_id):
             else:
                 messages.error(request,
                                _('Someting go wrong. Cannot do this action'))
+    return redirect('/show_report/%s/' % scan_id)
+
+
+def get_filtered_vulnerabilities(scan, severity):
+    allowed_values = settings.SEVERITY_DICT[severity]
+    return Vulnerability.objects.filter(scan=scan,
+                                        severity__in=allowed_values)
+
+
+@csrf_protect
+@login_required
+def show_report(request, scan_id):
+    scan = Scan.objects.get(id=scan_id)
+    if (not request.user.has_perm('w3af_webui.view_all_data') and
+        scan.user != request.user):
+        logger.info('fobbiden page for user %s' % request.user)
+        return HttpResponseForbidden()
+    severity = request.GET.get('severity', 'all')
     class Issue:
         __slots__ = ['id',
                      'plugin',
@@ -171,9 +189,8 @@ def show_report(request, scan_id):
                      'desc',
                      'http_trans',
                     ]
-
     vuln_list = []
-    vulnerabilities = Vulnerability.objects.filter(scan=scan)
+    vulnerabilities = get_filtered_vulnerabilities(scan, severity)
     for vuln in vulnerabilities:
         vulnerability = Issue()
         vulnerability.id = vuln.id
@@ -182,11 +199,15 @@ def show_report(request, scan_id):
         vulnerability.desc = vuln.description
         vulnerability.http_trans = vuln.http_transaction
         vuln_list.append(vulnerability)
+    severity_filter = get_select_code(severity,
+                                      settings.SEVERITY_FILTER,
+                                      'severity')
     context = {'target': scan.scan_task.target.url,
                'vulns': vuln_list,
                'extra_element': get_extra_button(),
+               'severity_filter': severity_filter,
                }
-    return render_to_response("admin/w3af_webui/vulnerabilities.html", context,
+    return render_to_response('admin/w3af_webui/vulnerabilities.html', context,
                               context_instance=RequestContext(request))
 
 

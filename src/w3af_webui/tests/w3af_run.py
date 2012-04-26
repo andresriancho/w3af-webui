@@ -190,6 +190,21 @@ class TestW3afRun(TestCase):
             Vulnerability.objects.filter(scan=self.scan).count(), 1)
         self.assertTrue(result)
 
+
+    def test_save_vulner_not_found(self):
+        Vulnerability.objects.all().delete
+        test_xml = open('/var/tmp/test.xml', 'w')
+        test_xml.write(
+            '<?xml version="1.0" encoding="UTF-8"?>'
+            '<w3afrun start="1334319384">'
+            '</w3afrun>'
+            )
+        test_xml.close()
+        result = save_vulnerabilities(self.scan, test_xml.name)
+        self.assertEqual(
+            Vulnerability.objects.filter(scan=self.scan).count(), 0)
+        self.assertTrue(result)
+
     def test_save_vulner_fail(self):
         test_xml = open('/var/tmp/test.xml', 'w')
         # wrong xml

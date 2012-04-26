@@ -134,7 +134,7 @@ def save_vulnerabilities(scan, xml_report):
                                          description=description,
                                          http_transaction=http_transaction,
                                          )
-            return True
+        return True
     except Exception, e:
         logger.error('Cannot parse xml report for scan %s: %s' % (
                       scan.id, e))

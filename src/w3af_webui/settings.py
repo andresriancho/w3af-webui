@@ -143,6 +143,17 @@ LANGUAGES = (
     ('en', _('English')),
 )
 
+SEVERITY_FILTER = (
+            ('all', _('All'), ('Low', 'Medium', 'High', 'Information')),
+            ('high', _('High'), ('High',)),
+            ('medium_and_more', _('Medium and higher'), ('High', 'Medium',)),
+            ('medium', _('Medium'), ('Medium',)),
+            ('low', _('Low'), ('Low',)),
+            ('information', _('Information'), ('Information',)),
+            )
+
+SEVERITY_DICT = dict([ (x[0], x[2]) for x in SEVERITY_FILTER])
+
 # Set default language for interfase. This value must be in LANGUAGES tuple
 DEFAULT_LANGUAGE = 'en'
 
