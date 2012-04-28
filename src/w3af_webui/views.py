@@ -208,6 +208,7 @@ def show_report(request, scan_id):
        'vulns': vuln_list,
        'extra_element': get_extra_button(),
        'severity_filter': severity_filter,
+       'target_comment': scan.scan_task.target.comment
     }
     template =  getattr(settings, 'VULNERABILITY_TEMPLATE',
                         'admin/w3af_webui/vulnerabilities.html')
@@ -229,8 +230,8 @@ def post_ticket(request):
     cc_users = request.POST['cc']
     post_module = get_vulnerability_module()
     json_data = json.dumps({'status': 'fail',})
-    if 'create_issue' in dir(post_module):
-        ticket_id, ticket_url = post_module.create_issue(
+    if 'post_vulnerability' in dir(post_module):
+        ticket_id, ticket_url = post_module.post_vulnerability(
                                              project,
                                              summary,
                                              description,
