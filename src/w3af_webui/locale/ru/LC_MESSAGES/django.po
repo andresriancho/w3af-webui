@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-04-26 18:38+0400\n"
-"PO-Revision-Date: 2012-04-26 18:44+0400\n"
+"POT-Creation-Date: 2012-04-28 16:18+0400\n"
+"PO-Revision-Date: 2012-04-27 12:05+0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -35,11 +35,11 @@ msgid "Stop selected"
 msgstr "Остановить выделенное"
 
 #: admin.py:154 models.py:109 models.py:162
-#: templates/admin/w3af_webui/vulnerabilities.html:25
 msgid "Target"
 msgstr "Цель"
 
 #: admin.py:159 models.py:110 models.py:263
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:51
 msgid "Description"
 msgstr "Описание"
 
@@ -181,6 +181,7 @@ msgid "Last scan date"
 msgstr "Дата последнего сканирования"
 
 #: models.py:90 templates/admin/base.html:57
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:17
 msgid "Targets"
 msgstr "Цели"
 
@@ -265,7 +266,7 @@ msgstr "никогда"
 msgid "Vulnerability type"
 msgstr ""
 
-#: models.py:264
+#: models.py:264 templates/admin/w3af_webui/yandex_vulnerabilities.html:34
 msgid "HTTP Transaction"
 msgstr ""
 
@@ -357,15 +358,15 @@ msgstr "ежемесячно"
 msgid "Comment"
 msgstr "JIRA ID"
 
-#: views.py:99
+#: views.py:100
 msgid "Your settings has been changed successfully"
 msgstr ""
 
-#: views.py:163
+#: views.py:164
 msgid "This action finished successfully"
 msgstr ""
 
-#: views.py:166
+#: views.py:167
 msgid "Someting go wrong. Cannot do this action"
 msgstr ""
 
@@ -408,7 +409,8 @@ msgid "Welcome,"
 msgstr "Добро пожаловать,"
 
 #: templates/admin/base.html:34 templates/admin/user_settings.html:7
-#: templates/admin/w3af_webui/vulnerabilities.html:12
+#: templates/admin/w3af_webui/vulnerabilities.html:10
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:10
 msgid " User Settings"
 msgstr "Настройки пользователя"
 
@@ -460,16 +462,60 @@ msgstr "История"
 msgid "View on site"
 msgstr "Посмотреть на сайте"
 
-#: templates/admin/w3af_webui/vulnerabilities.html:16
+#: templates/admin/w3af_webui/vulnerabilities.html:12
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:12
 msgid "Vulnerability Report"
 msgstr "Уязвимости"
 
-#: templates/admin/w3af_webui/vulnerabilities.html:32
+#: templates/admin/w3af_webui/vulnerabilities.html:23
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:23
 msgid "Filter by severity:"
-msgstr "Фильтровать по уровню уязвимости"
+msgstr ""
 
-#: templates/admin/w3af_webui/vulnerabilities.html:46
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:14
+#, fuzzy
+msgid "Scan information"
+msgstr "Только информационные"
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:27
 msgid "Security Issues"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:33
+msgid "Issue"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:37
+msgid "Create ticket to JIRA"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:41
+msgid "Project"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:45
+msgid "Subject"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:55
+msgid "Priority"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:67
+msgid "Assignee"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:71
+msgid "CC"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:80
+msgid ""
+"Something go wrong, cannot create ticket. Correct your data and try again."
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:86
+msgid "Ticket was created"
 msgstr ""
 
 #: templates/admin/w3af_webui/target/change_form.html:8

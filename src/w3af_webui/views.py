@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import os
 import urllib2
+import json
 from logging import getLogger
 
 from django.utils.translation import ugettext_lazy as _
@@ -202,13 +203,48 @@ def show_report(request, scan_id):
     severity_filter = get_select_code(severity,
                                       settings.SEVERITY_FILTER,
                                       'severity')
-    context = {'target': scan.scan_task.target.url,
-               'vulns': vuln_list,
-               'extra_element': get_extra_button(),
-               'severity_filter': severity_filter,
-               }
-    return render_to_response('admin/w3af_webui/vulnerabilities.html', context,
+    context = {
+       'target': scan.scan_task.target.url,
+       'vulns': vuln_list,
+       'extra_element': get_extra_button(),
+       'severity_filter': severity_filter,
+    }
+    template =  getattr(settings, 'VULNERABILITY_TEMPLATE',
+                        'admin/w3af_webui/vulnerabilities.html')
+    return render_to_response(template,
+                              context,
                               context_instance=RequestContext(request))
+
+
+@csrf_protect
+def post_ticket(request):
+    """
+    View for your own module for vulnerability sending.
+    """
+    project = request.POST['project']
+    summary = request.POST['summary']
+    description = request.POST['description']
+    priority = request.POST['priority']
+    assignee = request.POST['assignee']
+    cc_users = request.POST['cc']
+    post_module = get_vulnerability_module()
+    json_data = json.dumps({'status': 'fail',})
+    if 'create_issue' in dir(post_module):
+        ticket_id, ticket_url = post_module.create_issue(
+                                             project,
+                                             summary,
+                                             description,
+                                             assignee,
+                                             cc_users=cc_users,
+                                             priority=priority,
+                                             reporter=request.user.username,)
+        if ticket_id:
+            json_data = json.dumps({
+                'status': 'ok',
+                'ticket_id': ticket_id,
+                'ticket_url': ticket_url,
+            })
+    return HttpResponse(json_data, mimetype='json')
 
 
 def check_url(request):

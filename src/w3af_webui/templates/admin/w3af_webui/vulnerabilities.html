@@ -4,61 +4,47 @@
 {% block extrastyle %}
 {{ block.super }}
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}admin/css/forms.css" />
-<script type="text/javascript" src="/jsi18n/"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}/admin/js/jquery.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}/admin/js/jquery.init.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}admin/js/jquery.min.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}admin/js/jquery.init.js"></script>
 {% endblock %}
-{% block user_settings_link %}
-    {% trans ' User Settings' %} /
-{% endblock %}
-
+{% block user_settings_link %} {% trans ' User Settings' %} / {% endblock %}
 
 {% block title %}{% trans 'Vulnerability Report' %}{% endblock %}
-
 {% block content %}
-        <style>
-        </style>
-<br />
-<h2>Scan information</h2>
+<h2>{% trans 'Scan information' %}</h2>
 <table class="targets">
     <tr>
-        <th>{% trans 'Target' %}</th>
-        <td>{{ target|escape }}</td>
-    </tr>
+        <th>{% trans 'Targets' %}</th>
+         <td>{{ target|escape }}</td>
+     </tr>
 </table>
-<br />
+<br/>
 <form id="severity_form" action="" method="get">
-{% trans 'Filter by severity:' %} 
-{{ severity_filter|safe }}
-<script type="text/javascript">
-(function($) { 
-    $('#severity').change(function() {
-        $('#severity_form').submit();
-    });
-})(django.jQuery);
-</script>
-
+    {% trans 'Filter by severity:' %} 
+    {{ severity_filter|safe }}
 </form>
 <br />
-
-
 <h2>{% trans 'Security Issues' %}</h2>
 {% if vulns %}
 {% for vuln in vulns %}
-<form action="" method="post">{% csrf_token %}
 <input type=hidden name=vuln_id value={{ vuln.id }} />
 <table class="issues">
     <tr><th colspan="2">{{ vuln.plugin }} / {{ vuln.severity }}</th></tr>
-    <tr><th>Issue</th><td>{{ vuln.desc|escape }}</td></tr>
-    <tr><th>HTTP Transaction</td><td><textarea readonly="true">{{ vuln.http_trans|escape }}</textarea></td></tr>
-    <tr><th>{{ extra_element }}</th><td></td></tr>
+    <tr><th>{% trans 'Issue' %} </th><td>{{ vuln.desc|escape }}</td></tr>
+    <tr><th>{% trans 'HTTP Transaction' %}</td><td><textarea readonly="true">{{ vuln.http_trans|escape }}</textarea></td></tr>
 </table>
 <br />
 <br />
-</form>
 {% endfor %}
 {% else %}
-    <p>There is no security issue was found.</p>
+    <p>{% trans 'There is no security issue was found.' %}</p>
 {% endif %}
+<script type="text/javascript">
+(function($) {
+    $('#severity').change(function() {
+        $('#severity_form').submit();
+    });
+ })(django.jQuery);
+</script>
 
 {% endblock %}
