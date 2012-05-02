@@ -6,7 +6,7 @@ sys.path[0:0] = [
     _PATH,
     _PATH + '/w3af_webui',
     #'/usr/lib/python2.6/dist-packages',
-]
+    ]
 
 if __name__ == "__main__":
     os.environ.setdefault("DJANGO_SETTINGS_MODULE",

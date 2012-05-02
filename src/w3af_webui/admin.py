@@ -17,6 +17,7 @@ from w3af_webui.models import ScanTask
 from w3af_webui.models import Scan
 from w3af_webui.models import ProfilesTasks
 from w3af_webui.models import ProfilesTargets
+from w3af_webui.models import Vulnerability
 from w3af_webui.utils import delay_task_generator
 from w3af_webui.utils import periodic_task_generator
 from w3af_webui.utils import periodic_task_remove
@@ -126,11 +127,14 @@ class ScanProfileAdmin(W3AF_ModelAdmin):
 
 
 class ScanAdmin(W3AF_ModelAdmin):
+    readonly_fields = ['scan_task_link', 'icon', 'get_target', ]
     search_fields = ['scan_task__name', 'scan_task__comment']
     list_display = ['icon', 'scan_task_link', 'comment', 'start', 'finish',
                     'report_or_stop','show_log', ]
     ordering = ('-id',)
-    list_display_links = ('report_or_stop', )
+    list_display_links = ('icon', )
+    list_display_links = ('scan_task_link', )
+    #list_display_links = ('report_or_stop', )
     actions = ['stop_action', 'delete_selected']
 
     def delete_selected(self, request, queryset):
@@ -153,6 +157,11 @@ class ScanAdmin(W3AF_ModelAdmin):
         self.messages.success(request, _('Scans stoped successfully.'))
 
     stop_action.short_description = _('Stop selected %(verbose_name_plural)s')
+
+    def get_target(self, obj):
+        return mark_safe(obj.scan_task.target)
+
+    get_target.short_description = _('Target')
 
     def comment(self, obj):
         return mark_safe(obj.scan_task.comment)
@@ -226,6 +235,15 @@ class ScanAdmin(W3AF_ModelAdmin):
         if request.user.has_perm('w3af_webui.view_all_data'):
             return Scan.objects.all()
         return Scan.objects.filter(user=request.user)
+
+    def change_view(self, request, object_id, extra_context=None):
+        scan = Scan.objects.all().get(pk=object_id)
+        extra_context = {'title': u'%s %s' % (
+                                  _('Scan'),
+                                  scan.scan_task.target.url,
+                                  ) }
+        return super(ScanAdmin, self).change_view(request, object_id,
+                                                  extra_context)
 
     def changelist_view(self, request, extra_context=None):
         extra_context = {'title': u'%s' % _('Scans'), }

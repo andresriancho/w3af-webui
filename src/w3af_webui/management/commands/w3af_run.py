@@ -10,6 +10,7 @@ from subprocess import Popen
 from subprocess import PIPE
 from logging import getLogger
 import ConfigParser
+import xml.etree.ElementTree as etree
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -17,6 +18,8 @@ from django.conf import settings
 from w3af_webui.models import ProfilesTasks
 from w3af_webui.models import ProfilesTargets
 from w3af_webui.models import Scan
+from w3af_webui.models import Vulnerability
+from w3af_webui.models import VulnerabilityType
 
 W3AF_POLL_PERIOD = 15 # seconds
 logger = getLogger(__name__)
@@ -68,9 +71,12 @@ def get_profile(scan_task, report_path, report_file):
     try:
         config.add_section(settings.W3AF_OUTPUT_PLUGIN)
         config.add_section(settings.W3AF_LOG_PLUGIN)
+        config.add_section('output.xmlFile')
     except Exception, e:
         logger.error('can not add output plugin %s' % e)
     config.set(settings.W3AF_OUTPUT_PLUGIN, 'fileName', report_file)
+    xml_report = report_file[:-5] + '.xml'
+    config.set('output.xmlFile', 'fileName', xml_report)
     config.set(settings.W3AF_LOG_PLUGIN, 'fileName', report_file[:-5] + '.txt')
     config.set(settings.W3AF_LOG_PLUGIN, 'httpFileName',
                report_file[:-5] + '-http.txt')
@@ -78,7 +84,7 @@ def get_profile(scan_task, report_path, report_file):
     with open(profile_fh.name, 'wb') as configfile:
         config.write(configfile)
     print >> sys.stderr, profile_fh.name
-    return profile_fh.name
+    return (profile_fh.name, xml_report)
 
 
 def get_report_path():
@@ -102,20 +108,53 @@ def fail_scan(scan_id, message):
     scan.set_task_status_free()
 
 
-def post_finish(scan, returncode):
+def save_vulnerabilities(scan, xml_report):
+    try:
+        tree = etree.parse(xml_report)
+        issues = list(tree.getiterator(tag='vulnerability'))
+        for issue in issues:
+            severity = issue.get('severity')
+            type_name = issue.get('plugin')
+            vuln_type, created = VulnerabilityType.objects.get_or_create(
+                                    name=type_name)
+            description = issue.getiterator(tag='description')[0].text.strip()
+            request = issue.getiterator(tag='httprequest')[0]
+            status = request.getiterator(tag='status')[0]
+            http_transaction = status.text.strip() + '\n'
+            headers = request.getiterator(tag='headers')[0]
+            header_list = list(headers.getiterator(tag='header'))
+            for header in header_list:
+                http_transaction += '%s: %s\n' % (
+                        header.get('field').strip(),
+                        header.get('content').strip(),
+                                   )
+            Vulnerability.objects.create(scan=scan,
+                                         severity=severity,
+                                         vuln_type=vuln_type,
+                                         description=description,
+                                         http_transaction=http_transaction,
+                                         )
+        return True
+    except Exception, e:
+        logger.error('Cannot parse xml report for scan %s: %s' % (
+                      scan.id, e))
+        return False
+
+
+def post_finish(scan, returncode, xml_report):
     """
     Change scan status to done if returncode and scan status is ok
     """
-    if int(returncode) != 0:
-        # process terminated with error
+    is_valid_xml = save_vulnerabilities(scan, xml_report)
+    if int(returncode) != 0 or not is_valid_xml:
+        # process terminated with error or fail xml report
         fail_scan(scan.id,
-                  'w3af process return code %s' % returncode,
-                  )
+                  'w3af process return code %s' % returncode)
         return
     # process terminated successfully
     if (Scan.objects.get(pk=int(scan.id)).status ==
         settings.SCAN_STATUS['fail']):
-        return
+            return
     scan.result_message = ''
     if not send_notification(scan):
         scan.result_message = 'Can not send notification'
@@ -123,7 +162,12 @@ def post_finish(scan, returncode):
     scan.save()
 
 
-def wait_process_finish(scan, process):
+def  wait_process_finish(scan, profile_fname):
+    process = Popen([settings.W3AF_RUN,
+                    '--no-update', '-P',
+                    profile_fname],
+                    stdout=PIPE,
+                    stderr=PIPE)
     scan.pid = process.pid
     scan.save()
     while process.returncode is None:
@@ -164,22 +208,19 @@ class Command(BaseCommand):
                     scan.data = output.name
                     scan.result_message = 'Scan in process now \n'
                     scan.save()
-                    profile_fname = get_profile(scan.scan_task,
-                                                report_path,
-                                                output.name)
-                    process = Popen([settings.W3AF_RUN,
-                                    '--no-update', '-P',
-                                    profile_fname],
-                                    stdout=PIPE,
-                                    stderr=PIPE)
-                    returncode = wait_process_finish(scan, process)
-                    post_finish(scan, returncode)
+                    (profile_fname, xml_report) = get_profile(scan.scan_task,
+                                                              report_path,
+                                                              output.name)
+                    returncode = wait_process_finish(scan, profile_fname)
+                    post_finish(scan, returncode, xml_report)
+                    #if os.access(xml_report, os.F_OK):
+                    #    os.remove(xml_report)
             except Scan.DoesNotExist, e:
                 logger.error('scan object does not exist %s' % e)
                 raise Scan.DoesNotExist
             except Exception, e:
                 logger.error('w3af_run exception: %s' % e)
                 fail_scan(scan_id, ' w3af_run exception: %s' % e)
-                raise Exception, e
+                raise
                 #raise CommandError('w3af scan fail %s' % e)
         return {}

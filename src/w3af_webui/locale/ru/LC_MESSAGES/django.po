@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-04-16 16:57+0400\n"
-"PO-Revision-Date: 2012-04-16 17:00+0400\n"
+"POT-Creation-Date: 2012-04-28 16:18+0400\n"
+"PO-Revision-Date: 2012-04-27 12:05+0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -18,123 +18,108 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 
-#: admin.py:69
+#: admin.py:68
 msgid "Personal info"
 msgstr ""
 
-#: admin.py:75
+#: admin.py:74
 msgid "Permissions"
 msgstr ""
 
-#: admin.py:100 models.py:61 models.py:81 models.py:107 models.py:211
+#: admin.py:99 models.py:61 models.py:81 models.py:107 models.py:212
 msgid "User"
 msgstr "Пользователь"
 
-#: admin.py:140
-#, python-format
-msgid "Cannot delete scan in process.Stop scan \"%s\" and try again"
-msgstr ""
-"Невозможно удалить работающее сканирование. Остановите \"%s\" и попробуйте "
-"снова"
+#: admin.py:149
+msgid "Stop selected"
+msgstr "Остановить выделенное"
 
-#: admin.py:147 admin.py:409
-#, python-format
-msgid "Delete selected %(verbose_name_plural)s"
-msgstr ""
+#: admin.py:154 models.py:109 models.py:162
+msgid "Target"
+msgstr "Цель"
 
-#: admin.py:153
-msgid "Scans stoped successfully."
-msgstr "Сканирования успешно остановлены"
-
-#: admin.py:155
-#, python-format
-msgid "Stop selected %(verbose_name_plural)s"
-msgstr "Остановить выбранные %(verbose_name_plural)s"
-
-#: admin.py:160 models.py:110
+#: admin.py:159 models.py:110 models.py:263
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:51
 msgid "Description"
 msgstr "Описание"
 
-#: admin.py:166 admin.py:327
+#: admin.py:165 admin.py:330
 msgid "Stop"
 msgstr "Остановить"
 
-#: admin.py:170 admin.py:206 admin.py:334
+#: admin.py:169 admin.py:205 admin.py:337
 msgid "Action"
 msgstr "Действие"
 
-#: admin.py:179 models.py:100
+#: admin.py:178 models.py:100
 msgid "Task name"
 msgstr "Название задачи"
 
-#: admin.py:195 admin.py:306 models.py:102 models.py:195
+#: admin.py:194 admin.py:309 models.py:102 models.py:196
 msgid "Status"
 msgstr "Статус"
 
-#: admin.py:202
+#: admin.py:201
 msgid "Show report"
 msgstr "Показать отчёт"
 
-#: admin.py:204
+#: admin.py:203
 msgid "Stop scan"
 msgstr "Остановить сканирование"
 
-#: admin.py:212 admin.py:215
+#: admin.py:211 admin.py:214
 msgid "Show log"
 msgstr "Показать лог"
 
-#: admin.py:231 templates/admin/base.html:49
+#: admin.py:228 models.py:180 models.py:257
+msgid "Scan"
+msgstr "Сканирование"
+
+#: admin.py:235 templates/admin/base.html:49
 msgid "Scans"
 msgstr "Сканирования"
 
-#: admin.py:282
+#: admin.py:285
 msgid "Repeating"
 msgstr "Повторять"
 
-#: admin.py:295
+#: admin.py:298
 msgid "Schedule"
 msgstr "Расписание"
 
-#: admin.py:296
+#: admin.py:299
 msgid "One-time"
 msgstr "Одноразово"
 
-#: admin.py:298
+#: admin.py:301
 msgid "Run regularity"
 msgstr "Запускать регулярно"
 
-#: admin.py:303
+#: admin.py:306
 msgid "Active"
 msgstr "Активно"
 
-#: admin.py:304
+#: admin.py:307
 msgid "Not active"
 msgstr "Неактивно"
 
-#: admin.py:313 models.py:89
+#: admin.py:316 models.py:89
 msgid "target"
 msgstr "цель"
 
-#: admin.py:331
+#: admin.py:334
 msgid "Run now"
 msgstr "Запустить сейчас"
 
-#: admin.py:347
+#: admin.py:350
 msgid "Last scan"
 msgstr "Последнее сканирование"
 
-#: admin.py:356
+#: admin.py:359
 msgid "Tasks"
 msgstr "Задачи"
 
-#: admin.py:402
-#, fuzzy, python-format
-msgid "Cannot delete task in process. Stop task \"%s\" and try again"
-msgstr ""
-"Невозможно удалить работающую задачу. Остановите задачу \"%s\" и попробуйте "
-"снова"
-
-#: admin.py:423 models.py:166
+#: admin.py:407 models.py:166
 msgid "Default scan profiles"
 msgstr "Профили сканирования по умолчанию"
 
@@ -142,12 +127,16 @@ msgstr "Профили сканирования по умолчанию"
 msgid "JIRA"
 msgstr "JIRA"
 
-#: extra_settings.py:13 settings.py:167
+#: extra_settings.py:13 settings.py:178
 msgid "e-mail"
 msgstr ""
 
-#: extra_settings.py:14 settings.py:166
+#: extra_settings.py:14 settings.py:177
 msgid "None"
+msgstr ""
+
+#: extra_settings.py:17
+msgid "Post in jira"
 msgstr ""
 
 #: models.py:33 templates/admin/user_settings.html:27
@@ -159,7 +148,7 @@ msgid "Notification"
 msgstr "Уведомления"
 
 #: models.py:55 models.py:75 models.py:99 models.py:156 models.py:174
-#: models.py:192
+#: models.py:193 models.py:243 models.py:256
 msgid "id"
 msgstr "ID"
 
@@ -192,16 +181,13 @@ msgid "Last scan date"
 msgstr "Дата последнего сканирования"
 
 #: models.py:90 templates/admin/base.html:57
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:17
 msgid "Targets"
 msgstr "Цели"
 
-#: models.py:106 models.py:199
+#: models.py:106 models.py:200
 msgid "Scan start"
 msgstr "Начало сканирования"
-
-#: models.py:109 models.py:162
-msgid "Target"
-msgstr "Цель"
 
 #: models.py:112
 msgid "Cron string"
@@ -231,7 +217,7 @@ msgstr "задача на сканирование"
 msgid "scan tasks"
 msgstr "задачи на сканирование"
 
-#: models.py:159 models.py:177 models.py:182
+#: models.py:159 models.py:177 models.py:183
 msgid "Profile"
 msgstr "Профиль"
 
@@ -239,33 +225,58 @@ msgstr "Профиль"
 msgid "Default scan profile"
 msgstr "Профиль сканирования по умолчанию"
 
-#: models.py:180
-msgid "Scan"
-msgstr "Сканирование"
-
-#: models.py:183
+#: models.py:184
 msgid "Profiles"
 msgstr "Профили"
 
-#: models.py:193
+#: models.py:194
 msgid "Scan task"
 msgstr "Задача на сканирования"
 
-#: models.py:201
+#: models.py:202
 msgid "Scan finish"
 msgstr "Сканирование завершено"
 
-#: models.py:205
+#: models.py:206
 msgid "Report"
 msgstr "Отчёт"
 
-#: models.py:232
+#: models.py:233
 msgid "scan"
 msgstr "сканирование"
 
-#: models.py:233
+#: models.py:234
 msgid "scans"
 msgstr "сканирования"
+
+#: models.py:244 models.py:250
+msgid "Type of vulnerability"
+msgstr ""
+
+#: models.py:251
+msgid "Types of vulnerability"
+msgstr ""
+
+#: models.py:258
+#, fuzzy
+msgid "Severity"
+msgstr "никогда"
+
+#: models.py:261
+msgid "Vulnerability type"
+msgstr ""
+
+#: models.py:264 templates/admin/w3af_webui/yandex_vulnerabilities.html:34
+msgid "HTTP Transaction"
+msgstr ""
+
+#: models.py:273
+msgid "Vulnerability"
+msgstr ""
+
+#: models.py:274
+msgid "Vulnerabilities"
+msgstr "Уязвимости"
 
 #: settings.py:45 settings.py:142
 msgid "Russian"
@@ -275,53 +286,89 @@ msgstr "Русский"
 msgid "English"
 msgstr "Английский"
 
-#: settings.py:171
+#: settings.py:147
+msgid "All"
+msgstr ""
+
+#: settings.py:148
+msgid "High"
+msgstr "Только критичные"
+
+#: settings.py:149
+msgid "Medium and higher"
+msgstr "Средней критичности и выше"
+
+#: settings.py:150
+msgid "Medium"
+msgstr "Только средней критичности"
+
+#: settings.py:151
+msgid "Low"
+msgstr "Только низкой критичности"
+
+#: settings.py:152
+msgid "Information"
+msgstr "Только информационные"
+
+#: settings.py:185
 msgid "Monday"
 msgstr "Понедельник"
 
-#: settings.py:171
+#: settings.py:185
 msgid "Tuesday"
 msgstr "Вторник"
 
-#: settings.py:171
+#: settings.py:185
 msgid "Wednesday"
 msgstr "Среда"
 
-#: settings.py:171
+#: settings.py:185
 msgid "Thursday"
 msgstr "Четверг"
 
-#: settings.py:172
+#: settings.py:186
 msgid "Friday"
 msgstr "Пятница"
 
-#: settings.py:172
+#: settings.py:186
 msgid "Saturday"
 msgstr "Суббота"
 
-#: settings.py:172
+#: settings.py:186
 msgid "Sunday"
 msgstr "Воскресенье"
 
-#: settings.py:182
+#: settings.py:196
 msgid "never"
 msgstr "никогда"
 
-#: settings.py:182
+#: settings.py:196
 msgid "daily"
 msgstr "ежедневно"
 
-#: settings.py:182
+#: settings.py:196
 msgid "weekly"
 msgstr "еженедельно"
 
-#: settings.py:182
+#: settings.py:196
 msgid "monthly"
 msgstr "ежемесячно"
 
-#: settings.py:234
+#: settings.py:248
 msgid "Comment"
 msgstr "JIRA ID"
+
+#: views.py:100
+msgid "Your settings has been changed successfully"
+msgstr ""
+
+#: views.py:164
+msgid "This action finished successfully"
+msgstr ""
+
+#: views.py:167
+msgid "Someting go wrong. Cannot do this action"
+msgstr ""
 
 #: templates/404.html:4 templates/404.html.py:8
 msgid "Page not found"
@@ -362,6 +409,8 @@ msgid "Welcome,"
 msgstr "Добро пожаловать,"
 
 #: templates/admin/base.html:34 templates/admin/user_settings.html:7
+#: templates/admin/w3af_webui/vulnerabilities.html:10
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:10
 msgid " User Settings"
 msgstr "Настройки пользователя"
 
@@ -413,6 +462,62 @@ msgstr "История"
 msgid "View on site"
 msgstr "Посмотреть на сайте"
 
+#: templates/admin/w3af_webui/vulnerabilities.html:12
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:12
+msgid "Vulnerability Report"
+msgstr "Уязвимости"
+
+#: templates/admin/w3af_webui/vulnerabilities.html:23
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:23
+msgid "Filter by severity:"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:14
+#, fuzzy
+msgid "Scan information"
+msgstr "Только информационные"
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:27
+msgid "Security Issues"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:33
+msgid "Issue"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:37
+msgid "Create ticket to JIRA"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:41
+msgid "Project"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:45
+msgid "Subject"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:55
+msgid "Priority"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:67
+msgid "Assignee"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:71
+msgid "CC"
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:80
+msgid ""
+"Something go wrong, cannot create ticket. Correct your data and try again."
+msgstr ""
+
+#: templates/admin/w3af_webui/yandex_vulnerabilities.html:86
+msgid "Ticket was created"
+msgstr ""
+
 #: templates/admin/w3af_webui/target/change_form.html:8
 msgid "Available URL"
 msgstr "Доступный URL"
@@ -424,9 +529,6 @@ msgstr "Недоступный URL"
 #: templates/admin/w3af_webui/target/change_form.html:10
 msgid "Invalid URL"
 msgstr "Неправильный URL"
-
-#~ msgid "Stop selected"
-#~ msgstr "Остановить выделенное"
 
 #~ msgid "Finish"
 #~ msgstr "Финиш"

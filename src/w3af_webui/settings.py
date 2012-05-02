@@ -143,6 +143,17 @@ LANGUAGES = (
     ('en', _('English')),
 )
 
+SEVERITY_FILTER = (
+            ('all', _('All'), ('Low', 'Medium', 'High', 'Information')),
+            ('high', _('High'), ('High',)),
+            ('medium_and_more', _('Medium and higher'), ('High', 'Medium',)),
+            ('medium', _('Medium'), ('Medium',)),
+            ('low', _('Low'), ('Low',)),
+            ('information', _('Information'), ('Information',)),
+            )
+
+SEVERITY_DICT = dict([ (x[0], x[2]) for x in SEVERITY_FILTER])
+
 # Set default language for interfase. This value must be in LANGUAGES tuple
 DEFAULT_LANGUAGE = 'en'
 
@@ -157,7 +168,7 @@ W3AF_LOG_PLUGIN = 'output.textFile' # default log plugin for all scans
 W3AF_RUN = 'w3af_console'
 
 # Notification about scan finish. You can write your own notification module and 
-# link up it here. Date format: 
+# link up it here. Data format: 
 # {'label': 'notification name', 
 #  'id': 'notification_string_id', 
 #  'module': 'python module witch send notification'},
@@ -166,6 +177,9 @@ NOTIFY_MODULES = (
     {'label': _('None'), 'id': 'None', 'module': ''}, # status number 1 set as default
     {'label': _('e-mail'), 'id': 'Mail', 'module': 'w3af_webui.notification.send_mail'},
 )
+
+VULN_POST_MODULE = {}
+
 
 # Week day name
 WEEK_DAY_NAME = (_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'),
@@ -233,6 +247,9 @@ USER_ROLES = {
 # Name of one of the field for target page
 TARGET_COMMENT_LABEL = _('Comment')
 
+TEST_DISCOVERY_ROOT = os.path.join(_PATH, 'tests')
+TEST_RUNNER = 'tests.runner.DiscoveryRunner'
+
 # ----------End W3af_webui particular settings--------------
 # ------import local settings-------------------------------
 TEMPLATE_DIRS = (
@@ -289,11 +306,11 @@ INSTALLED_APPS += (
     'django.contrib.staticfiles',
     'django.contrib.admin',
     #'django_any',
-    
+
     'djcelery',
     #'ghettoq',
     'djkombu',
-    
+
     'w3af_webui',
     'south',
     'django_extensions',

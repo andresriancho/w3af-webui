@@ -178,6 +178,7 @@ class ProfilesTasks(models.Model):
     scan_task = models.ForeignKey(ScanTask,
                                   blank=True,
                                   verbose_name=_('Scan'))
+
     class Meta:
         verbose_name        = _('Profile')
         verbose_name_plural = _('Profiles')
@@ -236,4 +237,40 @@ class Scan(models.Model):
 
     def __unicode__(self):
         return u'%s' % (self.scan_task, )
+
+
+class VulnerabilityType(models.Model):
+    id = models.AutoField(_('id'), primary_key=True)
+    name = models.CharField(_('Type of vulnerability'), max_length=80)
+
+    def __unicode__(self):
+        return u'%s' % self.name
+
+    class Meta:
+        verbose_name = _('Type of vulnerability')
+        verbose_name_plural = _('Types of vulnerability')
+        db_table = u'vulnerability_types'
+
+
+class Vulnerability(models.Model):
+    id = models.AutoField(_('id'), primary_key=True)
+    scan = models.ForeignKey(Scan, verbose_name=_('Scan'))
+    severity = models.CharField(_('Severity'), max_length=30,
+                               null=True)
+    vuln_type = models.ForeignKey(VulnerabilityType,
+                                  verbose_name=_('Vulnerability type'),
+                                  null=True)
+    description = models.TextField(_('Description'), blank=True, null=True)
+    http_transaction = models.TextField(_('HTTP Transaction'),
+                                        blank=True,
+                                        null=True,
+                                        )
+
+    def __unicode__(self):
+        return u'%s' % self.vuln_type
+
+    class Meta:
+        verbose_name = _('Vulnerability')
+        verbose_name_plural = _('Vulnerabilities')
+        db_table = u'vulnerabilities'
 

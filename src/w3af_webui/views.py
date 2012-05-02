@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 import os
 import urllib2
+import json
 from logging import getLogger
 
+from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
 from django.template.context import RequestContext
 from django.shortcuts import HttpResponse
@@ -14,13 +16,25 @@ from django.shortcuts import redirect
 from django.utils import translation
 from django.contrib.auth.decorators import login_required
 from django.conf import settings
+from django.utils.safestring import mark_safe
+from django.contrib import messages
 
 from w3af_webui.models import ScanTask
 from w3af_webui.models import Scan
 from w3af_webui.models import Profile
+from w3af_webui.models import Vulnerability
 from w3af_webui.tasks import scan_start
 
 logger = getLogger(__name__)
+
+list_per_page_values = (
+            ('10', '10'),
+            ('30', '30'),
+            ('50', '50'),
+            ('70', '70'),
+            ('90', '90'),
+            ('100', '100'),
+            )
 
 def r(request, template, **kwargs):
     return render_to_response(template,
@@ -41,13 +55,8 @@ def run_now(request):
     try:
         scan_start.delay(scan.id)
     except Exception, e:
-        print 'exception run now %s' % e
-        print scan.id
         scan.unlock_task()
         logger.error('run_row fail %s' % e)
-        #message = (' There was some problems with celery and '
-        #           ' this task was failed by find_scan celery task')
-        #scan.unlock_task(message)
     return redirect('/w3af_webui/scantask/')
 
 
@@ -78,30 +87,23 @@ def get_select_code(select_value, data_array, element_id):
 @csrf_protect
 @login_required
 def user_settings(request):
-    print 'USER SETTINGS VIEW!'
     profile = request.user.get_profile()
     if request.method == 'POST':
         iface_lang = request.POST['iface_lang']
-        profile.list_per_page = request.POST['list_per_page']
         profile.lang_ui = iface_lang
+        profile.list_per_page = request.POST['list_per_page']
         profile.notification = request.POST['notification']
         profile.save()
         translation.activate(iface_lang)
         request.LANGUAGE_CODE = iface_lang
+        messages.success(request,
+                         _('Your settings has been changed successfully'))
     class Form:
         __slots__ = ['list_per_page_code',
                      'iface_lang',
                      'notification',
                     ]
     form = Form()
-    list_per_page_values = (
-            ('10', '10'),
-            ('30', '30'),
-            ('50', '50'),
-            ('70', '70'),
-            ('90', '90'),
-            ('100', '100'),
-            )
     form.list_per_page_code = get_select_code(str(profile.list_per_page),
                                               list_per_page_values,
                                               'list_per_page')
@@ -133,21 +135,117 @@ def show_report_txt(request, scan_id):
         raise Http404
 
 
+def get_extra_button():
+    if ('label' not in settings.VULN_POST_MODULE or
+        'module' not in settings.VULN_POST_MODULE):
+            return ''
+    return mark_safe(u'<input type=submit value="%s"/>' %
+                           settings.VULN_POST_MODULE['label'] )
+
+
+def get_vulnerability_module():
+    return __import__(settings.VULN_POST_MODULE['module'],
+                      fromlist=[''])
+
+@csrf_protect
+@login_required
+def post_vulnerability(request, scan_id):
+    scan = Scan.objects.get(id=scan_id)
+    if (not request.user.has_perm('w3af_webui.view_all_data') and
+        scan.user != request.user):
+        logger.info('fobbiden page for user %s' % request.user)
+        return HttpResponseForbidden()
+    if request.method == 'POST':
+        vuln_id = request.POST['vuln_id']
+        post_module = get_vulnerability_module()
+        if 'post_vulnerability' in dir(post_module):
+            if post_module.post_vulnerability(vuln_id, request.user):
+                messages.success(request,
+                                 _('This action finished successfully'))
+            else:
+                messages.error(request,
+                               _('Someting go wrong. Cannot do this action'))
+    return redirect('/show_report/%s/' % scan_id)
+
+
+def get_filtered_vulnerabilities(scan, severity):
+    allowed_values = settings.SEVERITY_DICT[severity]
+    return Vulnerability.objects.filter(scan=scan,
+                                        severity__in=allowed_values)
+
+
+@csrf_protect
 @login_required
 def show_report(request, scan_id):
-    try:
-        obj = Scan.objects.get(id=scan_id)
-        if (not request.user.has_perm('w3af_webui.view_all_data') and
-            obj.user != request.user):
-            return HttpResponseForbidden()
-        context = {'result_message': obj.result_message, }
-        if os.access(obj.data , os.F_OK):
-            context['report_link'] = obj.data
-        return render_to_response("admin/show_report.html", context,
-                                  context_instance=RequestContext(request))
-    except Exception, e:
-        print 'exception %s' % e
-        raise Http404
+    scan = Scan.objects.get(id=scan_id)
+    if (not request.user.has_perm('w3af_webui.view_all_data') and
+        scan.user != request.user):
+        logger.info('fobbiden page for user %s' % request.user)
+        return HttpResponseForbidden()
+    severity = request.GET.get('severity', 'all')
+    class Issue:
+        __slots__ = ['id',
+                     'plugin',
+                     'severity',
+                     'desc',
+                     'http_trans',
+                    ]
+    vuln_list = []
+    vulnerabilities = get_filtered_vulnerabilities(scan, severity)
+    for vuln in vulnerabilities:
+        vulnerability = Issue()
+        vulnerability.id = vuln.id
+        vulnerability.plugin = vuln.vuln_type
+        vulnerability.severity = vuln.severity
+        vulnerability.desc = vuln.description
+        vulnerability.http_trans = vuln.http_transaction
+        vuln_list.append(vulnerability)
+    severity_filter = get_select_code(severity,
+                                      settings.SEVERITY_FILTER,
+                                      'severity')
+    context = {
+       'target': scan.scan_task.target.url,
+       'vulns': vuln_list,
+       'extra_element': get_extra_button(),
+       'severity_filter': severity_filter,
+       'target_comment': scan.scan_task.target.comment
+    }
+    template =  getattr(settings, 'VULNERABILITY_TEMPLATE',
+                        'admin/w3af_webui/vulnerabilities.html')
+    return render_to_response(template,
+                              context,
+                              context_instance=RequestContext(request))
+
+
+@csrf_protect
+def post_ticket(request):
+    """
+    View for your own module for vulnerability sending.
+    """
+    project = request.POST['project']
+    summary = request.POST['summary']
+    description = request.POST['description']
+    priority = request.POST['priority']
+    assignee = request.POST['assignee']
+    cc_users = request.POST['cc']
+    post_module = get_vulnerability_module()
+    json_data = json.dumps({'status': 'fail',})
+    if 'post_vulnerability' in dir(post_module):
+        ticket_id, ticket_url = post_module.post_vulnerability(
+                                             project,
+                                             summary,
+                                             description,
+                                             assignee,
+                                             cc_users=cc_users,
+                                             priority=priority,
+                                             reporter=request.user.username,)
+        if ticket_id:
+            json_data = json.dumps({
+                'status': 'ok',
+                'ticket_id': ticket_id,
+                'ticket_url': ticket_url,
+            })
+    return HttpResponse(json_data, mimetype='json')
 
 
 def check_url(request):
