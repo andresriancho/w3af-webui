@@ -124,13 +124,6 @@ class ScanProfileAdmin(W3AF_ModelAdmin):
         return ScanProfile.objects.filter(user=request.user)
 
 
-    def has_delete_permission(self, request):
-        return False
-
-    def has_add_permission(self, request):
-        return False
-
-
 class ScanAdmin(W3AF_ModelAdmin):
     readonly_fields = ['scan_task_link', 'icon', 'get_target', ]
     search_fields = ['scan_task__name', 'scan_task__comment']
