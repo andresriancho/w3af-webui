@@ -176,6 +176,11 @@ W3AF_RUN = 'w3af_console'
 NOTIFY_MODULES = (
     {'label': _('None'), 'id': 'None', 'module': ''}, # status number 1 set as default
     {'label': _('e-mail'), 'id': 'Mail', 'module': 'w3af_webui.notification.send_mail'},
+    {
+        'label': _('e-mail, about vulnerabilities only'),
+        'id': 'MailOnlyBad',
+        'module': 'w3af_webui.notification.send_mail_only_bad',
+    },
 )
 
 VULN_POST_MODULE = {}
