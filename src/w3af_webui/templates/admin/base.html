@@ -3,7 +3,9 @@
 <head>
 <title>{% block title %}{% endblock %}</title>
 <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "admin/css/base.css" %}{% endblock %}" />
-{% block extrastyle %}{% endblock %}
+{% block extrastyle %}
+<link rel="stylesheet" type="text/css" href="{% static "w3af_webui/css/extra.css" %}" />
+{% endblock %}
 <!--[if lte IE 7]><link rel="stylesheet" type="text/css" href="{% block stylesheet_ie %}{% static "admin/css/ie.css" %}{% endblock %}" /><![endif]-->
 {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
 <script type="text/javascript">window.__admin_media_prefix__ = "{% filter escapejs %}{% static "admin/" %}{% endfilter %}";</script>
@@ -44,7 +46,7 @@
             {% endblock %}
         </div>
         <!-- custom menu -->        
-            <div style="font-weight:bold; color:red; padding:10px; border:0px solid black; margin: 10px 10px 10px 10px">
+            <div id="main-menu">
             {% if perms.w3af_webui.change_scan %} 
             <a href="/w3af_webui/scan/">{% trans 'Scans' %}</a> 
             {% endif %}
