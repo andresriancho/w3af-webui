@@ -16,19 +16,11 @@ from w3af_webui.models import ScanProfile
 from w3af_webui.models import Scan
 from w3af_webui.models import Vulnerability
 from w3af_webui.views import get_select_code
-from w3af_webui.views import get_extra_button
 from w3af_webui.views import show_report
 from w3af_webui.views import show_report_txt
 from w3af_webui.views import user_settings
 
 class TestGetCode(TestCase):
-    @override_settings(VULN_POST_MODULE={'label': 'test_btn',
-                                         'module': 'test' })
-    def test_get_extra_button(self):
-        btn_code = get_extra_button()
-        self.assertIn('input', btn_code)
-        self.assertIn('test_btn', btn_code)
-
     def test_get_select_code(self):
         list_per_page_values = (
             ('10', '10'),

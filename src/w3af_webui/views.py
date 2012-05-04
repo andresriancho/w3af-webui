@@ -135,16 +135,11 @@ def show_report_txt(request, scan_id):
         raise Http404
 
 
-def get_extra_button():
-    if ('label' not in settings.VULN_POST_MODULE or
-        'module' not in settings.VULN_POST_MODULE):
-            return ''
-    return mark_safe(u'<input type=submit value="%s"/>' %
-                           settings.VULN_POST_MODULE['label'] )
-
-
 def get_vulnerability_module():
-    return __import__(settings.VULN_POST_MODULE['module'],
+    post_module =  getattr(settings,
+                           'VULN_POST_MODULE',
+                           '')
+    return __import__(post_module,
                       fromlist=[''])
 
 @csrf_protect
@@ -206,11 +201,11 @@ def show_report(request, scan_id):
     context = {
        'target': scan.scan_task.target.url,
        'vulns': vuln_list,
-       'extra_element': get_extra_button(),
        'severity_filter': severity_filter,
-       'target_comment': scan.scan_task.target.comment
+       'target_comment': scan.scan_task.target.comment,
     }
-    template =  getattr(settings, 'VULNERABILITY_TEMPLATE',
+    template =  getattr(settings,
+                        'VULNERABILITY_TEMPLATE',
                         'admin/w3af_webui/vulnerabilities.html')
     return render_to_response(template,
                               context,

@@ -183,8 +183,7 @@ NOTIFY_MODULES = (
     },
 )
 
-VULN_POST_MODULE = {}
-
+VULN_POST_MODULE = ''
 
 # Week day name
 WEEK_DAY_NAME = (_('Monday'), _('Tuesday'), _('Wednesday'), _('Thursday'),
