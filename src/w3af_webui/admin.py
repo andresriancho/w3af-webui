@@ -119,6 +119,7 @@ class W3AF_ModelAdmin(admin.ModelAdmin):
 class ScanProfileAdmin(W3AF_ModelAdmin):
     list_display = ['name', 'short_comment']
     search_fields = ['name', 'short_comment']
+    ordering = ('-id',)
 
     def queryset(self, request):
         if(request.user.has_perm('w3af_webui.view_all_data')):
@@ -432,6 +433,7 @@ class TargetAdmin(W3AF_ModelAdmin):
     inlines = (ProfileTargetInline,)
     list_display = ['name', 'url', 'get_profiles', 'last_scan']
     search_fields = ['name', 'url']
+    ordering = ('-id',)
 
     def get_profiles(self, obj):
         all_profiles = ProfilesTargets.objects.filter(target=obj)
