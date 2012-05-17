@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-05-17 11:26+0400\n"
+"POT-Creation-Date: 2012-05-17 13:18+0400\n"
 "PO-Revision-Date: 2012-04-27 12:05+0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -54,7 +54,6 @@ msgid "Target"
 msgstr "Цель"
 
 #: admin.py:170 models.py:110 models.py:263
-#: templates/admin/w3af_webui/yandex_vulnerabilities.html:51
 msgid "Description"
 msgstr "Описание"
 
@@ -143,6 +142,7 @@ msgstr "Нельзя удалить задачу в процессе выпол�
 msgid "Default scan profiles"
 msgstr "Профили сканирования по умолчанию"
 
+<<<<<<< HEAD
 #: extra_settings.py:14
 msgid "JIRA, about vulnerabilities only"
 msgstr "JIRA, только при наличии уязвимостей"
@@ -163,6 +163,8 @@ msgstr "Электронная почта, только при наличии у
 msgid "None"
 msgstr "Нет"
 
+=======
+>>>>>>> new localization file again
 #: models.py:33 templates/admin/user_settings.html:27
 msgid "Interface language"
 msgstr "Язык интерфейса"
@@ -206,7 +208,6 @@ msgstr "Дата последнего сканирования"
 
 #: models.py:90 templates/admin/base.html:59
 #: templates/admin/w3af_webui/vulnerabilities.html:16
-#: templates/admin/w3af_webui/yandex_vulnerabilities.html:16
 msgid "Targets"
 msgstr "Цели"
 
@@ -292,7 +293,6 @@ msgid "Vulnerability type"
 msgstr "Тип уязвимости"
 
 #: models.py:264 templates/admin/w3af_webui/vulnerabilities.html:33
-#: templates/admin/w3af_webui/yandex_vulnerabilities.html:33
 msgid "HTTP Transaction"
 msgstr "HTTP-транзакция"
 
@@ -335,6 +335,18 @@ msgstr "Только низкой критичности"
 #: settings.py:152
 msgid "Information"
 msgstr "Только информационные"
+
+#: settings.py:177
+msgid "None"
+msgstr ""
+
+#: settings.py:178
+msgid "e-mail"
+msgstr ""
+
+#: settings.py:180
+msgid "e-mail, about vulnerabilities only"
+msgstr ""
 
 #: settings.py:189
 msgid "Monday"
@@ -491,36 +503,31 @@ msgid "Statistic Report"
 msgstr "Статистический отчёт"
 
 #: templates/admin/w3af_webui/vulnerabilities.html:11
-#: templates/admin/w3af_webui/yandex_vulnerabilities.html:11
 msgid "Vulnerability Report"
 msgstr "Уязвимости"
 
 #: templates/admin/w3af_webui/vulnerabilities.html:13
-#: templates/admin/w3af_webui/yandex_vulnerabilities.html:13
 #, fuzzy
 msgid "Scan information"
 msgstr "Только информационные"
 
 #: templates/admin/w3af_webui/vulnerabilities.html:22
-#: templates/admin/w3af_webui/yandex_vulnerabilities.html:22
 msgid "Filter by severity:"
 msgstr "Фильтровать по критичности:"
 
 #: templates/admin/w3af_webui/vulnerabilities.html:26
-#: templates/admin/w3af_webui/yandex_vulnerabilities.html:26
 msgid "Security Issues"
 msgstr "Проблемы безопасности"
 
 #: templates/admin/w3af_webui/vulnerabilities.html:32
-#: templates/admin/w3af_webui/yandex_vulnerabilities.html:32
 msgid "Issue"
 msgstr "Проблема"
 
 #: templates/admin/w3af_webui/vulnerabilities.html:39
-#: templates/admin/w3af_webui/yandex_vulnerabilities.html:129
 msgid "There is no security issue was found."
 msgstr "Проблем безопасности не обнаружено"
 
+<<<<<<< HEAD
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:36
 msgid "Create ticket to JIRA"
 msgstr "Создать тикет в Джире"
@@ -554,6 +561,8 @@ msgstr ""
 msgid "Ticket was created"
 msgstr "Тикет создан"
 
+=======
+>>>>>>> new localization file again
 #: templates/admin/w3af_webui/target/change_form.html:8
 msgid "Available URL"
 msgstr "Доступный URL"
@@ -565,3 +574,63 @@ msgstr "Недоступный URL"
 #: templates/admin/w3af_webui/target/change_form.html:10
 msgid "Invalid URL"
 msgstr "Неправильный URL"
+<<<<<<< HEAD
+=======
+
+#~ msgid "JIRA"
+#~ msgstr "JIRA"
+
+#~ msgid "Stop selected"
+#~ msgstr "Остановить выделенное"
+
+#~ msgid "Finish"
+#~ msgstr "Финиш"
+
+#~ msgid "Add"
+#~ msgstr "Добавить"
+
+#~ msgid "Change"
+#~ msgstr "Изменить"
+
+#~ msgid "You don't have permission to edit anything."
+#~ msgstr "У вас не достаточно прав"
+
+#~ msgid "Recent Actions"
+#~ msgstr "Последние действия"
+
+#~ msgid "My Actions"
+#~ msgstr "Мои действия"
+
+#~ msgid "Unknown content"
+#~ msgstr "Неизвестное содержание"
+
+#~ msgid "Password change"
+#~ msgstr "Изменить пароль"
+
+#~ msgid "Add %(name)s"
+#~ msgstr "Добавить %(name)s"
+
+#~ msgid "JIRA ID"
+#~ msgstr "JIRA ID"
+
+#~ msgid "Filter"
+#~ msgstr "Фильтр"
+
+#, fuzzy
+#~ msgid "Username:"
+#~ msgstr "Пользователь"
+
+#, fuzzy
+#~ msgid "Log in"
+#~ msgstr "Выйти"
+
+#~ msgid "Notificaton"
+#~ msgstr "Уведомления"
+
+#~ msgid "Show"
+#~ msgstr "Показать"
+
+#, fuzzy
+#~ msgid "Start"
+#~ msgstr "Начало сканирования"
+>>>>>>> new localization file again
