@@ -3,6 +3,10 @@ import os
 import urllib2
 import json
 from logging import getLogger
+from datetime import datetime
+from datetime import date
+import time
+from qsstats import QuerySetStats
 
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
@@ -253,3 +257,28 @@ def check_url(request):
     except urllib2.URLError, e:
         return HttpResponseNotFound('URLError %s' % e)
     return HttpResponseNotFound('Some check_url error')
+
+@login_required
+def reports(request):
+    start_date = date(2012, 05, 1)
+    end_date = datetime.now()
+    queryset = Scan.objects.all()
+    # scan count...
+    qsstats = QuerySetStats(queryset,
+                            date_field='start',
+                            #aggregate=Count('id'),
+                           )
+    # ...per day
+    values = qsstats.time_series(start_date, end_date, interval='days')
+    #format_values = [ [x[0].strftime('%d-%m-%y'), x[1]] for x in values]
+    # last_time =  int(time.mktime(fmtime.timetuple()) * 1000 + 4 * 3600000)
+    format_values = []
+    for x in values:
+        fmtime = x[0].strftime('%d-%m-%y')
+        format_date =  int(time.mktime(x[0].timetuple()) * 1000 + 4 * 3600000)
+        format_values.append([format_date, x[1]])
+    print format_values
+    context = {'data': format_values } #[[0, 5], [1, 1], [2, 0], [3, 2]]}
+    return render_to_response('admin/w3af_webui/reports.html',
+                              context,
+                              context_instance=RequestContext(request))

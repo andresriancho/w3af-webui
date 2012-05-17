@@ -19,6 +19,7 @@ urlpatterns = patterns('w3af_webui.views',
     ('^stop_scan/$', 'stop_scan'),
     ('^user_settings/$', 'user_settings'),
     ('^run_now/$', 'run_now'),
+    ('^w3af_webui/reports/$', 'reports'),
     ('^$', 'root'),
     #('^admin/$', 'root'),
     (r'^static/(?P<path>.*)$', st, {'document_root': settings.STATIC_ROOT}),
@@ -26,7 +27,6 @@ urlpatterns = patterns('w3af_webui.views',
     url(r'', include(admin.site.urls), name=''),
 )
 if settings.DEBUG:
-# Обработка статичный файлов на сервере разработки
     urlpatterns += patterns('',
             (r'^static/(?P<path>.*)$', 'django.views.static.serve', {
              'document_root': settings.STATIC_ROOT
