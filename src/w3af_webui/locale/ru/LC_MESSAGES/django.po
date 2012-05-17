@@ -20,11 +20,11 @@ msgstr ""
 
 #: admin.py:70
 msgid "Personal info"
-msgstr ""
+msgstr "Персональная информация"
 
 #: admin.py:76
 msgid "Permissions"
-msgstr ""
+msgstr "Права"
 
 #: admin.py:101 models.py:61 models.py:81 models.py:107 models.py:212
 msgid "User"
@@ -33,21 +33,21 @@ msgstr "Пользователь"
 #: admin.py:145
 #, python-format
 msgid "Cannot delete scan in process.Stop scan \"%s\" and try again"
-msgstr ""
+msgstr "Нельзя удалить работающее сканирование. Остановите сканирование \"%s\" и попробуйте снова"
 
 #: admin.py:152 admin.py:428
 #, python-format
 msgid "Delete selected %(verbose_name_plural)s"
-msgstr ""
+msgstr "Удалить выбранные %(verbose_name_plural)s"
 
 #: admin.py:158
 msgid "Scans stoped successfully."
-msgstr ""
+msgstr "Сканирования успешно остановлены"
 
 #: admin.py:160
 #, python-format
 msgid "Stop selected %(verbose_name_plural)s"
-msgstr ""
+msgstr "Остановить выделленные %(verbose_name_plural)s"
 
 #: admin.py:165 models.py:109 models.py:162
 msgid "Target"
@@ -137,7 +137,7 @@ msgstr "Задачи"
 #: admin.py:421
 #, python-format
 msgid "Cannot delete task in process. Stop task \"%s\" and try again"
-msgstr ""
+msgstr "Нельзя удалить задачу в процессе выполнения. Остановите задачу \"%s\" и попробуйте снова."
 
 #: admin.py:443 models.py:166
 msgid "Default scan profiles"
@@ -145,7 +145,7 @@ msgstr "Профили сканирования по умолчанию"
 
 #: extra_settings.py:14
 msgid "JIRA, about vulnerabilities only"
-msgstr ""
+msgstr "JIRA, только при наличии уязвимостей"
 
 #: extra_settings.py:18
 msgid "JIRA"
@@ -153,15 +153,15 @@ msgstr "JIRA"
 
 #: extra_settings.py:19 settings.py:178
 msgid "e-mail"
-msgstr ""
+msgstr "Электронная почта"
 
 #: extra_settings.py:21 settings.py:180
 msgid "e-mail, about vulnerabilities only"
-msgstr ""
+msgstr "Электронная почта, только при наличии уязвимостей"
 
 #: extra_settings.py:25 settings.py:177
 msgid "None"
-msgstr ""
+msgstr "Нет"
 
 #: models.py:33 templates/admin/user_settings.html:27
 msgid "Interface language"
@@ -276,29 +276,29 @@ msgstr "сканирования"
 
 #: models.py:244 models.py:250
 msgid "Type of vulnerability"
-msgstr ""
+msgstr "Тип уязвимости"
 
 #: models.py:251
 msgid "Types of vulnerability"
-msgstr ""
+msgstr "Типы уязвимостей"
 
 #: models.py:258
 #, fuzzy
 msgid "Severity"
-msgstr "никогда"
+msgstr "Критичность"
 
 #: models.py:261
 msgid "Vulnerability type"
-msgstr ""
+msgstr "Тип уязвимости"
 
 #: models.py:264 templates/admin/w3af_webui/vulnerabilities.html:33
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:33
 msgid "HTTP Transaction"
-msgstr ""
+msgstr "HTTP-транзакция"
 
 #: models.py:273
 msgid "Vulnerability"
-msgstr ""
+msgstr "Уязвимость"
 
 #: models.py:274
 msgid "Vulnerabilities"
@@ -314,7 +314,7 @@ msgstr "Английский"
 
 #: settings.py:147
 msgid "All"
-msgstr ""
+msgstr "Все"
 
 #: settings.py:148
 msgid "High"
@@ -386,23 +386,23 @@ msgstr "JIRA ID"
 
 #: views.py:104
 msgid "Your settings has been changed successfully"
-msgstr ""
+msgstr "Ваши настройки успешно изменены"
 
 #: views.py:163
 msgid "This action finished successfully"
-msgstr ""
+msgstr "Это действие завершилось успешно"
 
 #: views.py:166
 msgid "Someting go wrong. Cannot do this action"
-msgstr ""
+msgstr "Что-то пошло не так. Невозможно выполнить это действие"
 
 #: templates/404.html:4 templates/404.html.py:8
 msgid "Page not found"
-msgstr ""
+msgstr "Страница не найдена"
 
 #: templates/404.html:10
 msgid "We're sorry, but the requested page could not be found."
-msgstr ""
+msgstr "Нам очень жаль, но запрашиваемая страница не обнаружена"
 
 #: templates/500.html:4 templates/admin/base.html:77
 msgid "Home"
@@ -410,15 +410,15 @@ msgstr "Домой"
 
 #: templates/500.html:4
 msgid "Server error"
-msgstr ""
+msgstr "Ошибка сервера"
 
 #: templates/500.html:6
 msgid "Server error (500)"
-msgstr ""
+msgstr "Ошибка сервера (500)"
 
 #: templates/500.html:9
 msgid "Server Error <em>(500)</em>"
-msgstr ""
+msgstr "Ошибка сервера <em>(500)</em>"
 
 #: templates/500.html:10
 msgid ""
@@ -488,7 +488,7 @@ msgstr "Посмотреть на сайте"
 
 #: templates/admin/w3af_webui/reports.html:12
 msgid "Statistic Report"
-msgstr ""
+msgstr "Статистический отчёт"
 
 #: templates/admin/w3af_webui/vulnerabilities.html:11
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:11
@@ -504,46 +504,46 @@ msgstr "Только информационные"
 #: templates/admin/w3af_webui/vulnerabilities.html:22
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:22
 msgid "Filter by severity:"
-msgstr ""
+msgstr "Фильтровать по критичности:"
 
 #: templates/admin/w3af_webui/vulnerabilities.html:26
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:26
 msgid "Security Issues"
-msgstr ""
+msgstr "Проблемы безопасности"
 
 #: templates/admin/w3af_webui/vulnerabilities.html:32
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:32
 msgid "Issue"
-msgstr ""
+msgstr "Проблема"
 
 #: templates/admin/w3af_webui/vulnerabilities.html:39
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:129
 msgid "There is no security issue was found."
-msgstr ""
+msgstr "Проблем безопасности не обнаружено"
 
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:36
 msgid "Create ticket to JIRA"
-msgstr ""
+msgstr "Создать тикет в Джире"
 
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:40
 msgid "Project"
-msgstr ""
+msgstr "Проект"
 
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:45
 msgid "Subject"
-msgstr ""
+msgstr "Тема"
 
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:55
 msgid "Priority"
-msgstr ""
+msgstr "Приоритет"
 
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:67
 msgid "Assignee"
-msgstr ""
+msgstr "Ответственный"
 
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:71
 msgid "CC"
-msgstr ""
+msgstr "Копия"
 
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:80
 msgid ""
@@ -552,7 +552,7 @@ msgstr ""
 
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:86
 msgid "Ticket was created"
-msgstr ""
+msgstr "Тикет создан"
 
 #: templates/admin/w3af_webui/target/change_form.html:8
 msgid "Available URL"
@@ -565,57 +565,3 @@ msgstr "Недоступный URL"
 #: templates/admin/w3af_webui/target/change_form.html:10
 msgid "Invalid URL"
 msgstr "Неправильный URL"
-
-#~ msgid "Stop selected"
-#~ msgstr "Остановить выделенное"
-
-#~ msgid "Finish"
-#~ msgstr "Финиш"
-
-#~ msgid "Add"
-#~ msgstr "Добавить"
-
-#~ msgid "Change"
-#~ msgstr "Изменить"
-
-#~ msgid "You don't have permission to edit anything."
-#~ msgstr "У вас не достаточно прав"
-
-#~ msgid "Recent Actions"
-#~ msgstr "Последние действия"
-
-#~ msgid "My Actions"
-#~ msgstr "Мои действия"
-
-#~ msgid "Unknown content"
-#~ msgstr "Неизвестное содержание"
-
-#~ msgid "Password change"
-#~ msgstr "Изменить пароль"
-
-#~ msgid "Add %(name)s"
-#~ msgstr "Добавить %(name)s"
-
-#~ msgid "JIRA ID"
-#~ msgstr "JIRA ID"
-
-#~ msgid "Filter"
-#~ msgstr "Фильтр"
-
-#, fuzzy
-#~ msgid "Username:"
-#~ msgstr "Пользователь"
-
-#, fuzzy
-#~ msgid "Log in"
-#~ msgstr "Выйти"
-
-#~ msgid "Notificaton"
-#~ msgstr "Уведомления"
-
-#~ msgid "Show"
-#~ msgstr "Показать"
-
-#, fuzzy
-#~ msgid "Start"
-#~ msgstr "Начало сканирования"
