@@ -6,7 +6,7 @@ from logging import getLogger
 from datetime import datetime
 from datetime import date
 import time
-from qsstats import QuerySetStats
+#from qsstats import QuerySetStats
 
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
@@ -257,9 +257,10 @@ def check_url(request):
     except urllib2.URLError, e:
         return HttpResponseNotFound('URLError %s' % e)
     return HttpResponseNotFound('Some check_url error')
-
 @login_required
 def reports(request):
+    return HttpResponseNotFound('Some error')
+"""
     start_date = date(2012, 05, 1)
     end_date = datetime.now()
     queryset = Scan.objects.all()
@@ -282,3 +283,4 @@ def reports(request):
     return render_to_response('admin/w3af_webui/reports.html',
                               context,
                               context_instance=RequestContext(request))
+"""
