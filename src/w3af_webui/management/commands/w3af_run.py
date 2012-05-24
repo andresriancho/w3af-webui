@@ -111,6 +111,19 @@ def fail_scan(scan_id, message):
 def save_vulnerabilities(scan, xml_report):
     try:
         tree = etree.parse(xml_report)
+        errors = list(tree.getiterator(tag='error'))
+        errors_message = '<br>'.join(
+                ['Error from %s: %s' %  (error.get('caller'), error.text)
+                 for error in errors]
+                 )
+        scan.result_message = errors_message
+        print errors_message
+        scan.save()
+        if 'Error from w3afCore' in errors_message:
+            return False
+        for error in errors:
+            caller = error.get('caller')
+            error_text = error.text.strip() + '\n'
         issues = list(tree.getiterator(tag='vulnerability'))
         for issue in issues:
             severity = issue.get('severity')
@@ -136,8 +149,11 @@ def save_vulnerabilities(scan, xml_report):
                                          )
         return True
     except Exception, e:
-        logger.error('Cannot parse xml report for scan %s: %s' % (
-                      scan.id, e))
+        scan.result_message = 'Internal w3af_webui error'
+        scan.save()
+        logger.error('Error in file w3af_run:save_vulnerabilities: '
+                     'Cannot parse xml report for scan %s: %s' % (scan.id, e)
+                    )
         return False
 
 

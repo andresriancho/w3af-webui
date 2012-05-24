@@ -9,7 +9,7 @@ def notify(user, target, scan_id):
     scan = Scan.objects.get(pk=scan_id)
     vuln = Vulnerability.objects.filter(scan=scan)
     if not vuln:
-        return False
+        return True # nothing 
     report_link = '%s/show_report/%s/' % (
         settings.APP_URL,
         scan_id,

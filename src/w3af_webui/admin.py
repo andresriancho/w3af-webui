@@ -262,13 +262,14 @@ class ProfileTargetInline(admin.StackedInline):
         'fields': (( 'scan_profile'), )}), )
 
 
+    """
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if (db_field.name == "scan_profile" and
             not request.user.has_perm('w3af_webui.view_all_data')):
             kwargs["queryset"] = ScanProfile.objects.filter(user=request.user)
         return super(ProfileTargetInline, self).formfield_for_foreignkey(
                     db_field, request, **kwargs)
-
+    """
 
 class ProfileInline(admin.StackedInline):
     '''for multiprofiles in task scan page '''

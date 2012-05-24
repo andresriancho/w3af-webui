@@ -6,7 +6,7 @@ from logging import getLogger
 from datetime import datetime
 from datetime import date
 import time
-#from qsstats import QuerySetStats
+from qsstats import QuerySetStats
 
 from django.utils.translation import ugettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
@@ -202,11 +202,13 @@ def show_report(request, scan_id):
     severity_filter = get_select_code(severity,
                                       settings.SEVERITY_FILTER,
                                       'severity')
+    print scan.result_message
     context = {
        'target': scan.scan_task.target.url,
        'vulns': vuln_list,
        'severity_filter': severity_filter,
        'target_comment': scan.scan_task.target.comment,
+       'error_message': scan.result_message.split("<br>"),
     }
     template =  getattr(settings,
                         'VULNERABILITY_TEMPLATE',
@@ -257,11 +259,11 @@ def check_url(request):
     except urllib2.URLError, e:
         return HttpResponseNotFound('URLError %s' % e)
     return HttpResponseNotFound('Some check_url error')
+
+
 @login_required
 def reports(request):
-    return HttpResponseNotFound('Some error')
-"""
-    start_date = date(2012, 05, 1)
+    start_date = date(2012, 05, 5)
     end_date = datetime.now()
     queryset = Scan.objects.all()
     # scan count...
@@ -274,13 +276,24 @@ def reports(request):
     #format_values = [ [x[0].strftime('%d-%m-%y'), x[1]] for x in values]
     # last_time =  int(time.mktime(fmtime.timetuple()) * 1000 + 4 * 3600000)
     format_values = []
+    amcharts_values = []
     for x in values:
         fmtime = x[0].strftime('%d-%m-%y')
+        fdate = x[0].strftime('%m-%d-%y')
+        year = x[0].strftime('%Y')
+        month = x[0].strftime('%m')
+        day = x[0].strftime('%d')
         format_date =  int(time.mktime(x[0].timetuple()) * 1000 + 4 * 3600000)
         format_values.append([format_date, x[1]])
-    print format_values
-    context = {'data': format_values } #[[0, 5], [1, 1], [2, 0], [3, 2]]}
+        amcharts_values.append(int(year))
+        amcharts_values.append(int(month))
+        amcharts_values.append(int(day))
+        amcharts_values.append(x[1])
+        #amcharts_values.append({ date: fmtime, visits: x[1]})
+    context = {
+              'data': format_values,
+              'amcharts_data': amcharts_values,
+               } #[[0, 5], [1, 1], [2, 0], [3, 2]]}
     return render_to_response('admin/w3af_webui/reports.html',
                               context,
                               context_instance=RequestContext(request))
-"""
