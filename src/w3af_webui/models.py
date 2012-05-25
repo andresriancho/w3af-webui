@@ -218,13 +218,14 @@ class Scan(models.Model):
         scan_task.status = settings.TASK_STATUS['free']
         scan_task.save()
 
-    def unlock_task(self, text_comment='unlock task'):
+    def unlock_task(self, text_comment='Internal error'):
         if self.status != settings.SCAN_STATUS['in_process']:
             return False
         kill_process(self.pid)
         self.set_task_status_free()
         self.status = settings.SCAN_STATUS['fail']
         self.result_message = text_comment
+        self.finish = datetime.now()
         self.save()
         logger.info('scan %s was failed' % self.id)
         return True

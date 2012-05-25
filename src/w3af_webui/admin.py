@@ -271,6 +271,7 @@ class ProfileTargetInline(admin.StackedInline):
                     db_field, request, **kwargs)
     """
 
+
 class ProfileInline(admin.StackedInline):
     '''for multiprofiles in task scan page '''
     model = ProfilesTasks

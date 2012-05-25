@@ -49,18 +49,21 @@ def r(request, template, **kwargs):
 def root(request):
     return redirect('/w3af_webui/scan/')
 
+def scan_start_callback(scan_id):
+    scan = Scan.objects.get(id=scan_id)
+    scan.unlock_task()
+    logger.error('scan fail by scan_start_callback')
 
 def run_now(request):
     if not 'id' in request.GET:
         raise Http404
     id = request.GET['id']
+    # create scan here and run scan task (not scan_create_task) for 
+    # view immediatelly  scan_task status=run
     scan_task = ScanTask.objects.get(id=id)
     scan = scan_task.create_scan(request.user)
-    try:
-        scan_start.delay(scan.id)
-    except Exception, e:
-        scan.unlock_task()
-        logger.error('run_row fail %s' % e)
+    fun = scan_start_callback
+    scan_start.delay(scan.id, fun)
     return redirect('/w3af_webui/scantask/')
 
 
@@ -202,7 +205,6 @@ def show_report(request, scan_id):
     severity_filter = get_select_code(severity,
                                       settings.SEVERITY_FILTER,
                                       'severity')
-    print scan.result_message
     context = {
        'target': scan.scan_task.target.url,
        'vulns': vuln_list,

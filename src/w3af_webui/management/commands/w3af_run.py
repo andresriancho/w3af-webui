@@ -20,11 +20,16 @@ from w3af_webui.models import ProfilesTargets
 from w3af_webui.models import Scan
 from w3af_webui.models import Vulnerability
 from w3af_webui.models import VulnerabilityType
+from w3af_webui.notification.send_mail import notify_about_fail
 
 W3AF_POLL_PERIOD = 15 # seconds
 logger = getLogger(__name__)
 
 def send_notification(scan):
+    '''
+    Send notification using method notify from module,
+    set as settings.NOTIFY_MODULES[notify_set]['module']
+    '''
     notify_set =  scan.scan_task.user.get_profile().notification
     try:
         if settings.NOTIFY_MODULES[notify_set]['id'] == 'None':
@@ -43,6 +48,9 @@ def send_notification(scan):
 
 
 def get_profile(scan_task, report_path, report_file):
+    '''
+    Agregate all included scan-profiles in one and added default plugins
+    '''
     profiles_tasks = ProfilesTasks.objects.filter(
                      scan_task__id=scan_task.id,
                      scan_profile__isnull=False).order_by('id')
@@ -99,16 +107,24 @@ def get_report_path():
 
 
 def fail_scan(scan_id, message):
-    '''set scan tatus to fail and set message to result_message '''
+    '''
+    Set scan status to fail and set message to result_message
+    '''
     scan = Scan.objects.get(pk=int(scan_id))
     previous_message = scan.result_message
     scan.result_message = previous_message + message
     scan.status = settings.SCAN_STATUS['fail']
     scan.save()
     scan.set_task_status_free()
+    notify_about_fail(scan.user,
+                      scan.scan_task.target,
+                      scan.id)
 
 
 def save_vulnerabilities(scan, xml_report):
+    '''
+    Parse w3af xml output file, and save error ans vulnerabities from it ti db
+    '''
     try:
         tree = etree.parse(xml_report)
         errors = list(tree.getiterator(tag='error'))
@@ -117,7 +133,6 @@ def save_vulnerabilities(scan, xml_report):
                  for error in errors]
                  )
         scan.result_message = errors_message
-        print errors_message
         scan.save()
         if 'Error from w3afCore' in errors_message:
             return False
@@ -149,7 +164,7 @@ def save_vulnerabilities(scan, xml_report):
                                          )
         return True
     except Exception, e:
-        scan.result_message = 'Internal w3af_webui error'
+        scan.result_message = 'Internal w3af_webui error in save vulnerabilies'
         scan.save()
         logger.error('Error in file w3af_run:save_vulnerabilities: '
                      'Cannot parse xml report for scan %s: %s' % (scan.id, e)
@@ -158,27 +173,32 @@ def save_vulnerabilities(scan, xml_report):
 
 
 def post_finish(scan, returncode, xml_report):
-    """
+    '''
     Change scan status to done if returncode and scan status is ok
-    """
-    is_valid_xml = save_vulnerabilities(scan, xml_report)
-    if int(returncode) != 0 or not is_valid_xml:
+    '''
+    if int(returncode) != 0:
         # process terminated with error or fail xml report
         fail_scan(scan.id,
                   'w3af process return code %s' % returncode)
         return
     # process terminated successfully
+    if not save_vulnerabilities(scan, xml_report):
+        fail_scan(scan.id, '')
+        return
+    # process was stoped by user
     if (Scan.objects.get(pk=int(scan.id)).status ==
         settings.SCAN_STATUS['fail']):
             return
-    scan.result_message = ''
     if not send_notification(scan):
         scan.result_message = 'Can not send notification'
     scan.status = settings.SCAN_STATUS['done']
     scan.save()
 
 
-def  wait_process_finish(scan, profile_fname):
+def wait_process_finish(scan, profile_fname):
+    '''
+    Start w3af process in new process, and wait while it terminate
+    '''
     process = Popen([settings.W3AF_RUN,
                     '--no-update', '-P',
                     profile_fname],
@@ -222,7 +242,6 @@ class Command(BaseCommand):
                     logger.info('Output file: %s' % output.name)
                     scan.start = datetime.now()
                     scan.data = output.name
-                    scan.result_message = 'Scan in process now \n'
                     scan.save()
                     (profile_fname, xml_report) = get_profile(scan.scan_task,
                                                               report_path,

@@ -46,7 +46,7 @@ class TestSendMail(TestCase):
                                            self.scan.id)
         self.assertEqual(len(mail.outbox), 0,
                         'Should not send notification about scan without vulnerabilities')
-        self.assertFalse(result)
+        self.assertTrue(result, 'Should return True if error was not happend')
         vulnerability = any_model(Vulnerability,
                                   scan=self.scan,
                                  )

@@ -35,7 +35,7 @@ class TestSendMail(TestCase):
         self.scan_task.delete()
         self.scan.delete()
 
-    def test_send_mail_notify(self):
+    def test_notify(self):
         # Empty the test outbox
         mail.outbox = []
         result = send_mail.notify(self.user,
@@ -43,6 +43,16 @@ class TestSendMail(TestCase):
                                   self.scan.id)
         self.assertEqual(len(mail.outbox), 1)
         self.assertTrue(result)
+
+    def test_notify_about_fail(self):
+        # Empty the test outbox
+        mail.outbox = []
+        result = send_mail.notify_about_fail(self.user,
+                                             self.scan.scan_task.target,
+                                             self.scan.id)
+        self.assertEqual(len(mail.outbox), 1)
+        self.assertTrue(result)
+
 
     @patch('django.core.mail.send_mail')
     def _test_fail_send_mail_notify(self, mock_send_mail):

@@ -60,15 +60,16 @@ def monthly_task(*args, **kwargs):
 
 
 @task()
-def scan_start(*args, **kwargs):
+def scan_start(scan_id, callback_func, *args, **kwargs):
     '''
     Start exist scan
     args = [scan_id, ]
     '''
     try:
-        call_command('w3af_run', *args)
+        call_command('w3af_run', scan_id)
     except Exception, e:
         logger.error("task.py scan_start exception %s" % e)
+        callback_func(scan_id)
         raise Exception, e
 
 

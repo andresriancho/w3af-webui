@@ -7,7 +7,7 @@ from django.contrib.auth.models import Group
 
 from w3af_webui.management import init_user_group
 from w3af_webui.management import create_superuser
-from w3af_webui.management import create_extra_permission
+from w3af_webui.management import create_permission
 
 
 class TestInitUserGroup(TestCase):
@@ -18,7 +18,7 @@ class TestInitUserGroup(TestCase):
         self.assertFalse(mock_superuser.called)
         init_user_group('w3af_webui')
         self.assertTrue(mock_superuser.called)
-        self.assertEqual(5, Group.objects.count())
+        self.assertEqual(6, Group.objects.count())
 
     def test_create_superuser(self):
         self.assertEqual(0, User.objects.count())
@@ -26,7 +26,8 @@ class TestInitUserGroup(TestCase):
         self.assertEqual(1, User.objects.count())
 
     def test_create_permission(self):
-        #self.assertEqual(0, User.objects.count())
-        create_extra_permission()
-         #self.assertEqual(1, User.objects.count())
+        permission = create_permission('test_perm', 'test_desc')
+        self.assertNotEqual(None, permission)
+        self.assertEqual('test_perm', permission.codename)
+        self.assertEqual('test_desc', permission.name)
 
