@@ -13,7 +13,7 @@ system_depends = [
 ]
 py_depends = {
         'lxml':'In Debian based systems just install python-lxml',
-        'django-qsstats-magic':
+        'QuerySetStats':
                 'You can install it from PyPI by easy_install django-qsstats-magic',
         'ghettoq':'You can install it from PyPI by easy_install ghettoq',
         'celery':'You can install it from PyPI by easy_install celery',

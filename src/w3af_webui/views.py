@@ -391,10 +391,6 @@ def get_vuln_per_day(start_date, end_date):
                                 Q(vulnerability__isnull=True) |
                                 Q(vulnerability__vuln_type=vuln_type)
                                 ).annotate(cnt=Count('vulnerability'))
-        #vuln_qsstats = QuerySetStats(scan_with_vuln_qset,
-        #                             date_field='start',)
-        #vuln_values = vuln_qsstats.time_series(start_date, end_date) #, interval='days')
-        #vuln_count = format_date(vuln_values)
         vuln_count = format_date([[x.start, int(x.cnt) ] for x in scan_qset])
         result.append({'label': vuln_type.name.encode('utf8'),
                        'data': vuln_count,
