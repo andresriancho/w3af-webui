@@ -5,6 +5,7 @@ import json
 from logging import getLogger
 from datetime import datetime
 from datetime import date
+from datetime import timedelta
 import time
 from qsstats import QuerySetStats
 
@@ -22,11 +23,19 @@ from django.contrib.auth.decorators import login_required
 from django.conf import settings
 from django.utils.safestring import mark_safe
 from django.contrib import messages
+from django.db.models import Sum
+from django.db.models import Count
+from django.utils.encoding import smart_str
+from django.db.models import Q
+
 
 from w3af_webui.models import ScanTask
 from w3af_webui.models import Scan
 from w3af_webui.models import Profile
+from w3af_webui.models import ProfilesTargets
+from w3af_webui.models import Target
 from w3af_webui.models import Vulnerability
+from w3af_webui.models import VulnerabilityType
 from w3af_webui.tasks import scan_start
 
 logger = getLogger(__name__)
@@ -49,21 +58,27 @@ def r(request, template, **kwargs):
 def root(request):
     return redirect('/w3af_webui/scan/')
 
+
 def scan_start_callback(scan_id):
     scan = Scan.objects.get(id=scan_id)
     scan.unlock_task()
     logger.error('scan fail by scan_start_callback')
 
+
 def run_now(request):
     if not 'id' in request.GET:
         raise Http404
     id = request.GET['id']
-    # create scan here and run scan task (not scan_create_task) for 
-    # view immediatelly  scan_task status=run
-    scan_task = ScanTask.objects.get(id=id)
-    scan = scan_task.create_scan(request.user)
-    fun = scan_start_callback
-    scan_start.delay(scan.id, fun)
+    try:
+        # create scan here and run scan task (not scan_create_task) for 
+        # view immediatelly  scan_task status=run
+        scan_task = ScanTask.objects.get(id=id)
+        scan = scan_task.create_scan(request.user)
+    except Exception, e:
+        logger.error('run now function fail: %s' % e)
+    else:
+        fun = scan_start_callback
+        scan_start.delay(scan.id, fun)
     return redirect('/w3af_webui/scantask/')
 
 
@@ -149,6 +164,7 @@ def get_vulnerability_module():
     return __import__(post_module,
                       fromlist=[''])
 
+
 @csrf_protect
 @login_required
 def post_vulnerability(request, scan_id):
@@ -171,9 +187,28 @@ def post_vulnerability(request, scan_id):
 
 
 def get_filtered_vulnerabilities(scan, severity):
+    class Issue:
+        __slots__ = ['id',
+                     'plugin',
+                     'severity',
+                     'desc',
+                     'http_trans',
+                    ]
+
     allowed_values = settings.SEVERITY_DICT[severity]
-    return Vulnerability.objects.filter(scan=scan,
+    vulnerabilities = Vulnerability.objects.filter(scan=scan,
                                         severity__in=allowed_values)
+    vuln_list = []
+    for vuln in vulnerabilities:
+        vulnerability = Issue()
+        vulnerability.id = vuln.id
+        vulnerability.plugin = vuln.vuln_type
+        vulnerability.severity = vuln.severity
+        vulnerability.desc = vuln.description
+        vulnerability.http_trans = vuln.http_transaction
+        vuln_list.append(vulnerability)
+    return vuln_list
+
 
 
 @csrf_protect
@@ -184,24 +219,11 @@ def show_report(request, scan_id):
         scan.user != request.user):
         logger.info('fobbiden page for user %s' % request.user)
         return HttpResponseForbidden()
+    if (scan.user == request.user and scan.show_report_time is None):
+        scan.show_report_time = datetime.now()
+        scan.save()
     severity = request.GET.get('severity', 'all')
-    class Issue:
-        __slots__ = ['id',
-                     'plugin',
-                     'severity',
-                     'desc',
-                     'http_trans',
-                    ]
-    vuln_list = []
-    vulnerabilities = get_filtered_vulnerabilities(scan, severity)
-    for vuln in vulnerabilities:
-        vulnerability = Issue()
-        vulnerability.id = vuln.id
-        vulnerability.plugin = vuln.vuln_type
-        vulnerability.severity = vuln.severity
-        vulnerability.desc = vuln.description
-        vulnerability.http_trans = vuln.http_transaction
-        vuln_list.append(vulnerability)
+    vuln_list = get_filtered_vulnerabilities(scan, severity)
     severity_filter = get_select_code(severity,
                                       settings.SEVERITY_FILTER,
                                       'severity')
@@ -263,39 +285,263 @@ def check_url(request):
     return HttpResponseNotFound('Some check_url error')
 
 
+def date_to_milliseconds(dt):
+    return int(time.mktime(dt.timetuple()) * 1000 + 4 * 3600000)
+
+
+def format_date(lst):
+    """lst = [[Date1, value1], [Date2, value2],...]"""
+    return [[date_to_milliseconds(x[0]), x[1]]
+            for x in lst]
+
+
+def get_last_scan_vuln(TOP_LIMIT):
+    last_scan_vuln_qs = Vulnerability.objects.raw(
+        'SELECT v.id, last_scan.target_name, count(v.id) AS cnt FROM '
+        '(SELECT max(s.id) AS id, MAX(s.start), target_id, t.name as '
+        'target_name FROM scans s JOIN scan_tasks st ON (s.scan_task_id '
+        '= st.id) JOIN targets t ON (st.target_id = t.id) WHERE s.status=%s '
+        'GROUP BY target_id) last_scan JOIN vulnerabilities v on (v.scan_id '
+        '= last_scan.id) GROUP BY last_scan.id ORDER BY cnt DESC limit %s',
+         [settings.SCAN_STATUS['done'], TOP_LIMIT])
+    last_scan_vuln = [{'label': smart_str(v.target_name),
+                       'data': [ [i, int(v.cnt)], ] }
+                       for i, v in enumerate(last_scan_vuln_qs)]
+    last_scan_vuln_label = [[i, smart_str(v.target_name)]
+                       for i, v in enumerate(last_scan_vuln_qs)]
+    return (last_scan_vuln, last_scan_vuln_label)
+
+
+def get_last_scan_critic_vuln(TOP_LIMIT):
+    last_scan_vuln_qs = Vulnerability.objects.raw(
+        'SELECT v.id, last_scan.target_name, sum(v.severity="Hight") AS cnt FROM '
+        '(SELECT max(s.id) AS id, MAX(s.start), target_id, t.name as '
+        'target_name FROM scans s JOIN scan_tasks st ON (s.scan_task_id '
+        '= st.id) JOIN targets t ON (st.target_id = t.id) WHERE s.status=%s '
+        'GROUP BY target_id) last_scan JOIN vulnerabilities v on (v.scan_id '
+        '= last_scan.id) GROUP BY last_scan.id ORDER BY cnt DESC limit %s',
+         [settings.SCAN_STATUS['done'], TOP_LIMIT])
+    last_scan_vuln = [{'label': smart_str(v.target_name),
+                       'data': [
+                       [i, int(v.cnt) if v.cnt is not None else 0 ],]}
+                       for i, v in enumerate(last_scan_vuln_qs)]
+    last_scan_vuln_label = [[i, v.target_name.encode('utf-8')]
+                       for i, v in enumerate(last_scan_vuln_qs)]
+    return (last_scan_vuln, last_scan_vuln_label)
+
+
+def get_target_not_show_report(TOP_LIMIT):
+    # top targets with max count of unshow report (only successfull scans)
+    top_not_show_qs = Target.objects.raw('SELECT t.id, t.name, '
+        'COUNT(DISTINCT(s.id)) AS cnt FROM vulnerabilities v JOIN scans s ON '
+        '(scan_id = s.id) JOIN scan_tasks st ON (s.scan_task_id = st.id) '
+        'JOIN targets t ON (st.target_id = t.id) WHERE s.show_report_time '
+        'IS NULL GROUP BY t.id ORDER BY cnt DESC limit %s;', [TOP_LIMIT])
+    top_not_show_report = [{'label': v.name.encode('utf-8'),
+                            'data': [ [i, int(v.cnt)], ] }
+                            for i, v in enumerate(top_not_show_qs)]
+    top_not_show_report_label = [[i, v.name.encode('utf-8')]
+                                 for i, v in enumerate(top_not_show_qs)]
+    return (top_not_show_report, top_not_show_report_label)
+
+
+def get_target_downtime(TOP_LIMIT):
+    # top target - time after last scan
+    downtime_qs = Target.objects.raw('SELECT t.id, t.name, TO_DAYS(NOW()) - '
+        'TO_DAYS(max(s.start)) AS downtime FROM  scans s JOIN scan_tasks st '
+        'ON (s.scan_task_id = st.id) join targets t on (st.target_id = t.id) '
+        'WHERE s.status = %s GROUP BY target_id ORDER BY downtime DESC '
+        'limit %s;', [settings.SCAN_STATUS['done'], TOP_LIMIT] )
+    downtime = [{'label': v.name.encode('utf-8'),
+                 'data': [ [i, int(v.downtime)], ] }
+                  for i, v in enumerate(downtime_qs)]
+    downtime_label = [[i, v.name.encode('utf-8')]
+                      for i, v in enumerate(downtime_qs)]
+    return(downtime, downtime_label)
+
+
+def get_scan_per_day(start_date, end_date):
+    scan_qsstats = QuerySetStats(Scan.objects.all(),
+                                 date_field='start',)
+    scan_values = scan_qsstats.time_series(start_date, end_date, interval='days')
+    return format_date(scan_values)
+
+
+def get_all_vuln(start_date, target=None):
+    # All type
+    if target:
+        all_type_qset = Scan.objects.filter(
+                        scan_task__target=target).annotate(
+                                        cnt=Count('vulnerability'))
+    else:
+        all_type_qset = Scan.objects.all().annotate(
+                                        cnt=Count('vulnerability'))
+    vuln_count = format_date([[x.start, int(x.cnt) ] for x in all_type_qset])
+    return {'label': 'all',
+            'data': vuln_count,
+    }
+
+
+def get_vuln_per_day(start_date, end_date):
+    result = [get_all_vuln(start_date)] # all type
+    # Each type separatly
+    for vuln_type in VulnerabilityType.objects.all():
+        scan_qset = Scan.objects.filter(
+                                Q(start__gte=start_date),
+                                Q(vulnerability__isnull=True) |
+                                Q(vulnerability__vuln_type=vuln_type)
+                                ).annotate(cnt=Count('vulnerability'))
+        #vuln_qsstats = QuerySetStats(scan_with_vuln_qset,
+        #                             date_field='start',)
+        #vuln_values = vuln_qsstats.time_series(start_date, end_date) #, interval='days')
+        #vuln_count = format_date(vuln_values)
+        vuln_count = format_date([[x.start, int(x.cnt) ] for x in scan_qset])
+        result.append({'label': vuln_type.name.encode('utf8'),
+                       'data': vuln_count,
+        })
+    return result
+
+
+def get_active_target(start_date, end_date):
+    start_active_date = start_date - timedelta(days=90)
+    end_active_date = start_date
+    active_count = []
+    while (end_active_date <= end_date):
+        active_target_qs = Scan.objects.raw('SELECT s.id, '
+            'COUNT(DISTINCT(target_id)) AS cnt FROM scans s JOIN scan_tasks '
+            'st ON (s.scan_task_id = st.id) JOIN targets t ON (st.target_id '
+            '= t.id)  WHERE s.start >= %s AND s.start <= %s AND s.status = %s '
+            'AND s.show_report_time is not null',
+            [start_active_date.strftime("%Y%m%d"),
+            end_active_date.strftime("%Y%m%d"),
+            settings.SCAN_STATUS['done'],
+        ])
+        if active_target_qs[0].cnt:
+            active_count.append([date_to_milliseconds(end_active_date),
+                            int(active_target_qs[0].cnt)])
+        start_active_date += timedelta(days=1)
+        end_active_date += timedelta(days=1)
+    return active_count
+
+
 @login_required
-def reports(request):
-    start_date = date(2012, 05, 5)
-    end_date = datetime.now()
-    queryset = Scan.objects.all()
-    # scan count...
-    qsstats = QuerySetStats(queryset,
-                            date_field='start',
-                            #aggregate=Count('id'),
-                           )
-    # ...per day
-    values = qsstats.time_series(start_date, end_date, interval='days')
-    #format_values = [ [x[0].strftime('%d-%m-%y'), x[1]] for x in values]
-    # last_time =  int(time.mktime(fmtime.timetuple()) * 1000 + 4 * 3600000)
-    format_values = []
-    amcharts_values = []
-    for x in values:
-        fmtime = x[0].strftime('%d-%m-%y')
-        fdate = x[0].strftime('%m-%d-%y')
-        year = x[0].strftime('%Y')
-        month = x[0].strftime('%m')
-        day = x[0].strftime('%d')
-        format_date =  int(time.mktime(x[0].timetuple()) * 1000 + 4 * 3600000)
-        format_values.append([format_date, x[1]])
-        amcharts_values.append(int(year))
-        amcharts_values.append(int(month))
-        amcharts_values.append(int(day))
-        amcharts_values.append(x[1])
-        #amcharts_values.append({ date: fmtime, visits: x[1]})
+def stats(request):
+    end_date = date.today()
+    start_date = end_date - timedelta(days=92)
+    one_year_ago = end_date - timedelta(days=365)
+    TOP_LIMIT = 5
+    last_scan_vuln, last_scan_vuln_label =  \
+                                get_last_scan_vuln(TOP_LIMIT)
+    last_scan_critic_vuln, last_scan_critic_vuln_label =  \
+                                get_last_scan_critic_vuln(TOP_LIMIT)
+    # top targets with max count of unshow report (only successfull scans)
+    not_show_report, not_show_report_label =\
+                                get_target_not_show_report(TOP_LIMIT)
+    # top target - time after last scan
+    downtime, downtime_label = get_target_downtime(TOP_LIMIT)
+    # scan per day
+    scan_count = get_scan_per_day(start_date, end_date)
+    # vulnerabilities per day
+    vuln_count = get_vuln_per_day(start_date, end_date)
+    # active target count
+    active_target = get_active_target(one_year_ago, end_date)
     context = {
-              'data': format_values,
-              'amcharts_data': amcharts_values,
-               } #[[0, 5], [1, 1], [2, 0], [3, 2]]}
-    return render_to_response('admin/w3af_webui/reports.html',
+              'last_scan_vuln': last_scan_vuln,
+              'last_scan_vuln_label': last_scan_vuln_label,
+              'last_scan_critic_vuln': last_scan_critic_vuln,
+              'last_scan_critic_vuln_label': last_scan_critic_vuln_label,
+              'top_not_show_report': not_show_report,
+              'top_not_show_report_label': not_show_report_label,
+              'downtime': downtime,
+              'downtime_label': downtime_label,
+              'scan_count': scan_count,
+              'vuln_count': vuln_count,
+              'active_target': active_target,
+               }
+    return render_to_response('admin/w3af_webui/stats.html',
                               context,
                               context_instance=RequestContext(request))
+
+
+def get_vuln_count_by_severity_for_target(target, start_date):
+    result = [get_all_vuln(start_date, target)] # all type
+    severity_queryset = Vulnerability.objects.values('severity').distinct('severity')
+    for vuln in severity_queryset:
+        scan_queryset = Scan.objects.raw('SELECT s.id, s.start, COUNT(v.id) AS cnt,'
+        ' v.severity AS severity FROM scans s LEFT JOIN vulnerabilities v '
+        'on (s.id = v.scan_id) JOIN scan_tasks st on (s.scan_task_id = st.id'
+        ') WHERE st.target_id=%s AND s.start>=%s AND (v.id is null OR '
+        'v.severity = %s) GROUP BY s.id',
+        [target.id, start_date.strftime("%Y%m%d"), vuln['severity']])
+        data = format_date([[x.start,
+                            int(x.cnt) if x.severity is not None else 0]
+                            for x in scan_queryset
+        ])
+        result.append({'label': vuln['severity'].encode('utf-8'),
+                       'data': data,
+        })
+    return result
+
+
+def get_vuln_count_by_type_for_target(target, start_date):
+    result =  [get_all_vuln(start_date, target)] # all type
+    for vuln_type in VulnerabilityType.objects.all():
+        queryset = Scan.objects.raw('SELECT s.id, s.start, COUNT(v.id) AS cnt,'
+        ' v.vuln_type_id AS vuln_type FROM scans s LEFT JOIN vulnerabilities v '
+        'on (s.id = v.scan_id) JOIN scan_tasks st on (s.scan_task_id = st.id'
+        ') WHERE st.target_id=%s AND s.start>=%s  AND (v.id is null OR '
+        'v.vuln_type_id = %s) GROUP BY s.id',
+        [target.id, start_date.strftime("%Y%m%d"), vuln_type.id])
+        data = format_date([[x.start,
+                            int(x.cnt) if x.vuln_type is not None else 0]
+                            for x in queryset
+        ])
+        result.append({'label': vuln_type.name.encode('utf8'),
+                       'data': data,
+        })
+    return result
+
+
+def not_show_time_for_target(target_id, start_date):
+    not_show_time_qs = Scan.objects.raw('SELECT s.id, s.start, TO_DAYS(NOW())'
+        ' - TO_DAYS(s.finish) as now_minus_finish, TO_DAYS(s.show_report_time)'
+        ' - TO_DAYS(s.finish) as show_minus_finish from scans s JOIN '
+        'scan_tasks st on (s.scan_task_id = st.id) WHERE st.target_id=%s AND '
+        's.status = %s AND s.start>=%s',
+        [target_id, settings.SCAN_STATUS['done'],
+        start_date.strftime("%Y%m%d"),
+    ])
+    data = format_date([[x.start,
+                        int(x.show_minus_finish)
+                        if x.show_minus_finish is not None
+                        else int(x.now_minus_finish)]
+                        for x in not_show_time_qs
+    ])
+    return [data]
+
+
+@login_required
+def target_stats(request, target_id):
+    target = Target.objects.get(pk=target_id)
+    if (not request.user.has_perm('w3af_webui.view_all_data') and
+        target.user != request.user):
+        logger.info('fobbiden page for user %s' % request.user)
+        return HttpResponseForbidden()
+    profiles = ProfilesTargets.objects.filter(target=target)
+    profiles_str = ", ".join([x.scan_profile.name for x in profiles])
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=92)
+    context = {
+               'vuln_count_by_type':
+                   get_vuln_count_by_type_for_target(target, start_date),
+               'vuln_count_by_severity':
+                   get_vuln_count_by_severity_for_target(target, start_date),
+               'not_show_time':
+                   not_show_time_for_target(target_id, start_date),
+               'target': target,
+               'profiles': profiles_str,
+    }
+    return render_to_response('admin/w3af_webui/target_stats.html',
+                              context,
+                              context_instance=RequestContext(request))
+

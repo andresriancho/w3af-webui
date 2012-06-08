@@ -13,11 +13,12 @@ system_depends = [
 ]
 py_depends = {
         'lxml':'In Debian based systems just install python-lxml',
+        'django-qsstats-magic':
+                'You can install it from PyPI by easy_install django-qsstats-magic',
         'ghettoq':'You can install it from PyPI by easy_install ghettoq',
         'celery':'You can install it from PyPI by easy_install celery',
         'django_extensions':'You can install it from PyPI by easy_install django-extensions',
         'south':'You can install it from PyPI by easy_install south',
-        'cronex':'You can get it from https://github.com/jameseric/cronex',
         'djcelery':'You can install it from PyPI by easy_install django-celery',
         'djkombu':'You can install it from PyPI by easy_install django-kombu',
         'MySQLdb':'In Debian based systems just install python-mysqldb',

@@ -70,4 +70,4 @@ def init_user_group(app, **kwargs):
     group_obj, created = Group.objects.get_or_create(name='%s_stat_manager' % app)
     group_obj.permissions.add(view_stat)
 
-#post_migrate.connect(init_user_group)
+post_migrate.connect(init_user_group)

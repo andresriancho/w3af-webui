@@ -114,11 +114,14 @@ def fail_scan(scan_id, message):
     previous_message = scan.result_message
     scan.result_message = previous_message + message
     scan.status = settings.SCAN_STATUS['fail']
+    scan.finish = datetime.now()
     scan.save()
     scan.set_task_status_free()
-    notify_about_fail(scan.user,
-                      scan.scan_task.target,
-                      scan.id)
+    notify_set =  scan.scan_task.user.get_profile().notification
+    if settings.NOTIFY_MODULES[notify_set]['id'] != 'None':
+        notify_about_fail(scan.user,
+                          scan.scan_task.target,
+                          scan.id)
 
 
 def save_vulnerabilities(scan, xml_report):

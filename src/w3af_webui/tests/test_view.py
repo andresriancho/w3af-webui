@@ -134,25 +134,6 @@ class TestView(unittest.TestCase):
         self.assertFalse(mock_delay.called)
         self.assertEqual(response.status_code, 404, 'Must return 404')
 
-    @patch('w3af_webui.models.ScanTask.create_scan')
-    @patch('w3af_webui.models.Scan.unlock_task')
-    @patch('w3af_webui.tasks.scan_start.delay')
-    def test_run_now_exc(self, mock_delay, mock_unlock, mock_create_scan):
-        exc = Exception('Boom!')
-        mock_delay.side_effect = exc
-        mock_create_scan.return_value = self.scan
-        self.client.get('/run_now/',
-                       {'id': self.scan.id},
-                       follow=True,
-                       )
-        self.assertRaises(Exception,
-                          self.client.get('/run_now/',
-                                         {'id': self.scan.id},
-                                         follow=True,
-                                        )
-                          )
-        self.assertTrue(mock_unlock.called)
-
     def test_check_url(self):
         # Issue a GET request.
         response = self.client.get('/check_url/',

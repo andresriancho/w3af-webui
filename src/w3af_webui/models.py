@@ -103,7 +103,7 @@ class ScanTask(models.Model):
                     default=settings.TASK_STATUS[settings.TASK_STATUS_KEYS[0]],
                     choices=(list((settings.TASK_STATUS[k], k)
                     for k in settings.TASK_STATUS_KEYS)))
-    start = models.fields.DateTimeField(_('Scan start'), null=True, blank=True)
+    run_at = models.fields.DateTimeField(_('Scan start'), null=True, blank=True)
     user = models.ForeignKey(User, verbose_name=_('User'), blank=True,
                              null=True)
     target = models.ForeignKey(Target, verbose_name=_('Target'))
@@ -211,6 +211,9 @@ class Scan(models.Model):
     result_message = models.CharField(max_length=1000, null=True, default='')
     user = models.ForeignKey(User, verbose_name=_('User'), blank=True,
                              null=True)
+    show_report_time = models.fields.DateTimeField(_('Show report time'),
+                                                   blank=True,
+                                                   null=True)
 
 
     def set_task_status_free(self):

@@ -128,7 +128,8 @@ class ScanProfileAdmin(W3AF_ModelAdmin):
 
 
 class ScanAdmin(W3AF_ModelAdmin):
-    readonly_fields = ['scan_task_link', 'icon', 'get_target', ]
+    fields = ['scan_task', 'icon', 'get_target', ]
+    readonly_fields = ['scan_task', 'icon', 'get_target', ]
     search_fields = ['scan_task__name', 'scan_task__comment']
     list_display = ['icon', 'scan_task_link', 'comment', 'start', 'finish',
                     'report_or_stop','show_log', ]
@@ -298,7 +299,7 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
     search_fields = ['name', 'comment', 'target__name', 'target__url',]
     fieldsets = (
                 (None, {
-                    'fields' : ('name', 'target', 'comment', 'start', ),
+                    'fields' : ('name', 'target', 'comment', 'run_at', ),
                 }),
                 (_('Repeating'), {
                     'classes': ('collapse',),
@@ -388,11 +389,11 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
 
     def save_model(self, request, obj, form, change):
         obj.user = request.user
-        if not obj.start and obj.id:
+        if not obj.run_at and obj.id:
             periodic_task_remove('delay_%s' % obj.id)
-        if obj.start:
+        if obj.run_at:
             obj.save()
-            delay_task_generator(obj.id, obj.start)
+            delay_task_generator(obj.id, obj.run_at)
         functions = {1: generate_cron_never,
                      2: generate_cron_daily,
                      3: generate_cron_weekly,
@@ -433,7 +434,7 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
 
 class TargetAdmin(W3AF_ModelAdmin):
     inlines = (ProfileTargetInline,)
-    list_display = ['name', 'url', 'get_profiles', 'last_scan']
+    list_display = ['name', 'url', 'get_profiles', 'last_scan', 'get_stat_link']
     search_fields = ['name', 'url']
     ordering = ('-id',)
 
@@ -444,6 +445,15 @@ class TargetAdmin(W3AF_ModelAdmin):
 
     get_profiles.short_description = _('Default scan profiles')
     get_profiles.allow_tags = True
+
+    def get_stat_link(self, obj):
+        return mark_safe(u'<a href="../target_stats/%s/"> %s </a>' % (
+                         obj.id,
+                         _('Show stats')
+        ))
+
+    get_stat_link.short_description = _('Stats')
+    get_stat_link.allow_tags = True
 
     def queryset(self, request):
         if request.user.has_perm('w3af_webui.view_all_data'):
