@@ -106,6 +106,8 @@ setup(
                                 'templates/admin/w3af_webui/*.html',
                                 'templates/admin/w3af_webui/target/*.html',
                                 'locale/ru/LC_MESSAGES/*',
+                                'static/w3af_webui/flot/*',
+                                'static/w3af_webui/images/*',
                                 'static/w3af_webui/icons/*',
                                 'static/w3af_webui/css/*',
                                 ]
