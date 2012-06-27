@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
 import urllib2
-#import json
 import simplejson as json
 from logging import getLogger
 from datetime import datetime
