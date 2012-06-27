@@ -12,7 +12,7 @@ system_depends = [
     'w3af_console -h',
 ]
 py_depends = {
-        'simplejson':'In Debian based systems just install python-simplejson'
+        'simplejson':'In Debian based systems just install python-simplejson',
         'lxml':'In Debian based systems just install python-lxml',
         'ghettoq':'You can install it from PyPI by easy_install ghettoq',
         'celery':'You can install it from PyPI by easy_install celery',
