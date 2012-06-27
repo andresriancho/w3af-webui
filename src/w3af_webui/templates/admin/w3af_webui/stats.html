@@ -5,8 +5,7 @@
 {{ block.super }}
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}admin/css/forms.css" />
 <link rel="stylesheet" type="text/css" href="{{ STATIC_URL }}w3af_webui/css/extra.css" />
-<script type="text/javascript" src="{{ STATIC_URL }}admin/js/jquery.min.js"></script>
-<script type="text/javascript" src="{{ STATIC_URL }}admin/js/jquery.init.js"></script>
+<script type="text/javascript" src="{{ STATIC_URL }}w3af_webui/flot/jquery.min.js"></script>
 <script type="text/javascript" src="{{ STATIC_URL }}w3af_webui/flot/jquery.flot.js"></script>
 {% endblock %}
 
@@ -35,7 +34,7 @@
 </div>
 </div>
 <script type="text/javascript">
-(function($) {
+$(function() {
     var line_options = {
         series: { lines: { show: true },
                   points: { show: false },
@@ -48,7 +47,6 @@
                  minTickSize: 1,
                  tickDecimals: 0,
         },
-        //colors: ['rgb(0, 0, 220)', 'rgb(255, 0, 0)'],
     };
     var line_without_points = line_options; 
     var bar_option = {
@@ -60,8 +58,6 @@
                  minTickSize: 1,
                  tickDecimals: 0,
         },
-
-        //colors: ['rgb(0, 0, 220)', 'yellow', 'red', 'green'],
     };
     //top target for vulnerabilities
     bar_option["xaxis"] = {ticks: {{ last_scan_vuln_label|safe }}}
@@ -123,7 +119,7 @@
 
 
     
-})(django.jQuery);
+})
 
 </script>
 

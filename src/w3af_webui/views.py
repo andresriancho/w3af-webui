@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 import os
 import urllib2
-import json
+#import json
+import simplejson as json
 from logging import getLogger
 from datetime import datetime
 from datetime import date
@@ -304,11 +305,15 @@ def get_last_scan_vuln(TOP_LIMIT):
         'GROUP BY target_id) last_scan JOIN vulnerabilities v on (v.scan_id '
         '= last_scan.id) GROUP BY last_scan.id ORDER BY cnt DESC limit %s',
          [settings.SCAN_STATUS['done'], TOP_LIMIT])
-    last_scan_vuln = [{'label': smart_str(v.target_name),
-                       'data': [ [i, int(v.cnt)], ] }
-                       for i, v in enumerate(last_scan_vuln_qs)]
-    last_scan_vuln_label = [[i, smart_str(v.target_name)]
-                       for i, v in enumerate(last_scan_vuln_qs)]
+    last_scan_vuln = json.dumps(
+            [{'label': smart_str(v.target_name),
+              'data': [ [i, int(v.cnt)], ] }
+            for i, v in enumerate(last_scan_vuln_qs)]
+    )
+    last_scan_vuln_label = json.dumps(
+                        [[i, smart_str(v.target_name)]
+                        for i, v in enumerate(last_scan_vuln_qs)]
+    )
     return (last_scan_vuln, last_scan_vuln_label)
 
 
@@ -321,12 +326,14 @@ def get_last_scan_critic_vuln(TOP_LIMIT):
         'GROUP BY target_id) last_scan JOIN vulnerabilities v on (v.scan_id '
         '= last_scan.id) GROUP BY last_scan.id ORDER BY cnt DESC limit %s',
          [settings.SCAN_STATUS['done'], TOP_LIMIT])
-    last_scan_vuln = [{'label': smart_str(v.target_name),
-                       'data': [
-                       [i, int(v.cnt) if v.cnt is not None else 0 ],]}
-                       for i, v in enumerate(last_scan_vuln_qs)]
-    last_scan_vuln_label = [[i, v.target_name.encode('utf-8')]
-                       for i, v in enumerate(last_scan_vuln_qs)]
+    last_scan_vuln = json.dumps(
+            [{'label': smart_str(v.target_name),
+              'data': [
+                      [i, int(v.cnt) if v.cnt is not None else 0 ],]
+             } for i, v in enumerate(last_scan_vuln_qs)]
+    )
+    last_scan_vuln_label = json.dumps([[i, v.target_name.encode('utf-8')]
+                       for i, v in enumerate(last_scan_vuln_qs)])
     return (last_scan_vuln, last_scan_vuln_label)
 
 
@@ -337,26 +344,33 @@ def get_target_not_show_report(TOP_LIMIT):
         '(scan_id = s.id) JOIN scan_tasks st ON (s.scan_task_id = st.id) '
         'JOIN targets t ON (st.target_id = t.id) WHERE s.show_report_time '
         'IS NULL GROUP BY t.id ORDER BY cnt DESC limit %s;', [TOP_LIMIT])
-    top_not_show_report = [{'label': v.name.encode('utf-8'),
+    top_not_show_report = json.dumps(
+                            [{'label': v.name.encode('utf-8'),
                             'data': [ [i, int(v.cnt)], ] }
                             for i, v in enumerate(top_not_show_qs)]
-    top_not_show_report_label = [[i, v.name.encode('utf-8')]
-                                 for i, v in enumerate(top_not_show_qs)]
+    )
+    top_not_show_report_label = json.dumps(
+                                [[i, v.name.encode('utf-8')]
+                                for i, v in enumerate(top_not_show_qs)]
+    )
     return (top_not_show_report, top_not_show_report_label)
 
 
 def get_target_downtime(TOP_LIMIT):
-    # top target - time after last scan
     downtime_qs = Target.objects.raw('SELECT t.id, t.name, TO_DAYS(NOW()) - '
         'TO_DAYS(max(s.start)) AS downtime FROM  scans s JOIN scan_tasks st '
         'ON (s.scan_task_id = st.id) join targets t on (st.target_id = t.id) '
         'WHERE s.status = %s GROUP BY target_id ORDER BY downtime DESC '
         'limit %s;', [settings.SCAN_STATUS['done'], TOP_LIMIT] )
-    downtime = [{'label': v.name.encode('utf-8'),
-                 'data': [ [i, int(v.downtime)], ] }
-                  for i, v in enumerate(downtime_qs)]
-    downtime_label = [[i, v.name.encode('utf-8')]
-                      for i, v in enumerate(downtime_qs)]
+    downtime = json.dumps(
+                    [{'label': v.name.encode('utf-8'),
+                    'data': [ [i, int(v.downtime)], ] }
+                    for i, v in enumerate(downtime_qs)]
+    )
+    downtime_label = json.dumps(
+                    [[i, v.name.encode('utf-8')]
+                    for i, v in enumerate(downtime_qs)]
+    )
     return(downtime, downtime_label)
 
 

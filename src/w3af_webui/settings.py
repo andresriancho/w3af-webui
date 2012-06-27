@@ -19,7 +19,8 @@ DATABASES = {
         'PASSWORD' : 'w3af_webui',
         'HOST'     : '',
         'PORT'     : '3306',
-        'OPTIONS'  : { 'init_command': 'SET storage_engine=INNODB;' },
+        'OPTIONS'  : { 'init_command': 'SET storage_engine=INNODB; '
+                                       'SET names utf8;' },
     }
 }
 
