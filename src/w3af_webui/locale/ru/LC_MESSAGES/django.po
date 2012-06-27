@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2012-06-27 14:44+0400\n"
-"PO-Revision-Date: 2012-06-27 14:46+0400\n"
+"PO-Revision-Date: 2012-06-27 14:54+0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -149,7 +149,6 @@ msgid "Default scan profiles"
 msgstr "Профили сканирования по умолчанию"
 
 #: admin.py:452
-#, fuzzy
 msgid "Show stats"
 msgstr "Статистика"
 
@@ -476,7 +475,6 @@ msgid "Scan tasks"
 msgstr "Задачи на сканирование"
 
 #: templates/admin/base.html:67
-#, fuzzy
 msgid "Statistics"
 msgstr "Статистика"
 
