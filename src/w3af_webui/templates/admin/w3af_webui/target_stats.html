@@ -13,24 +13,22 @@
 <fieldset class="module aligned ">
 <div class="form-row name">
 <label>{% trans 'Target' %}:</label>
-<p> {{target.name}}</p>
+<p><a href='../../target/{{target.id}}'>{{target.name}}</a></p>
 <label>{% trans 'URL' %}:</label>
 <p> {{target.url}}</p>
 <label>{% trans 'Profiles' %}:</label>
 <p> {{profiles}}</p>
-<br/>
-<a href='../../target/{{target.id}}'>{% trans 'Edit' %}</a>
 </div>
 </fieldset>
 <div>
 <div style="float: left; padding: 10px;">
-<br/><h1>Количество найденных уязвимостей по типам</h1>
+<br/><h1>{% trans 'Vulnerability count by type' %}</h1>
 <div id="vuln_count_by_type" class="flot-charts"></div>
-<br/><h1>Количество найденных уязвимостей по уровню критичности</h1>
+<br/><h1>{% trans 'Vulnerability count by severity' %}</h1>
 <div id="vuln_count_by_severity" class="flot-charts"></div>
-<br/><h1>Сколько дней отчет находился был/есть непросмотрен (Только для успешных
-сканирований)</h1>
+<br/><h1>{% trans 'Days befor checking a report' %}</h1>
 <div id="not_show_time" class="flot-charts"></div>
+{% trans 'Only successfull scans with vulnerabilities was counted' %}
 </div>
 </div>
 <script type="text/javascript">

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-27 14:44+0400\n"
-"PO-Revision-Date: 2012-06-27 14:54+0400\n"
+"POT-Creation-Date: 2012-06-28 15:47+0400\n"
+"PO-Revision-Date: 2012-06-28 16:02+0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -515,9 +515,55 @@ msgstr "Посмотреть на сайте"
 msgid "Statistic Report"
 msgstr "Статистический отчёт"
 
-#: templates/admin/w3af_webui/target_stats.html:22
-msgid "Edit"
-msgstr ""
+#: templates/admin/w3af_webui/stats.html:18
+msgid "Top 5 target by number of vulnerabilities in last scan"
+msgstr "Топ 5 сервисов по количеству уязвимостей, обнаруженных на последнем успешном сканировании"
+
+#: templates/admin/w3af_webui/stats.html:22
+msgid "Top 5 target by number of critical vulnerabilities in last scan"
+msgstr "Топ 5 сервисов по количеству критичных уязвимостей, обнаруженных на последнем успешном сканировании"
+
+#: templates/admin/w3af_webui/stats.html:25
+msgid "Top 5 target by number of unchecked reports"
+msgstr "Топ 5 сервисов по количеству непросмотренных отчётов с уязвимостями"
+
+#: templates/admin/w3af_webui/stats.html:28
+msgid "Top 5 targets by days since last successfull scan"
+msgstr "Топ 5 сервисов по количеству дней, прошедших с последнего успешного сканирования"
+
+#: templates/admin/w3af_webui/stats.html:31
+msgid "Active target count"
+msgstr "Количество активных сервисов"
+
+#: templates/admin/w3af_webui/stats.html:37
+msgid ""
+"Target is active if there is at least one successfull scan and all it "
+"vulnerabilities is checked in period of last 3 month before some date"
+msgstr "Сервис считается активным, если за 3 месяца до указанной даты, было хотя бы одно сканирование завершилось успешно и все уязвимости просмотрены"
+
+#: templates/admin/w3af_webui/stats.html:39
+msgid "Scan count (daily)"
+msgstr "Количество проведенных сканирований по дням"
+
+#: templates/admin/w3af_webui/stats.html:42
+msgid "Vulnerability count"
+msgstr "Количество найденных уязвимостей"
+
+#: templates/admin/w3af_webui/target_stats.html:25
+msgid "Vulnerability count by type"
+msgstr "Количество уязвимостей по типам"
+
+#: templates/admin/w3af_webui/target_stats.html:27
+msgid "Vulnerability count by severity"
+msgstr "Количество уязвимостей по уровню уязвимостей"
+
+#: templates/admin/w3af_webui/target_stats.html:29
+msgid "Days befor checking a report"
+msgstr "Количество дней, прошедших до просмотра отчета"
+
+#: templates/admin/w3af_webui/target_stats.html:31
+msgid "Only successfull scans with vulnerabilities was counted"
+msgstr "Тут посчитаны только сканирования с найденными уязвимостями"
 
 #: templates/admin/w3af_webui/vulnerabilities.html:11
 #: templates/admin/w3af_webui/yandex_vulnerabilities.html:11

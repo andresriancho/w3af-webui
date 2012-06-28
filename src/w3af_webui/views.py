@@ -362,7 +362,8 @@ def get_target_downtime(TOP_LIMIT):
         'WHERE s.status = %s GROUP BY target_id ORDER BY downtime DESC '
         'limit %s;', [settings.SCAN_STATUS['done'], TOP_LIMIT] )
     downtime = json.dumps(
-                    [{'label': v.name.encode('utf-8'),
+                    #[{'label': v.name.encode('utf-8'),
+                    [{'label': v.id,
                     'data': [ [i, int(v.downtime)], ] }
                     for i, v in enumerate(downtime_qs)]
     )

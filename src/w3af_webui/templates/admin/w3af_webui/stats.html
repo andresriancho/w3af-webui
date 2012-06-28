@@ -13,24 +13,29 @@
 {% block content %}
 <div>
 <div style="float: left; padding: 10px;">
-<h1>Топ 5 сервисов по количеству уязвимостей, обнаруженных на последнем
-успешном сканировании</h1>
+<h1>{% trans 'Top 5 target by number of vulnerabilities in last scan' %}</h1>
 <div id="last_scan_vuln" class="flot-charts"></div>
-<br/><h1>Топ 5 сервисов по количеству критичных уязвимостей, обнаруженных на
-последнем успешном сканировании</h1>
+
+<h1>{% trans 'Top 5 target by number of critical vulnerabilities in last scan' %}</h1>
 <div id="last_scan_critic_vuln" class="flot-charts"></div>
-<br/><h1>Топ 5 сервисов по количеству непросмотренных отчётов с уязвимостями</h1>
+
+<br/><h1>{% trans 'Top 5 target by number of unchecked reports' %}</h1>
 <div id="top_not_show_report" class="flot-charts"></div>
-<br/><h1>Топ 5 сервисов по количеству дней, прошедших с последнего успешного сканирования</h1>
+
+<br/><h1>{% trans 'Top 5 targets by days since last successfull scan' %}</h1>
 <div id="downtime" class="flot-charts"></div>
-<br/><h1>Количество активных сервисов</h1>
+
+<br/><h1>{% trans 'Active target count' %}</h1>
 <div id="active_target" class="flot-charts"></div>
-Для даты X посчитано количество сервисов у которого есть хотя бы одно успешное
-сканирование с просмотренным отчетов за период [X-3 месяца, X]</br>
-<br/><h1>Количество проведенных сканирований по дням</h1>
+{% trans 'Target is active if there is at least one successfull scan and all it vulnerabilities is checked in period of last 3 month before some date' %}
+<br/>
+
+<br/><h1>{% trans 'Scan count (daily)' %}</h1>
 <div id="scan_count_chart" class="flot-charts"></div>
-<br/><h1>Количество найденных уязвимостей</h1>
+
+<br/><h1>{% trans 'Vulnerability count' %}</h1>
 <div id="vuln_count_chart" class="flot-charts"></div>
+
 </div>
 </div>
 <script type="text/javascript">
@@ -57,6 +62,14 @@ $(function() {
         yaxis: { show: true,
                  minTickSize: 1,
                  tickDecimals: 0,
+        },
+        legend: {
+            labelFormatter: function(label, series) {
+                // series is the series object for the label
+                return '<a href="../target/' + label + '">' +
+                series.xaxis.ticks[series.data[0][0]]['label'] + 
+                '</a>';
+                }
         },
     };
     //top target for vulnerabilities
