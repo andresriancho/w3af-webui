@@ -115,6 +115,13 @@ class W3AF_ModelAdmin(admin.ModelAdmin):
         return super(W3AF_ModelAdmin, self).changelist_view(
                      request, extra_context)
 
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        '''Sort user by name'''
+        if db_field.name == 'user':
+            kwargs['queryset'] = User.objects.all().order_by('username')
+        return super( W3AF_ModelAdmin, self).formfield_for_foreignkey(
+                    db_field, request, **kwargs)
+
 
 class ScanProfileAdmin(W3AF_ModelAdmin):
     list_display = ['name', 'short_comment']
@@ -125,6 +132,7 @@ class ScanProfileAdmin(W3AF_ModelAdmin):
         if(request.user.has_perm('w3af_webui.view_all_data')):
             return ScanProfile.objects.all()
         return ScanProfile.objects.filter(user=request.user)
+
 
 
 class ScanAdmin(W3AF_ModelAdmin):
@@ -203,7 +211,7 @@ class ScanAdmin(W3AF_ModelAdmin):
             settings.STATIC_URL, icon,
             ))
 
-    icon.short_description = _('Status')
+    icon.short_description = _('St')
     icon.allow_tags = True
     icon.admin_order_field = 'status'
 
@@ -261,10 +269,9 @@ class ProfileTargetInline(admin.StackedInline):
     fieldsets = (
         (None, { 'classes': ('extrapretty' ),
         'fields': (( 'scan_profile'), )}), )
-
-
     """
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    '''Show only your own profiles'''
         if (db_field.name == "scan_profile" and
             not request.user.has_perm('w3af_webui.view_all_data')):
             kwargs["queryset"] = ScanProfile.objects.filter(user=request.user)

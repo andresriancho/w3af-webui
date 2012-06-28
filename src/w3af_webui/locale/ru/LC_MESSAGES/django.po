@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-28 15:47+0400\n"
-"PO-Revision-Date: 2012-06-28 16:02+0400\n"
+"POT-Creation-Date: 2012-06-28 18:03+0400\n"
+"PO-Revision-Date: 2012-06-28 18:04+0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -73,9 +73,9 @@ msgstr "Действие"
 msgid "Task name"
 msgstr "Название задачи"
 
-#: admin.py:206 admin.py:328 models.py:102 models.py:196
-msgid "Status"
-msgstr "Статус"
+#: admin.py:206
+msgid "St"
+msgstr "Ст"
 
 #: admin.py:213
 msgid "Show report"
@@ -121,6 +121,10 @@ msgstr "Активно"
 msgid "Not active"
 msgstr "Неактивно"
 
+#: admin.py:328 models.py:102 models.py:196
+msgid "Status"
+msgstr "Статус"
+
 #: admin.py:335 models.py:89
 msgid "target"
 msgstr "цель"
@@ -157,24 +161,15 @@ msgstr "Статистика"
 msgid "Stats"
 msgstr "Статус"
 
-#: extra_settings.py:14
-#, fuzzy
-msgid "JIRA, about vulnerabilities only"
-msgstr "Тип уязвимости"
-
-#: extra_settings.py:18
-msgid "JIRA"
-msgstr ""
-
-#: extra_settings.py:19 settings.py:179
-msgid "e-mail"
-msgstr ""
-
-#: extra_settings.py:21 settings.py:181
+#: extra_settings.py:14 settings.py:181
 msgid "e-mail, about vulnerabilities only"
 msgstr ""
 
-#: extra_settings.py:25 settings.py:178
+#: extra_settings.py:18 settings.py:179
+msgid "e-mail"
+msgstr ""
+
+#: extra_settings.py:19 settings.py:178
 msgid "None"
 msgstr ""
 
@@ -515,37 +510,45 @@ msgstr "Посмотреть на сайте"
 msgid "Statistic Report"
 msgstr "Статистический отчёт"
 
-#: templates/admin/w3af_webui/stats.html:18
+#: templates/admin/w3af_webui/stats.html:16
 msgid "Top 5 target by number of vulnerabilities in last scan"
-msgstr "Топ 5 сервисов по количеству уязвимостей, обнаруженных на последнем успешном сканировании"
+msgstr ""
+"Топ 5 сервисов по количеству уязвимостей, обнаруженных на последнем успешном "
+"сканировании"
+
+#: templates/admin/w3af_webui/stats.html:19
+msgid "Top 5 target by number of critical vulnerabilities in last scan"
+msgstr ""
+"Топ 5 сервисов по количеству критичных уязвимостей, обнаруженных на "
+"последнем успешном сканировании"
 
 #: templates/admin/w3af_webui/stats.html:22
-msgid "Top 5 target by number of critical vulnerabilities in last scan"
-msgstr "Топ 5 сервисов по количеству критичных уязвимостей, обнаруженных на последнем успешном сканировании"
-
-#: templates/admin/w3af_webui/stats.html:25
 msgid "Top 5 target by number of unchecked reports"
 msgstr "Топ 5 сервисов по количеству непросмотренных отчётов с уязвимостями"
 
-#: templates/admin/w3af_webui/stats.html:28
+#: templates/admin/w3af_webui/stats.html:25
 msgid "Top 5 targets by days since last successfull scan"
-msgstr "Топ 5 сервисов по количеству дней, прошедших с последнего успешного сканирования"
+msgstr ""
+"Топ 5 сервисов по количеству дней, прошедших с последнего успешного "
+"сканирования"
 
-#: templates/admin/w3af_webui/stats.html:31
+#: templates/admin/w3af_webui/stats.html:28
 msgid "Active target count"
 msgstr "Количество активных сервисов"
 
-#: templates/admin/w3af_webui/stats.html:37
+#: templates/admin/w3af_webui/stats.html:30
 msgid ""
 "Target is active if there is at least one successfull scan and all it "
 "vulnerabilities is checked in period of last 3 month before some date"
-msgstr "Сервис считается активным, если за 3 месяца до указанной даты, было хотя бы одно сканирование завершилось успешно и все уязвимости просмотрены"
+msgstr ""
+"Сервис считается активным, если за 3 месяца до указанной даты, было хотя бы "
+"одно сканирование завершилось успешно и все уязвимости просмотрены"
 
-#: templates/admin/w3af_webui/stats.html:39
+#: templates/admin/w3af_webui/stats.html:33
 msgid "Scan count (daily)"
 msgstr "Количество проведенных сканирований по дням"
 
-#: templates/admin/w3af_webui/stats.html:42
+#: templates/admin/w3af_webui/stats.html:36
 msgid "Vulnerability count"
 msgstr "Количество найденных уязвимостей"
 
@@ -639,3 +642,7 @@ msgstr "Недоступный URL"
 #: templates/admin/w3af_webui/target/change_form.html:10
 msgid "Invalid URL"
 msgstr "Неправильный URL"
+
+#, fuzzy
+#~ msgid "JIRA, about vulnerabilities only"
+#~ msgstr "Тип уязвимости"

@@ -110,6 +110,7 @@ def fail_scan(scan_id, message):
     '''
     Set scan status to fail and set message to result_message
     '''
+    print 'fail scan'
     scan = Scan.objects.get(pk=int(scan_id))
     previous_message = scan.result_message
     scan.result_message = previous_message + message
@@ -179,6 +180,9 @@ def post_finish(scan, returncode, xml_report):
     '''
     Change scan status to done if returncode and scan status is ok
     '''
+    if int(returncode) == -9:
+        # stoped by user, just return
+        return
     if int(returncode) != 0:
         # process terminated with error or fail xml report
         fail_scan(scan.id,
