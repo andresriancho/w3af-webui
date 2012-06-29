@@ -297,7 +297,8 @@ def format_date(lst):
 
 def get_last_scan_vuln(TOP_LIMIT):
     last_scan_vuln_qs = Vulnerability.objects.raw(
-        'SELECT v.id, last_scan.target_name, count(v.id) AS cnt FROM '
+        'SELECT v.id, last_scan.target_name, last_scan.target_id '
+        'as target_id, count(v.id) AS cnt FROM '
         '(SELECT max(s.id) AS id, MAX(s.start), target_id, t.name as '
         'target_name FROM scans s JOIN scan_tasks st ON (s.scan_task_id '
         '= st.id) JOIN targets t ON (st.target_id = t.id) WHERE s.status=%s '
@@ -305,7 +306,7 @@ def get_last_scan_vuln(TOP_LIMIT):
         '= last_scan.id) GROUP BY last_scan.id ORDER BY cnt DESC limit %s',
          [settings.SCAN_STATUS['done'], TOP_LIMIT])
     last_scan_vuln = json.dumps(
-            [{'label': v.id,
+            [{'label': v.target_id,
               'data': [ [i, int(v.cnt)], ] }
             for i, v in enumerate(last_scan_vuln_qs)]
     )
@@ -318,7 +319,8 @@ def get_last_scan_vuln(TOP_LIMIT):
 
 def get_last_scan_critic_vuln(TOP_LIMIT):
     last_scan_vuln_qs = Vulnerability.objects.raw(
-        'SELECT v.id, last_scan.target_name, sum(v.severity="Hight") AS cnt FROM '
+        'SELECT v.id, last_scan.target_name, last_scan.target_id '
+        'as target_id, sum(v.severity="Hight") AS cnt FROM '
         '(SELECT max(s.id) AS id, MAX(s.start), target_id, t.name as '
         'target_name FROM scans s JOIN scan_tasks st ON (s.scan_task_id '
         '= st.id) JOIN targets t ON (st.target_id = t.id) WHERE s.status=%s '
@@ -326,7 +328,7 @@ def get_last_scan_critic_vuln(TOP_LIMIT):
         '= last_scan.id) GROUP BY last_scan.id ORDER BY cnt DESC limit %s',
          [settings.SCAN_STATUS['done'], TOP_LIMIT])
     last_scan_vuln = json.dumps(
-            [{'label': v.id,
+            [{'label': v.target_id,
               'data': [
                       [i, int(v.cnt) if v.cnt is not None else 0 ],]
              } for i, v in enumerate(last_scan_vuln_qs)]
