@@ -305,12 +305,12 @@ def get_last_scan_vuln(TOP_LIMIT):
         '= last_scan.id) GROUP BY last_scan.id ORDER BY cnt DESC limit %s',
          [settings.SCAN_STATUS['done'], TOP_LIMIT])
     last_scan_vuln = json.dumps(
-            [{'label': smart_str(v.target_name),
+            [{'label': v.id,
               'data': [ [i, int(v.cnt)], ] }
             for i, v in enumerate(last_scan_vuln_qs)]
     )
     last_scan_vuln_label = json.dumps(
-                        [[i, smart_str(v.target_name)]
+                        [[i, v.target_name.encode('utf-8')]
                         for i, v in enumerate(last_scan_vuln_qs)]
     )
     return (last_scan_vuln, last_scan_vuln_label)
@@ -326,7 +326,7 @@ def get_last_scan_critic_vuln(TOP_LIMIT):
         '= last_scan.id) GROUP BY last_scan.id ORDER BY cnt DESC limit %s',
          [settings.SCAN_STATUS['done'], TOP_LIMIT])
     last_scan_vuln = json.dumps(
-            [{'label': smart_str(v.target_name),
+            [{'label': v.id,
               'data': [
                       [i, int(v.cnt) if v.cnt is not None else 0 ],]
              } for i, v in enumerate(last_scan_vuln_qs)]
@@ -344,7 +344,7 @@ def get_target_not_show_report(TOP_LIMIT):
         'JOIN targets t ON (st.target_id = t.id) WHERE s.show_report_time '
         'IS NULL GROUP BY t.id ORDER BY cnt DESC limit %s;', [TOP_LIMIT])
     top_not_show_report = json.dumps(
-                            [{'label': v.name.encode('utf-8'),
+                            [{'label': v.id,
                             'data': [ [i, int(v.cnt)], ] }
                             for i, v in enumerate(top_not_show_qs)]
     )
@@ -362,7 +362,6 @@ def get_target_downtime(TOP_LIMIT):
         'WHERE s.status = %s GROUP BY target_id ORDER BY downtime DESC '
         'limit %s;', [settings.SCAN_STATUS['done'], TOP_LIMIT] )
     downtime = json.dumps(
-                    #[{'label': v.name.encode('utf-8'),
                     [{'label': v.id,
                     'data': [ [i, int(v.downtime)], ] }
                     for i, v in enumerate(downtime_qs)]

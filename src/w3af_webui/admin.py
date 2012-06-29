@@ -211,7 +211,7 @@ class ScanAdmin(W3AF_ModelAdmin):
             settings.STATIC_URL, icon,
             ))
 
-    icon.short_description = _('St')
+    icon.short_description = _('S')
     icon.allow_tags = True
     icon.admin_order_field = 'status'
 
