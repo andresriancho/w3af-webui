@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-06-29 13:26+0400\n"
-"PO-Revision-Date: 2012-06-29 13:27+0400\n"
+"POT-Creation-Date: 2012-07-02 17:45+0400\n"
+"PO-Revision-Date: 2012-07-02 18:27+0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -37,7 +37,7 @@ msgstr ""
 "Нельзя удалить работающее сканирование. Остановите сканирование \"%s\" и "
 "попробуйте снова"
 
-#: admin.py:161 admin.py:438
+#: admin.py:161 admin.py:458
 #, python-format
 msgid "Delete selected %(verbose_name_plural)s"
 msgstr "Удалить выбранные %(verbose_name_plural)s"
@@ -61,11 +61,11 @@ msgstr "Цель"
 msgid "Description"
 msgstr "Описание"
 
-#: admin.py:185 admin.py:356
+#: admin.py:185 admin.py:376
 msgid "Stop"
 msgstr "Остановить"
 
-#: admin.py:189 admin.py:225 admin.py:363
+#: admin.py:189 admin.py:245 admin.py:383
 msgid "Action"
 msgstr "Действие"
 
@@ -73,90 +73,106 @@ msgstr "Действие"
 msgid "Task name"
 msgstr "Название задачи"
 
+#: admin.py:206
+msgid "In process"
+msgstr "Идет сканирование"
+
+#: admin.py:210
+msgid "Finish successfull"
+msgstr "Успешно завершено"
+
 #: admin.py:214
+msgid "Fail"
+msgstr "Ошибка"
+
+#: admin.py:218
+msgid "Finished successfull and vulnerabilies found"
+msgstr "Успешно завершено и найдены уязвимости"
+
+#: admin.py:234
 msgid "S"
 msgstr "С"
 
-#: admin.py:221
+#: admin.py:241
 msgid "Show report"
 msgstr "Показать отчёт"
 
-#: admin.py:223
+#: admin.py:243
 msgid "Stop scan"
 msgstr "Остановить сканирование"
 
-#: admin.py:231 admin.py:234
+#: admin.py:251 admin.py:254
 msgid "Show log"
 msgstr "Показать лог"
 
-#: admin.py:252 models.py:180 models.py:261
+#: admin.py:272 models.py:180 models.py:261
 msgid "Scan"
 msgstr "Сканирование"
 
-#: admin.py:259 templates/admin/base.html:51
+#: admin.py:279 templates/admin/base.html:51
 msgid "Scans"
 msgstr "Сканирования"
 
-#: admin.py:311
+#: admin.py:331
 msgid "Repeating"
 msgstr "Повторять"
 
-#: admin.py:324
+#: admin.py:344
 msgid "Schedule"
 msgstr "Расписание"
 
-#: admin.py:325
+#: admin.py:345
 msgid "One-time"
 msgstr "Одноразово"
 
-#: admin.py:327
+#: admin.py:347
 msgid "Run regularity"
 msgstr "Запускать регулярно"
 
-#: admin.py:332
+#: admin.py:352
 msgid "Active"
 msgstr "Активно"
 
-#: admin.py:333
+#: admin.py:353
 msgid "Not active"
 msgstr "Неактивно"
 
-#: admin.py:335 models.py:102 models.py:196
+#: admin.py:355 models.py:102 models.py:196
 msgid "Status"
 msgstr "Статус"
 
-#: admin.py:342 models.py:89
+#: admin.py:362 models.py:89
 msgid "target"
 msgstr "цель"
 
-#: admin.py:360
+#: admin.py:380
 msgid "Run now"
 msgstr "Запустить сейчас"
 
-#: admin.py:376
+#: admin.py:396
 msgid "Last scan"
 msgstr "Последнее сканирование"
 
-#: admin.py:385
+#: admin.py:405
 msgid "Tasks"
 msgstr "Задачи"
 
-#: admin.py:431
+#: admin.py:451
 #, python-format
 msgid "Cannot delete task in process. Stop task \"%s\" and try again"
 msgstr ""
 "Нельзя удалить задачу в процессе выполнения. Остановите задачу \"%s\" и "
 "попробуйте снова."
 
-#: admin.py:453 models.py:166
+#: admin.py:473 models.py:166
 msgid "Default scan profiles"
 msgstr "Профили сканирования по умолчанию"
 
-#: admin.py:459
+#: admin.py:479
 msgid "Show stats"
 msgstr "Статистика"
 
-#: admin.py:462
+#: admin.py:482
 #, fuzzy
 msgid "Stats"
 msgstr "Статус"

@@ -201,15 +201,36 @@ class ScanAdmin(W3AF_ModelAdmin):
 
     def icon(self, obj):
         icons_status = {
-            1: 'icon-in-proc.gif', # in process
-            2: 'icon-yes.gif', # done
-            3: 'icon-no.gif', # error
+           settings.SCAN_STATUS['in_process'] :
+               {'icon': 'icon-in-proc.gif', # in process
+                'hint': _('In process'),
+               },
+           settings.SCAN_STATUS['done']:
+               {'icon': 'icon-yes.gif', # done
+                'hint': _('Finish successfull'),
+               },
+           settings.SCAN_STATUS['fail']:
+               {'icon': 'icon-no.gif', # error
+                'hint': _('Fail'),
+               },
+           'done_and_find':
+               {'icon': 'icon-yes-vuln.gif', # vulnerabilies found
+                'hint': _('Finished successfull and vulnerabilies found'),
+               },
         }
-        icon = icons_status.get(obj.status)
+        status = obj.status
+        vuln_count = Vulnerability.objects.filter(scan=obj).count()
+        if vuln_count and obj.status == settings.SCAN_STATUS['done']:
+            status = 'done_and_find'
+        icon = icons_status.get(status)['icon']
+        hint = icons_status.get(status)['hint']
         return mark_safe(
-            '<img src="%s/w3af_webui/icons/%s"/>' % (
-            settings.STATIC_URL, icon,
-            ))
+            u'<img src="%s/w3af_webui/icons/%s" alt="%s" title="%s" />' % (
+                settings.STATIC_URL,
+                icon,
+                hint,
+                hint,
+        ))
 
     icon.short_description = _('S')
     icon.allow_tags = True
