@@ -386,7 +386,8 @@ def get_all_vuln(start_date, target=None):
     # All type
     scan_qset = Scan.objects.filter(start__gte=start_date)
     if target:
-        scan_qset = Scan.objects.filter(scan_task__target=target)
+        scan_qset = Scan.objects.filter(scan_task__target=target,
+                                        start__gte=start_date)
     all_type_qset = scan_qset.annotate(cnt=Count('vulnerability')
                                       ).order_by('start')
     vuln_count = format_date([[x.start, int(x.cnt) ] for x in all_type_qset])
@@ -395,15 +396,16 @@ def get_all_vuln(start_date, target=None):
     }
 
 
-def get_vuln_per_day(start_date, end_date):
+def get_vuln_by_type(start_date):
     result = [get_all_vuln(start_date)] # all type
     # Each type separatly
     for vuln_type in VulnerabilityType.objects.all():
-        scan_qset = Scan.objects.filter(
-                                Q(start__gte=start_date),
-                                Q(vulnerability__isnull=True) |
-                                Q(vulnerability__vuln_type=vuln_type)
-                                ).annotate(cnt=Count('vulnerability'))
+        scan_qset = Scan.objects.raw('SELECT s.id, s.start,'
+        'SUM(IF(v.vuln_type_id=%s,1,0)) AS cnt,'
+        ' v.vuln_type_id AS vuln_type FROM scans s LEFT JOIN vulnerabilities v '
+        'on (s.id = v.scan_id) JOIN scan_tasks st on (s.scan_task_id = st.id'
+        ') WHERE s.start>=%s GROUP BY s.id',
+        [vuln_type.id, start_date.strftime("%Y%m%d")])
         vuln_count = format_date([[x.start, int(x.cnt) ] for x in scan_qset])
         result.append({'label': vuln_type.name.encode('utf8'),
                        'data': vuln_count,
@@ -451,7 +453,7 @@ def stats(request):
     # scan per day
     scan_count = get_scan_per_day(start_date, end_date)
     # vulnerabilities per day
-    vuln_count = get_vuln_per_day(start_date, end_date)
+    vuln_count = get_vuln_by_type(start_date)
     # active target count
     active_target = get_active_target(one_year_ago, end_date)
     context = {
@@ -477,16 +479,14 @@ def get_vuln_count_by_severity_for_target(target, start_date):
     severity_queryset = Vulnerability.objects.values(
                         'severity').distinct('severity')
     for vuln in severity_queryset:
-        scan_queryset = Scan.objects.raw('SELECT s.id, s.start, COUNT(v.id) AS cnt,'
-        ' v.severity AS severity FROM scans s LEFT JOIN vulnerabilities v '
+        scan_queryset = Scan.objects.raw('SELECT s.id, s.start, '
+        'SUM(IF(v.severity=%s,1,0)) AS cnt, '
+        'v.severity AS severity FROM scans s LEFT JOIN vulnerabilities v '
         'on (s.id = v.scan_id) JOIN scan_tasks st on (s.scan_task_id = st.id'
-        ') WHERE st.target_id=%s AND s.start>=%s AND (v.id is null OR '
-        'v.severity = %s) GROUP BY s.id',
-        [target.id, start_date.strftime("%Y%m%d"), vuln['severity']])
-        data = format_date([[x.start,
-                            int(x.cnt) if x.severity is not None else 0]
-                            for x in scan_queryset
-        ])
+        ') WHERE st.target_id=%s AND s.start>=%s '
+        'GROUP BY s.id',
+        [vuln['severity'], target.id, start_date.strftime("%Y%m%d")])
+        data = format_date([[x.start,int(x.cnt)] for x in scan_queryset])
         result.append({'label': vuln['severity'].encode('utf-8'),
                        'data': data,
         })
@@ -496,16 +496,14 @@ def get_vuln_count_by_severity_for_target(target, start_date):
 def get_vuln_count_by_type_for_target(target, start_date):
     result =  [get_all_vuln(start_date, target)] # all type
     for vuln_type in VulnerabilityType.objects.all():
-        queryset = Scan.objects.raw('SELECT s.id, s.start, COUNT(v.id) AS cnt,'
+        queryset = Scan.objects.raw('SELECT s.id, s.start,'
+        'SUM(IF(v.vuln_type_id=%s,1,0)) AS cnt,'
         ' v.vuln_type_id AS vuln_type FROM scans s LEFT JOIN vulnerabilities v '
         'on (s.id = v.scan_id) JOIN scan_tasks st on (s.scan_task_id = st.id'
-        ') WHERE st.target_id=%s AND s.start>=%s  AND (v.id is null OR '
-        'v.vuln_type_id = %s) GROUP BY s.id',
-        [target.id, start_date.strftime("%Y%m%d"), vuln_type.id])
-        data = format_date([[x.start,
-                            int(x.cnt) if x.vuln_type is not None else 0]
-                            for x in queryset
-        ])
+        ') WHERE st.target_id=%s AND s.start>=%s  '
+        ' GROUP BY s.id',
+        [vuln_type.id, target.id, start_date.strftime("%Y%m%d")])
+        data = format_date([[x.start, int(x.cnt)] for x in queryset])
         result.append({'label': vuln_type.name.encode('utf8'),
                        'data': data,
         })
