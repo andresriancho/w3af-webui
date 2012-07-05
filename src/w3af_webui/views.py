@@ -384,7 +384,7 @@ def get_scan_per_day(start_date, end_date):
 
 def get_all_vuln(start_date, target=None):
     # All type
-    scan_qset = Scan.objects.all()
+    scan_qset = Scan.objects.filter(start__gte=start_date)
     if target:
         scan_qset = Scan.objects.filter(scan_task__target=target)
     all_type_qset = scan_qset.annotate(cnt=Count('vulnerability')
@@ -517,7 +517,7 @@ def not_show_time_for_target(target_id, start_date):
         ' - TO_DAYS(s.finish) as now_minus_finish, TO_DAYS(s.show_report_time)'
         ' - TO_DAYS(s.finish) as show_minus_finish from scans s JOIN '
         'scan_tasks st on (s.scan_task_id = st.id) WHERE st.target_id=%s AND '
-        's.status = %s AND s.start>=%s',
+        's.status = %s AND s.start>=%s ORDER BY s.start',
         [target_id, settings.SCAN_STATUS['done'],
         start_date.strftime("%Y%m%d"),
     ])
