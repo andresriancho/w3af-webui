@@ -259,16 +259,19 @@ class VulnerabilityType(models.Model):
 class Vulnerability(models.Model):
     id = models.AutoField(_('id'), primary_key=True)
     scan = models.ForeignKey(Scan, verbose_name=_('Scan'))
-    severity = models.CharField(_('Severity'), max_length=30,
-                               null=True)
+    severity = models.CharField(_('Severity'),
+                                max_length=30,
+                                null=True,
+    )
     vuln_type = models.ForeignKey(VulnerabilityType,
                                   verbose_name=_('Vulnerability type'),
-                                  null=True)
+                                  null=True,
+    )
     description = models.TextField(_('Description'), blank=True, null=True)
     http_transaction = models.TextField(_('HTTP Transaction'),
                                         blank=True,
                                         null=True,
-                                        )
+    )
 
     def __unicode__(self):
         return u'%s' % self.vuln_type

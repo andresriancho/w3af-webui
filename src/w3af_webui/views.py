@@ -384,13 +384,11 @@ def get_scan_per_day(start_date, end_date):
 
 def get_all_vuln(start_date, target=None):
     # All type
+    scan_qset = Scan.objects.all()
     if target:
-        all_type_qset = Scan.objects.filter(
-                        scan_task__target=target).annotate(
-                                        cnt=Count('vulnerability'))
-    else:
-        all_type_qset = Scan.objects.all().annotate(
-                                        cnt=Count('vulnerability'))
+        scan_qset = Scan.objects.filter(scan_task__target=target)
+    all_type_qset = scan_qset.annotate(cnt=Count('vulnerability')
+                                      ).order_by('start')
     vuln_count = format_date([[x.start, int(x.cnt) ] for x in all_type_qset])
     return {'label': 'all',
             'data': vuln_count,
@@ -476,7 +474,8 @@ def stats(request):
 
 def get_vuln_count_by_severity_for_target(target, start_date):
     result = [get_all_vuln(start_date, target)] # all type
-    severity_queryset = Vulnerability.objects.values('severity').distinct('severity')
+    severity_queryset = Vulnerability.objects.values(
+                        'severity').distinct('severity')
     for vuln in severity_queryset:
         scan_queryset = Scan.objects.raw('SELECT s.id, s.start, COUNT(v.id) AS cnt,'
         ' v.severity AS severity FROM scans s LEFT JOIN vulnerabilities v '
