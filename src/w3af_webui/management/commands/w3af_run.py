@@ -30,7 +30,7 @@ def send_notification(scan):
     Send notification using method notify from module,
     set as settings.NOTIFY_MODULES[notify_set]['module']
     '''
-    notify_set =  scan.scan_task.user.get_profile().notification
+    notify_set =  scan.user.get_profile().notification
     try:
         if settings.NOTIFY_MODULES[notify_set]['id'] == 'None':
             # No notification
@@ -135,7 +135,7 @@ def save_vulnerabilities(scan, xml_report):
         errors_message = '<br>'.join(
                 ['Error from %s: %s' %  (error.get('caller'), error.text)
                  for error in errors]
-                 )
+        )
         scan.result_message = errors_message
         scan.save()
         if 'Error from w3afCore' in errors_message:
@@ -159,7 +159,7 @@ def save_vulnerabilities(scan, xml_report):
                 http_transaction += '%s: %s\n' % (
                         header.get('field').strip(),
                         header.get('content').strip(),
-                                   )
+                )
             Vulnerability.objects.create(scan=scan,
                                          severity=severity,
                                          vuln_type=vuln_type,
@@ -168,11 +168,11 @@ def save_vulnerabilities(scan, xml_report):
                                          )
         return True
     except Exception, e:
-        scan.result_message = 'Internal w3af_webui error in save vulnerabilies'
+        scan.result_message = ('Internal w3af_webui error in save '
+                              'vulnerabilies: %s' % e)
         scan.save()
         logger.error('Error in file w3af_run:save_vulnerabilities: '
-                     'Cannot parse xml report for scan %s: %s' % (scan.id, e)
-                    )
+                     'Cannot parse xml report for scan %s: %s' % (scan.id, e))
         return False
 
 
