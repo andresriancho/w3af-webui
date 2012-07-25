@@ -14,7 +14,7 @@
 <table class="targets">
     <tr>
         <th>{% trans 'Targets' %}</th>
-         <td>{{ target|escape }}</td>
+        <td>{{ target|escape }}</td>
      </tr>
 </table>
 <br/>
@@ -31,6 +31,21 @@
     <tr><th colspan="2">{{ vuln.plugin }} / {{ vuln.severity }}</th></tr>
     <tr><th>{% trans 'Issue' %} </th><td>{{ vuln.desc|escape }}</td></tr>
     <tr><th>{% trans 'HTTP Transaction' %}</td><td><textarea readonly="true">{{ vuln.http_trans|escape }}</textarea></td></tr>
+    <tr><th colspan="2">
+    <div>
+            <a href="#" class="markFalsePositive" 
+            id="mark_false_positive_{{ vuln.id }}">
+            {% if vuln.is_false_positive %}
+            {% trans 'Cansel False Positive' %}</a>
+            {% else %}
+            {% trans 'Mark False Positive' %}</a>
+            {% endif %}
+            <br/> 
+            <br/> 
+            {% block extra_vulnerability %}
+            {% endblock %}
+    <div/>
+    </th></tr>
 </table>
 <br />
 <br />
@@ -43,6 +58,34 @@
     $('#severity').change(function() {
         $('#severity_form').submit();
     });
+    
+    function mark_false_positive(form_id) {
+        data = {
+            'vuln_id': form_id,
+            'csrfmiddlewaretoken': '{{ csrf_token }}'
+        }
+        $.post('/mark_vuln_false_positive/', data, function(data){
+            if (data.status == 'ok') {
+                var false_positive_link = $('#mark_false_positive_'+form_id);
+                if (data.is_positive) {
+                    false_positive_link.text('Cansel False Positive');
+                }
+                else {
+                    false_positive_link.text('Mark False Positive');
+                }
+            }
+            else {
+                alert("Something goes wrong, try again...");
+            }
+        }, 'json');
+   }
+
+    $('a.markFalsePositive').click(function() {
+         form_id=this.id.split('_');
+         mark_false_positive(form_id[form_id.length-1]);
+         return false;
+     });
+
  })(django.jQuery);
 </script>
 

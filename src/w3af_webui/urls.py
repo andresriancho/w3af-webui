@@ -14,6 +14,7 @@ admin.autodiscover()
 urlpatterns = patterns('w3af_webui.views',
     ('^check_url/$', 'check_url'),
     ('^post_ticket/$', 'post_ticket'),
+    ('^mark_vuln_false_positive/$', 'mark_vuln_false_positive'),
     ('^show_report/(\d+)/$', 'show_report'),
     ('^show_report_txt/(\d+)/$', 'show_report_txt'),
     ('^stop_scan/$', 'stop_scan'),

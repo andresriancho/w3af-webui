@@ -193,11 +193,13 @@ def get_filtered_vulnerabilities(scan, severity):
                      'severity',
                      'desc',
                      'http_trans',
+                     'is_false_positive',
                     ]
-
     allowed_values = settings.SEVERITY_DICT[severity]
-    vulnerabilities = Vulnerability.objects.filter(scan=scan,
-                                        severity__in=allowed_values)
+    vulnerabilities = Vulnerability.objects.filter(
+                            scan=scan,
+                            severity__in=allowed_values,
+                            )
     vuln_list = []
     for vuln in vulnerabilities:
         vulnerability = Issue()
@@ -206,9 +208,9 @@ def get_filtered_vulnerabilities(scan, severity):
         vulnerability.severity = vuln.severity
         vulnerability.desc = vuln.description
         vulnerability.http_trans = vuln.http_transaction
+        vulnerability.is_false_positive = vuln.is_false_positive
         vuln_list.append(vulnerability)
     return vuln_list
-
 
 
 @csrf_protect
@@ -234,12 +236,33 @@ def show_report(request, scan_id):
        'target_comment': scan.scan_task.target.comment,
        'error_message': scan.result_message.split("<br>"),
     }
-    template =  getattr(settings,
+    template = getattr(settings,
                         'VULNERABILITY_TEMPLATE',
                         'admin/w3af_webui/vulnerabilities.html')
     return render_to_response(template,
                               context,
                               context_instance=RequestContext(request))
+
+
+@csrf_protect
+def mark_vuln_false_positive(request):
+    """
+    View for ajax request for mark vulnerability as false positive
+    """
+    vuln_id = request.POST['vuln_id']
+    try:
+        vuln = Vulnerability.objects.get(pk=vuln_id)
+        vuln.is_false_positive = not vuln.is_false_positive
+        vuln.save()
+        json_data = json.dumps({
+            'status': 'ok',
+            'is_positive': vuln.is_false_positive,
+        })
+    except:
+        json_data = json.dumps({
+            'status': 'fail',
+        })
+    return HttpResponse(json_data, mimetype='json')
 
 
 @csrf_protect

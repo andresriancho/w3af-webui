@@ -70,6 +70,10 @@
             |
             <a href="/auth/user/">{% trans 'Users' %}</a>
             {% endif %}
+            {% if perms.auth.change_group %} |
+            <a href="/auth/group/">{% trans 'User groups' %}</a>
+            {% endif %}
+
         </div>
         {% endif %}
         {% block nav-global %}{% endblock %}

@@ -60,11 +60,12 @@ def generate_cron_never(*args, **kwargs):
 class CustomUserAdmin(UserAdmin):
     list_filter = ()
     list_display = (
-                    'username',
+                    'is_sudo',
+                    'get_username',
                     'first_name',
                     'last_name',
                     'email',
-                    'is_superuser',
+                    'get_user_group',
                     )
     fieldsets = (
                 ( _('Personal info'), {
@@ -79,6 +80,29 @@ class CustomUserAdmin(UserAdmin):
                                ),
                 }),
     )
+
+    def get_user_group(self, obj):
+        group_names = [g.name for g in obj.groups.all()]
+        return ', '.join(group_names)
+
+    get_user_group.allow_tags = True
+    get_user_group.short_description = _('User group')
+
+    def get_username(self, obj):
+        return mark_safe(u"<a href='/auth/user/%s'>%s</a> " % (
+               obj.id,
+               obj.username,
+        ))
+
+    get_username.allow_tags = True
+    get_username.short_description = _('User')
+
+    def is_sudo(self, obj):
+        return obj.is_superuser
+
+    is_sudo.short_description = _('SU')
+    is_sudo.allow_tags = True
+    is_sudo.boolean = True
 
     def save_model(self, request, obj, form, change):
         obj.is_staff=True
@@ -132,7 +156,6 @@ class ScanProfileAdmin(W3AF_ModelAdmin):
         if(request.user.has_perm('w3af_webui.view_all_data')):
             return ScanProfile.objects.all()
         return ScanProfile.objects.filter(user=request.user)
-
 
 
 class ScanAdmin(W3AF_ModelAdmin):
@@ -278,7 +301,6 @@ class ScanAdmin(W3AF_ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         extra_context = {'title': u'%s' % _('Scans'), }
-        self.list_per_page = request.user.get_profile().list_per_page
         return super(ScanAdmin, self).changelist_view(request,
                                                       extra_context)
 
@@ -357,8 +379,10 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
     get_status.allow_tags = True
 
     def target_name(self, obj):
-        return mark_safe(u'<a href="../target/%s/">'
-                        u'%s</a>' % (obj.target.id, obj.target.name))
+        if self.can_change_target:
+            return mark_safe(u'<a href="../target/%s/">'
+                            u'%s</a>' % (obj.target.id, obj.target.name))
+        return obj.target.name
 
     target_name.short_description = _('target')
     target_name.allow_tags = True
@@ -404,6 +428,9 @@ class ScanTaskAdmin(W3AF_ModelAdmin):
 
     def changelist_view(self, request, extra_context=None):
         extra_context = {'title': u'%s' % _('Tasks'), }
+        self.can_change_target = False
+        if request.user.has_perm('w3af_webui.change_target'):
+            self.can_change_target = True
         return super(ScanTaskAdmin, self).changelist_view(request,
                                                           extra_context)
 

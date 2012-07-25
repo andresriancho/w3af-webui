@@ -146,7 +146,7 @@ LANGUAGES = (
 
 SEVERITY_FILTER = (
             ('all', _('All'), ('Low', 'Medium', 'High', 'Information')),
-            ('high', _('High'), ('High',)),
+            ('high', _('Hight'), ('High',)),
             ('medium_and_more', _('Medium and higher'), ('High', 'Medium',)),
             ('medium', _('Medium'), ('Medium',)),
             ('low', _('Low'), ('Low',)),

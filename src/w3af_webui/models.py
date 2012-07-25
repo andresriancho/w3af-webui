@@ -261,17 +261,15 @@ class Vulnerability(models.Model):
     scan = models.ForeignKey(Scan, verbose_name=_('Scan'))
     severity = models.CharField(_('Severity'),
                                 max_length=30,
-                                null=True,
-    )
+                                null=True)
     vuln_type = models.ForeignKey(VulnerabilityType,
                                   verbose_name=_('Vulnerability type'),
-                                  null=True,
-    )
+                                  null=True)
     description = models.TextField(_('Description'), blank=True, null=True)
     http_transaction = models.TextField(_('HTTP Transaction'),
                                         blank=True,
-                                        null=True,
-    )
+                                        null=True)
+    is_false_positive = models.BooleanField('Is false Positive', default=False)
 
     def __unicode__(self):
         return u'%s' % self.vuln_type
