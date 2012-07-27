@@ -249,6 +249,7 @@ def mark_vuln_false_positive(request):
     """
     View for ajax request for mark vulnerability as false positive
     """
+    return HttpResponse(json.dumps({'status': 'fail', }), mimetype='json')
     vuln_id = request.POST['vuln_id']
     try:
         vuln = Vulnerability.objects.get(pk=vuln_id)
