@@ -86,7 +86,7 @@ class install(_install):
             not check_version_dependencies() or
             not check_py_dependencies()):
             print 'Can not find all requires'
-            raise EnvironmentError
+            #raise EnvironmentError
         _install.run(self)
 
 setup(
