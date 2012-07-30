@@ -19,9 +19,19 @@
 </table>
 <br/>
 <form id="severity_form" action="" method="get">
+    <span  style="padding:0px 5px;">
     {% trans 'Filter by severity:' %} 
     {{ severity_filter|safe }}
+    </span>
+    <span  style="padding:0px 5px;">
+    <input type="checkbox" id="show_false_positive"
+        name="show_false_positive"
+        value="checked" {{ show_false_positive}} >
+    {%trans 'Show false positive'%}
+    </input>
+    </span>
 </form>
+
 <br />
 <h2>{% trans 'Security Issues' %}</h2>
 {% if vulns %}
@@ -39,9 +49,7 @@
             {% trans 'Cansel False Positive' %}</a>
             {% else %}
             {% trans 'Mark False Positive' %}</a>
-            {% endif %}
-            <br/> 
-            <br/> 
+            {% endif %} 
             {% block extra_vulnerability %}
             {% endblock %}
     <div/>
@@ -59,11 +67,16 @@
         $('#severity_form').submit();
     });
     
+    $('#show_false_positive').change(function() {
+        $('#severity_form').submit();
+    });
+    
     function mark_false_positive(form_id) {
         data = {
             'vuln_id': form_id,
             'csrfmiddlewaretoken': '{{ csrf_token }}'
         }
+    
         $.post('/mark_vuln_false_positive/', data, function(data){
             if (data.status == 'ok') {
                 var false_positive_link = $('#mark_false_positive_'+form_id);
@@ -77,8 +90,8 @@
             else {
                 alert("Something goes wrong, try again...");
             }
-        }, 'json');
-   }
+            }, 'json');
+    }
 
     $('a.markFalsePositive').click(function() {
          form_id=this.id.split('_');
@@ -86,7 +99,7 @@
          return false;
      });
 
- })(django.jQuery);
+})(django.jQuery);
 </script>
 
 {% endblock %}

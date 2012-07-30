@@ -186,7 +186,7 @@ def post_vulnerability(request, scan_id):
     return redirect('/show_report/%s/' % scan_id)
 
 
-def get_filtered_vulnerabilities(scan, severity):
+def get_filtered_vulnerabilities(scan, severity, show_false_positive):
     class Issue:
         __slots__ = ['id',
                      'plugin',
@@ -195,10 +195,14 @@ def get_filtered_vulnerabilities(scan, severity):
                      'http_trans',
                      'is_false_positive',
                     ]
+    allowed_false_positive = (show_false_positive,)
+    if show_false_positive: # show false positive and not false positive
+        allowed_false_positive = (True, False)
     allowed_values = settings.SEVERITY_DICT[severity]
     vulnerabilities = Vulnerability.objects.filter(
                             scan=scan,
                             severity__in=allowed_values,
+                            is_false_positive__in=allowed_false_positive,
                             )
     vuln_list = []
     for vuln in vulnerabilities:
@@ -225,7 +229,10 @@ def show_report(request, scan_id):
         scan.show_report_time = datetime.now()
         scan.save()
     severity = request.GET.get('severity', 'all')
-    vuln_list = get_filtered_vulnerabilities(scan, severity)
+    show_false_positive = request.GET.get('show_false_positive', '')
+    vuln_list = get_filtered_vulnerabilities(scan,
+                                             severity,
+                                             show_false_positive)
     severity_filter = get_select_code(severity,
                                       settings.SEVERITY_FILTER,
                                       'severity')
@@ -233,6 +240,7 @@ def show_report(request, scan_id):
        'target': scan.scan_task.target.url,
        'vulns': vuln_list,
        'severity_filter': severity_filter,
+       'show_false_positive': show_false_positive,
        'target_comment': scan.scan_task.target.comment,
        'error_message': scan.result_message.split("<br>"),
     }
@@ -249,7 +257,7 @@ def mark_vuln_false_positive(request):
     """
     View for ajax request for mark vulnerability as false positive
     """
-    return HttpResponse(json.dumps({'status': 'fail', }), mimetype='json')
+    #return HttpResponse(json.dumps({'status': 'fail', }), mimetype='json')
     vuln_id = request.POST['vuln_id']
     try:
         vuln = Vulnerability.objects.get(pk=vuln_id)
@@ -327,7 +335,9 @@ def get_last_scan_vuln(TOP_LIMIT):
         'target_name FROM scans s JOIN scan_tasks st ON (s.scan_task_id '
         '= st.id) JOIN targets t ON (st.target_id = t.id) WHERE s.status=%s '
         'GROUP BY target_id) last_scan JOIN vulnerabilities v on (v.scan_id '
-        '= last_scan.id) GROUP BY last_scan.id ORDER BY cnt DESC limit %s',
+        '= last_scan.id) '
+        'AND v.is_false_positive=false '
+        'GROUP BY last_scan.id ORDER BY cnt DESC limit %s',
          [settings.SCAN_STATUS['done'], TOP_LIMIT])
     last_scan_vuln = json.dumps(
             [{'label': v.target_id,
@@ -349,7 +359,9 @@ def get_last_scan_critic_vuln(TOP_LIMIT):
         'target_name FROM scans s JOIN scan_tasks st ON (s.scan_task_id '
         '= st.id) JOIN targets t ON (st.target_id = t.id) WHERE s.status=%s '
         'GROUP BY target_id) last_scan JOIN vulnerabilities v on (v.scan_id '
-        '= last_scan.id) GROUP BY last_scan.id ORDER BY cnt DESC limit %s',
+        '= last_scan.id) '
+        'AND v.is_false_positive=false '
+        'GROUP BY last_scan.id ORDER BY cnt DESC limit %s',
          [settings.SCAN_STATUS['done'], TOP_LIMIT])
     last_scan_vuln = json.dumps(
             [{'label': v.target_id,
@@ -364,11 +376,13 @@ def get_last_scan_critic_vuln(TOP_LIMIT):
 
 def get_target_not_show_report(TOP_LIMIT):
     # top targets with max count of unshow report (only successfull scans)
+    # scan is successfull if status = done and count of vulnerabilities > 0
     top_not_show_qs = Target.objects.raw('SELECT t.id, t.name, '
         'COUNT(DISTINCT(s.id)) AS cnt FROM vulnerabilities v JOIN scans s ON '
         '(scan_id = s.id) JOIN scan_tasks st ON (s.scan_task_id = st.id) '
         'JOIN targets t ON (st.target_id = t.id) WHERE s.show_report_time '
-        'IS NULL GROUP BY t.id ORDER BY cnt DESC limit %s;', [TOP_LIMIT])
+        'IS NULL '
+        'GROUP BY t.id ORDER BY cnt DESC limit %s;', [TOP_LIMIT])
     top_not_show_report = json.dumps(
                             [{'label': v.id,
                             'data': [ [i, int(v.cnt)], ] }
@@ -405,15 +419,25 @@ def get_scan_per_day(start_date, end_date):
     scan_values = scan_qsstats.time_series(start_date, end_date, interval='days')
     return format_date(scan_values)
 
-
+# add is_false_positive=false
 def get_all_vuln(start_date, target=None):
     # All type
     scan_qset = Scan.objects.filter(start__gte=start_date)
+    target_condition = ' '
     if target:
-        scan_qset = Scan.objects.filter(scan_task__target=target,
-                                        start__gte=start_date)
-    all_type_qset = scan_qset.annotate(cnt=Count('vulnerability')
-                                      ).order_by('start')
+        target_condition = 'AND st.target_id=%s ' % target.id
+        print target_condition
+        #scan_qset = Scan.objects.filter(scan_task__target=target,
+        #                                start__gte=start_date)
+    #all_type_qset = scan_qset.annotate(cnt=Count('vulnerability')
+    #                                  ).order_by('start')
+    all_type_qset = Scan.objects.raw('SELECT s.id, s.start,'
+        'SUM(IF(v.is_false_positive=false,1,0)) AS cnt,'
+        ' v.vuln_type_id AS vuln_type FROM scans s LEFT JOIN vulnerabilities v '
+        'on (s.id = v.scan_id) JOIN scan_tasks st on (s.scan_task_id = st.id'
+        ') WHERE s.start>=%s ' + target_condition +
+        'GROUP BY s.id',
+        [start_date.strftime("%Y%m%d")])
     vuln_count = format_date([[x.start, int(x.cnt) ] for x in all_type_qset])
     return {'label': 'all',
             'data': vuln_count,
@@ -425,10 +449,11 @@ def get_vuln_by_type(start_date):
     # Each type separatly
     for vuln_type in VulnerabilityType.objects.all():
         scan_qset = Scan.objects.raw('SELECT s.id, s.start,'
-        'SUM(IF(v.vuln_type_id=%s,1,0)) AS cnt,'
+        'SUM(IF(v.vuln_type_id=%s AND v.is_false_positive=false,1,0)) AS cnt,'
         ' v.vuln_type_id AS vuln_type FROM scans s LEFT JOIN vulnerabilities v '
         'on (s.id = v.scan_id) JOIN scan_tasks st on (s.scan_task_id = st.id'
-        ') WHERE s.start>=%s GROUP BY s.id',
+        ') WHERE s.start>=%s '
+        'GROUP BY s.id',
         [vuln_type.id, start_date.strftime("%Y%m%d")])
         vuln_count = format_date([[x.start, int(x.cnt) ] for x in scan_qset])
         result.append({'label': vuln_type.name.encode('utf8'),
@@ -504,7 +529,7 @@ def get_vuln_count_by_severity_for_target(target, start_date):
                         'severity').distinct('severity')
     for vuln in severity_queryset:
         scan_queryset = Scan.objects.raw('SELECT s.id, s.start, '
-        'SUM(IF(v.severity=%s,1,0)) AS cnt, '
+        'SUM(IF(v.severity=%s AND v.is_false_positive=false,1,0)) AS cnt,'
         'v.severity AS severity FROM scans s LEFT JOIN vulnerabilities v '
         'on (s.id = v.scan_id) JOIN scan_tasks st on (s.scan_task_id = st.id'
         ') WHERE st.target_id=%s AND s.start>=%s '
@@ -521,7 +546,7 @@ def get_vuln_count_by_type_for_target(target, start_date):
     result =  [get_all_vuln(start_date, target)] # all type
     for vuln_type in VulnerabilityType.objects.all():
         queryset = Scan.objects.raw('SELECT s.id, s.start,'
-        'SUM(IF(v.vuln_type_id=%s,1,0)) AS cnt,'
+        'SUM(IF(v.vuln_type_id=%s AND v.is_false_positive=false,1,0)) AS cnt,'
         ' v.vuln_type_id AS vuln_type FROM scans s LEFT JOIN vulnerabilities v '
         'on (s.id = v.scan_id) JOIN scan_tasks st on (s.scan_task_id = st.id'
         ') WHERE st.target_id=%s AND s.start>=%s  '
