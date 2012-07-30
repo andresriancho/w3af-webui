@@ -17,47 +17,32 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--role',
                     dest='role',
-                    default='manager',
-                    help='Setup roles set for user(s): %s' %
-                    settings.USER_ROLES
+                    default='user',
+                    help='Setup roles set for user(s)', 
                     ),
         )
 
     def handle(self, *args, **options):
-        user_examples = {}
-        user_profiles = settings.USER_ROLES
+        user = {}
         for username in args:
-            user_examples[username] = user_profiles[options['role']]
+            user[username] = options['role']
 
-        for username in user_examples.keys():
+        for username in user.keys():
             new_user = None
             try:
                 new_user = User.objects.get(username=username)
-                logger.info("Update %s \"%s\" <%s>" % (
-                            user_examples[username]['description'],
-                            username,
-                            user_examples[username]['email_prefix']))
             except User.DoesNotExist:
                 new_user = User.objects.create_user(
                         username,
                         '',
                         username)
-                logger.info("Create %s \"%s\" <%s>" % (
-                            user_examples[username]['description'],
-                            username,
-                            user_examples[username]['email_prefix']))
-
             new_user.is_staff = True
             new_user.groups = []
-            for group_name in user_examples[username]['groups']:
-                full_group_name = '%s_%s' % (APP,
-                                             group_name)
-                try:
-                    group_object = Group.objects.get(name=full_group_name)
-                except Group.DoesNotExist:
-                    print 'Wrong group name %s' % group_name
-                    continue
-                new_user.groups.add(group_object)
+            if user[username] == 'admin':
+                new_user.is_superuser = True
+                new_user.save()
+                continue
+            group_object = Group.objects.get(name=user[username])
+            new_user.groups.add(group_object)
             new_user.save()
             print 'Setting role for user %s has done' % username
-

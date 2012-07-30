@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
 from logging import getLogger
 
 from django.contrib.auth.models import Group
@@ -28,6 +27,7 @@ def create_superuser():
     superuser.is_staff = True
     superuser.save()
 
+
 def create_permission(codename, description):
     permission_content_type = ContentType.objects.get(
                             app_label='auth', name='permission')
@@ -45,29 +45,16 @@ def init_user_group(app, **kwargs):
     create_superuser()
     create_permission('view_all_data',
                       'Can use other user`s objects')
-    # user groups
-    need_groups_names = ('Scan', 'ScanProfile', 'ScanTask', 'Target',)
-    for name in need_groups_names:
-        group_name = '%s_%s_manage' % (app, name.lower())
-        group, created = Group.objects.get_or_create(name=group_name)
-        group.permissions.clear()
-        content_type = ContentType.objects.get(app_label=app,
-                                               model=name.lower())
-        for permission in Permission.objects.filter(
-                            content_type=content_type):
-            group.permissions.add(permission)
-        group.save()
-    # w3af_webui_auth_manager
-    group_name = '%s_auth_manage' % app
-    group_obj, created = Group.objects.get_or_create(name=group_name)
-    for permission in Permission.objects.filter(
-                            content_type=ContentType.objects.filter(
-                            app_label='auth', name='user')):
-        group_obj.permissions.add(permission)
-    # add stat_manager group
     view_stat = create_permission('view_stats',
                                   'Can use statistic reports')
-    group_obj, created = Group.objects.get_or_create(name='%s_stat_manager' % app)
-    group_obj.permissions.add(view_stat)
+    # user groups
+    for user_group in settings.USER_GROUPS:
+        group_name = user_group['name']
+        group, created = Group.objects.get_or_create(name=group_name)
+        group.permissions.clear()
+        for codename in user_group['permissions']:
+            permission = Permission.objects.get(codename=codename)
+            group.permissions.add(permission)
+        group.save()
 
 post_migrate.connect(init_user_group)

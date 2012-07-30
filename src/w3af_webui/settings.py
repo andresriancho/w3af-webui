@@ -206,48 +206,62 @@ FSCAN_TDELTA = {
     'max': timedelta(seconds=62),
     'min': timedelta(seconds=1),
 }
+ # list of permission's codenames for group User 
+user_permission_list = [
+            # about scantask model
+            'add_scantask',
+            'change_scantask',
+            'delete_scantask',
+            # about scan model
+            'add_scan',
+            'change_scan',
+            'delete_scan',
+            # about vulnerabilitytype model
+            'add_vulnerabilitytype',
+            'change_vulnerabilitytype',
+            'delete_vulnerabilitytype',
+            # about vulnerability model
+            'add_vulnerability',
+            'change_vulnerability',
+            'delete_vulnerability',
+            # about profilestasks model
+            #'add_profilestasks',
+            #'change_profilestasks',
+            #'delete_profilestasks',
+        ]
+
+ # list of permission's codenames for group Advanced User 
+advanced_user_permission_list = user_permission_list + [
+            # about profilestargets model
+            'add_profilestargets',
+            'change_profilestargets',
+            'delete_profilestargets',
+            # about target model
+            'add_target',
+            'change_target',
+            'delete_target',
+            # about scanprofile model
+            'add_scanprofile',
+            'change_scanprofile',
+            'delete_scanprofile',
+            # about profilestasks model
+            'add_profilestasks',
+            'change_profilestasks',
+            'delete_profilestasks',
+            # permition view statistic
+            'view_stats',
+        ]
 
 # User permissions configuration
-# It describe logic group for command set_user_role
-# You can run manage.py set_role_for_user <username> --role admin
-# And <username> will be included in all django group from
-# USER_ROLES['admin']['groups'] 
-USER_ROLES = {
-            'admin' : {
-                'email_prefix' : 'admin',
-                'groups' : ['scan_manage',
-                            'scanprofile_manage',
-                            'target_manage',
-                            'auth_manage',
-                            'scantask_manage',
-                            ],
-                'description' : 'admin',
-            },
-            'manager' : {
-                'email_prefix' : 'manager',
-                'groups' : ['scan_manage','scantask_manage',],
-                'description' : 'manager (can start scans)',
-            },
-            'advanced_manager' : {
-                'email_prefix' : 'advanced_manager',
-                'groups' : ['scan_manage',
-                            'scanprofile_manage',
-                            'scantask_manage',
-                           ],
-                'description' : 'advanced manager (can start scans'
-                                ' and configure scan profiles)',
-            },
-            'engineer' : {
-                'email_prefix' : 'engineer',
-                'groups' : ['scan_manage',
-                            'scanprofile_manage',
-                            'target_manage',
-                            'scantask_manage',
-                           ],
-                'description' : 'engineer (can add targets, configure'
-                                ' scan profiles and start scans)',
-            },
-        }
+USER_GROUPS = ({
+        'name': 'User',
+        'permissions': user_permission_list,
+    },
+    {
+        'name': 'Advanced user',
+        'permissions': advanced_user_permission_list,
+    },
+)
 
 # Name of one of the field for target page
 TARGET_COMMENT_LABEL = _('Comment')
