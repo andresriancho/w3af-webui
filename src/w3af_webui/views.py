@@ -601,4 +601,12 @@ def target_stats(request, target_id):
     return render_to_response('admin/w3af_webui/target_stats.html',
                               context,
                               context_instance=RequestContext(request))
+@login_required
+def show_http_transaction(request, vuln_id):
+    obj = Vulnerability.objects.get(id=vuln_id)
+    if (not request.user.has_perm('w3af_webui.view_all_data') and
+        obj.scan.user != request.user):
+        return HttpResponseForbidden()
+    return HttpResponse(obj.http_transaction, mimetype='text/plain')
+
 

@@ -40,7 +40,13 @@
 <table class="issues">
     <tr><th colspan="2">{{ vuln.plugin }} / {{ vuln.severity }}</th></tr>
     <tr><th>{% trans 'Issue' %} </th><td>{{ vuln.desc|escape }}</td></tr>
-    <tr><th>{% trans 'HTTP Transaction' %}</td><td><textarea readonly="true">{{ vuln.http_trans|escape }}</textarea></td></tr>
+    <tr><th colspan=2>
+    <a target=_blanck href='/http_transaction/{{ vuln.id }}'> {% trans 'HTTP Transaction' %}</a>
+    <br>
+    </th>
+    <!--<textarea readonly="true">{{ vuln.http_trans|escape }}</textarea></td>
+    -->
+    </tr>
     <tr><th colspan="2">
     <div>
             <a href="#" class="markFalsePositive" 

@@ -150,21 +150,37 @@ def save_vulnerabilities(scan, xml_report):
             vuln_type, created = VulnerabilityType.objects.get_or_create(
                                     name=type_name)
             description = issue.getiterator(tag='description')[0].text.strip()
-            request = issue.getiterator(tag='httprequest')[0]
-            status = request.getiterator(tag='status')[0]
-            http_transaction = status.text.strip() + '\n'
-            headers = request.getiterator(tag='headers')[0]
-            header_list = list(headers.getiterator(tag='header'))
-            for header in header_list:
-                http_transaction += '%s: %s\n' % (
-                        header.get('field').strip(),
-                        header.get('content').strip(),
-                )
+            transaction_list = list(issue.getiterator(tag='http-transactions'))
+            http_transaction = ''
+            for transaction in transaction_list:
+                request = transaction.getiterator(tag='httprequest')[0]
+                status = request.getiterator(tag='status')[0]
+                http_transaction += '================= Request =============\n'
+                http_transaction += status.text.strip() + '\n'
+                headers = request.getiterator(tag='headers')[0]
+                header_list = list(headers.getiterator(tag='header'))
+                for header in header_list:
+                    http_transaction += '%s: %s\n' % (
+                            header.get('field').strip(),
+                            header.get('content').strip(),
+                    )
+                http_transaction += '================= Response =============\n'
+                response = transaction.getiterator(tag='httpresponse')[0]
+                status = response.getiterator(tag='status')[0]
+                http_transaction += status.text.strip() + '\n'
+                headers = response.getiterator(tag='headers')[0]
+                header_list = list(headers.getiterator(tag='header'))
+                for header in header_list:
+                    http_transaction += '%s: %s\n' % (
+                            header.get('field').strip(),
+                            header.get('content').strip(),
+                    )
             Vulnerability.objects.create(scan=scan,
                                          severity=severity,
                                          vuln_type=vuln_type,
                                          description=description,
                                          http_transaction=http_transaction,
+                                         is_false_positive=False,
                                          )
         return True
     except Exception, e:
