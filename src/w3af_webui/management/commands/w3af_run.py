@@ -175,6 +175,8 @@ def save_vulnerabilities(scan, xml_report):
                             header.get('field').strip(),
                             header.get('content').strip(),
                     )
+                body = response.getiterator(tag='body')[0]
+                http_transaction += body.text.strip() + '\n'
             Vulnerability.objects.create(scan=scan,
                                          severity=severity,
                                          vuln_type=vuln_type,

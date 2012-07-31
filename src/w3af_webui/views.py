@@ -607,6 +607,7 @@ def show_http_transaction(request, vuln_id):
     if (not request.user.has_perm('w3af_webui.view_all_data') and
         obj.scan.user != request.user):
         return HttpResponseForbidden()
-    return HttpResponse(obj.http_transaction, mimetype='text/plain')
+    return HttpResponse(obj.http_transaction,
+                        mimetype='text/plain; charset=utf-8')
 
 
