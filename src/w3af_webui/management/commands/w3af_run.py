@@ -150,12 +150,14 @@ def save_vulnerabilities(scan, xml_report):
             vuln_type, created = VulnerabilityType.objects.get_or_create(
                                     name=type_name)
             description = issue.getiterator(tag='description')[0].text.strip()
-            transaction_list = list(issue.getiterator(tag='http-transactions'))
+            transaction_list = list(issue.getiterator(tag='http-transaction'))
             http_transaction = ''
             for transaction in transaction_list:
+                transaction_id = transaction.get('id')
                 request = transaction.getiterator(tag='httprequest')[0]
                 status = request.getiterator(tag='status')[0]
-                http_transaction += '================= Request =============\n'
+                http_transaction += ('================= Request %s '
+                                     '=============\n' % transaction_id)
                 http_transaction += status.text.strip() + '\n'
                 headers = request.getiterator(tag='headers')[0]
                 header_list = list(headers.getiterator(tag='header'))
@@ -164,7 +166,8 @@ def save_vulnerabilities(scan, xml_report):
                             header.get('field').strip(),
                             header.get('content').strip(),
                     )
-                http_transaction += '================= Response =============\n'
+                http_transaction += ('================= Response %s'
+                                     '=============\n' % transaction_id)
                 response = transaction.getiterator(tag='httpresponse')[0]
                 status = response.getiterator(tag='status')[0]
                 http_transaction += status.text.strip() + '\n'
