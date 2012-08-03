@@ -229,7 +229,7 @@ def show_report(request, scan_id):
         scan.show_report_time = datetime.now()
         scan.save()
     severity = request.GET.get('severity', 'all')
-    show_false_positive = request.GET.get('show_false_positive', '')
+    show_false_positive = request.GET.get('false_positive', '')
     vuln_list = get_filtered_vulnerabilities(scan,
                                              severity,
                                              show_false_positive)
@@ -601,6 +601,8 @@ def target_stats(request, target_id):
     return render_to_response('admin/w3af_webui/target_stats.html',
                               context,
                               context_instance=RequestContext(request))
+
+
 @login_required
 def show_http_transaction(request, vuln_id):
     obj = Vulnerability.objects.get(id=vuln_id)

@@ -7,8 +7,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2012-07-30 16:15+0400\n"
-"PO-Revision-Date: 2012-07-30 16:20+0400\n"
+"POT-Creation-Date: 2012-08-03 14:10+0400\n"
+"PO-Revision-Date: 2012-08-03 14:12+0400\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "Language: \n"
@@ -314,7 +314,7 @@ msgstr "Критичность"
 msgid "Vulnerability type"
 msgstr "Тип уязвимости"
 
-#: models.py:269 templates/admin/w3af_webui/vulnerabilities.html:43
+#: models.py:269 templates/admin/w3af_webui/vulnerabilities.html:46
 msgid "HTTP Transaction"
 msgstr "HTTP-транзакция"
 
@@ -326,95 +326,95 @@ msgstr "Уязвимость"
 msgid "Vulnerabilities"
 msgstr "Уязвимости"
 
-#: settings.py:46 settings.py:143
+#: settings.py:46 settings.py:146
 msgid "Russian"
 msgstr "Русский"
 
-#: settings.py:47 settings.py:144
+#: settings.py:47 settings.py:147
 msgid "English"
 msgstr "Английский"
 
-#: settings.py:148
+#: settings.py:151
 msgid "All"
 msgstr "Все"
 
-#: settings.py:149
+#: settings.py:152
 msgid "Hight"
 msgstr "Только критичные"
 
-#: settings.py:150
+#: settings.py:153
 msgid "Medium and higher"
 msgstr "Средней критичности и выше"
 
-#: settings.py:151
+#: settings.py:154
 msgid "Medium"
 msgstr "Только средней критичности"
 
-#: settings.py:152
+#: settings.py:155
 msgid "Low"
 msgstr "Только низкой критичности"
 
-#: settings.py:153
+#: settings.py:156
 msgid "Information"
 msgstr "Только информационные"
 
-#: settings.py:178
+#: settings.py:181
 msgid "None"
 msgstr ""
 
-#: settings.py:179
+#: settings.py:182
 msgid "e-mail"
 msgstr ""
 
-#: settings.py:181
+#: settings.py:184
 msgid "e-mail, about vulnerabilities only"
 msgstr ""
 
-#: settings.py:190
+#: settings.py:193
 msgid "Monday"
 msgstr "Понедельник"
 
-#: settings.py:190
+#: settings.py:193
 msgid "Tuesday"
 msgstr "Вторник"
 
-#: settings.py:190
+#: settings.py:193
 msgid "Wednesday"
 msgstr "Среда"
 
-#: settings.py:190
+#: settings.py:193
 msgid "Thursday"
 msgstr "Четверг"
 
-#: settings.py:191
+#: settings.py:194
 msgid "Friday"
 msgstr "Пятница"
 
-#: settings.py:191
+#: settings.py:194
 msgid "Saturday"
 msgstr "Суббота"
 
-#: settings.py:191
+#: settings.py:194
 msgid "Sunday"
 msgstr "Воскресенье"
 
-#: settings.py:201
+#: settings.py:204
 msgid "never"
 msgstr "никогда"
 
-#: settings.py:201
+#: settings.py:204
 msgid "daily"
 msgstr "ежедневно"
 
-#: settings.py:201
+#: settings.py:204
 msgid "weekly"
 msgstr "еженедельно"
 
-#: settings.py:201
+#: settings.py:204
 msgid "monthly"
 msgstr "ежемесячно"
 
-#: settings.py:253
+#: settings.py:270
 msgid "Comment"
 msgstr "JIRA ID"
 
@@ -603,27 +603,29 @@ msgstr "Информация о сканировании"
 msgid "Filter by severity:"
 msgstr "Фильтровать по критичности:"
 
-#: templates/admin/w3af_webui/vulnerabilities.html:30
+#: templates/admin/w3af_webui/vulnerabilities.html:32
 msgid "Show false positive"
-msgstr "Показывать false positive уязвимости "
+msgstr "Показывать ложные срабатывания"
 
-#: templates/admin/w3af_webui/vulnerabilities.html:36
+#: templates/admin/w3af_webui/vulnerabilities.html:38
 msgid "Security Issues"
 msgstr "Проблемы безопасности"
 
-#: templates/admin/w3af_webui/vulnerabilities.html:42
+#: templates/admin/w3af_webui/vulnerabilities.html:44
 msgid "Issue"
 msgstr "Проблема"
 
-#: templates/admin/w3af_webui/vulnerabilities.html:49
-msgid "Cansel False Positive"
-msgstr "Удалить отметку False Positive"
+#: templates/admin/w3af_webui/vulnerabilities.html:57
+#: templates/admin/w3af_webui/vulnerabilities.html:84
+msgid "Unmark False Positive"
+msgstr "Снять метку о ложном срабатывании"
 
-#: templates/admin/w3af_webui/vulnerabilities.html:51
-msgid "Mark False Positive"
-msgstr "Отметить как False Positive"
+#: templates/admin/w3af_webui/vulnerabilities.html:59
+#: templates/admin/w3af_webui/vulnerabilities.html:83
+msgid "Mark issue as False Positive"
+msgstr "Отметить как ложное срабатывание"
 
-#: templates/admin/w3af_webui/vulnerabilities.html:62
+#: templates/admin/w3af_webui/vulnerabilities.html:71
 msgid "There is no security issue was found."
 msgstr "Проблем безопасности не обнаружено"
 
@@ -638,6 +640,9 @@ msgstr "Недоступный URL"
 #: templates/admin/w3af_webui/target/change_form.html:10
 msgid "Invalid URL"
 msgstr "Неправильный URL"
+
+#~ msgid "Cansel False Positive"
+#~ msgstr "Удалить отметку False Positive"
 
 #, fuzzy
 #~ msgid "JIRA, about vulnerabilities only"

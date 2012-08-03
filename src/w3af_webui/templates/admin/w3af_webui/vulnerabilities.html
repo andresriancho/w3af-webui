@@ -24,9 +24,11 @@
     {{ severity_filter|safe }}
     </span>
     <span  style="padding:0px 5px;">
-    <input type="checkbox" id="show_false_positive"
-        name="show_false_positive"
-        value="checked" {{ show_false_positive}} >
+    <input type="checkbox" id="false_positive"
+        name="false_positive"
+        value="1" 
+        {% if show_false_positive %} checked
+        {% endif %} >
     {%trans 'Show false positive'%}
     </input>
     </span>
@@ -52,10 +54,11 @@
             <a href="#" class="markFalsePositive" 
             id="mark_false_positive_{{ vuln.id }}">
             {% if vuln.is_false_positive %}
-            {% trans 'Cansel False Positive' %}</a>
+            {% trans 'Unmark False Positive' %}
             {% else %}
-            {% trans 'Mark False Positive' %}</a>
+            {% trans 'Mark issue as False Positive' %}
             {% endif %} 
+            </a>
             {% block extra_vulnerability %}
             {% endblock %}
     <div/>
@@ -73,10 +76,12 @@
         $('#severity_form').submit();
     });
     
-    $('#show_false_positive').change(function() {
+    $('#false_positive').change(function() {
         $('#severity_form').submit();
     });
     
+    var mark_false_positive_label = "{% trans 'Mark issue as False Positive' %}"
+    var unmark_false_positive_label = "{% trans 'Unmark False Positive' %}"
     function mark_false_positive(form_id) {
         data = {
             'vuln_id': form_id,
@@ -87,10 +92,10 @@
             if (data.status == 'ok') {
                 var false_positive_link = $('#mark_false_positive_'+form_id);
                 if (data.is_positive) {
-                    false_positive_link.text('Cansel False Positive');
+                    false_positive_link.text(unmark_false_positive_label);
                 }
                 else {
-                    false_positive_link.text('Mark False Positive');
+                    false_positive_link.text(mark_false_positive_label);
                 }
             }
             else {
