@@ -18,7 +18,7 @@ class Command(BaseCommand):
         make_option('--role',
                     dest='role',
                     default='user',
-                    help='Setup roles set for user(s)', 
+                    help='Setup roles set for user(s)',
                     ),
         )
 
