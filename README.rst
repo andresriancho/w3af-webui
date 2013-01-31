@@ -10,6 +10,9 @@ This project provides web interface for w3af (http://w3af.org/) and is mostly bu
 * Django (https://www.djangoproject.com/).
 * Celery (http://celeryproject.org/)
 
+The main repository for the `w3af project <https://github.com/andresriancho/w3af/>`_ can be found `w3af project <https://github.com/andresriancho/w3af/>`_.
+
+
 Install
 =======
 
