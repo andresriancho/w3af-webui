@@ -306,7 +306,7 @@ def post_ticket(request):
 
 
 def check_url(request):
-    url = request.GET.get('url', '') + '/'
+    url = request.GET.get('url', '') # + '/'
     try:
         urllib2.urlopen(url)
         return HttpResponse('OK', mimetype='text/plain')
