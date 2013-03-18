@@ -2,6 +2,7 @@
 from __future__ import absolute_import
 
 from os import makedirs
+from os import chmod
 import sys
 from tempfile import NamedTemporaryFile
 from datetime import datetime
@@ -11,6 +12,7 @@ from subprocess import PIPE
 from logging import getLogger
 import ConfigParser
 import xml.etree.ElementTree as etree
+import stat
 
 from django.core.management.base import BaseCommand
 from django.conf import settings
@@ -91,7 +93,8 @@ def get_profile(scan_task, report_path, report_file):
     config.set(settings.W3AF_LOG_PLUGIN, 'verbose', 'False')
     with open(profile_fh.name, 'wb') as configfile:
         config.write(configfile)
-    print >> sys.stderr, profile_fh.name
+    chmod(profile_fh.name, stat.S_IRWXU | stat.S_IRGRP | stat.S_IROTH)
+    #print >> sys.stderr, profile_fh.name
     return (profile_fh.name, xml_report)
 
 
