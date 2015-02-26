@@ -2,6 +2,7 @@
 from mock import patch
 
 from django.test import TestCase
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.contrib.auth.models import Group
 
@@ -18,7 +19,8 @@ class TestInitUserGroup(TestCase):
         self.assertFalse(mock_superuser.called)
         init_user_group('w3af_webui')
         self.assertTrue(mock_superuser.called)
-        self.assertEqual(6, Group.objects.count())
+        self.assertEqual(len(settings.USER_GROUPS),
+                         Group.objects.count())
 
     def test_create_superuser(self):
         self.assertEqual(0, User.objects.count())
