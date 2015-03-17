@@ -2,9 +2,9 @@
 from __future__ import absolute_import
 
 from django.views.static import serve as st
-from django.conf.urls.defaults import patterns
-from django.conf.urls.defaults import include
-from django.conf.urls.defaults import url
+from django.conf.urls import patterns
+from django.conf.urls import include
+from django.conf.urls import url
 from django.contrib import admin
 from django.conf import settings
 #from w3af_webui.settings import MEDIA_ROOT

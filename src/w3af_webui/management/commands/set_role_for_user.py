@@ -17,7 +17,7 @@ class Command(BaseCommand):
     option_list = BaseCommand.option_list + (
         make_option('--role',
                     dest='role',
-                    default='user',
+                    default='User',
                     help='Setup roles set for user(s)',
                     ),
         )

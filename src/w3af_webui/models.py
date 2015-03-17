@@ -15,13 +15,20 @@ logger = getLogger(__name__)
 def kill_process(str_pid):
     try:
         pid = int(str_pid)
-        if pid == 1: #default value, process did not start
-            return False
+    except ValueError, e:
+        logger.error("invalid str_pid value: %s" % e)
+        return False
+
+    if pid == 1: #default value, process did not start
+        return False
+    
+    try:
         os.kill(pid, signal.SIGKILL)
-        return True
     except Exception, e:
         logger.error('models.kill_process error: can not kill process: %s' % e)
         return False
+    else:
+        return True
 
 
 class Profile(models.Model):
